@@ -1,0 +1,91 @@
+\documentclass[12pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+% Title information
+\title{A Simple \LaTeX{} Test Document}
+\author{John Doe}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document is a simple test file for verifying that a \LaTeX{} environment
+is correctly installed and functioning. It demonstrates basic structures
+commonly used in academic writing.
+\end{abstract}
+
+\section{Introduction}
+
+\LaTeX{} is a typesetting system widely used for scientific and technical
+documents. It is especially popular in mathematics, computer science,
+and engineering due to its powerful handling of formulas and references.
+
+\section{Mathematical Example}
+
+An example of an inline equation is $E = mc^2$.
+A displayed equation is shown below:
+\begin{equation}
+\label{eq:sample}
+\int_{0}^{\infty} e^{-x^2} \, dx = \frac{\sqrt{\pi}}{2}.
+\end{equation}
+
+Equation~\ref{eq:sample} is a well-known result in mathematics.
+
+\section{Lists}
+
+An example of an itemized list:
+\begin{itemize}
+  \item First item
+  \item Second item
+  \item Third item
+\end{itemize}
+
+An example of an enumerated list:
+\begin{enumerate}
+  \item Step one
+  \item Step two
+  \item Step three
+\end{enumerate}
+
+\section{Table}
+
+Table~\ref{tab:example} shows a simple table.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+Method & Accuracy & Time (s) \\
+\midrule
+Method A & 0.85 & 1.2 \\
+Method B & 0.89 & 1.8 \\
+Method C & 0.83 & 0.9 \\
+\bottomrule
+\end{tabular}
+\caption{An example table for testing purposes}
+\label{tab:example}
+\end{table}
+
+\section{Conclusion}
+
+This test document confirms that text, mathematics, lists, tables,
+and references can be compiled successfully. It can be extended
+as a starting point for more complex academic documents.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{1}
+\bibitem{lamport1994}
+Leslie Lamport.
+\textit{\LaTeX: A Document Preparation System}.
+Addison-Wesley, 2nd edition, 1994.
+\end{thebibliography}
+
+\end{document}
