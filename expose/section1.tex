@@ -1,11 +1,22 @@
 \section{Problem Statement}
-The purpose of this study is to explore the challenges and gaps in the current research area. 
-The main problem addressed is the lack of understanding regarding the relationship between X and Y.
+Image focus detection aims to distinguish focused (sharp) regions from
+unfocused (blurred) regions within an image and is widely used in image
+analysis and quality assessment. A common strategy is to segment images into
+regions and classify these regions according to their focus characteristics.
 
-\subsection{Background}
-Recent studies have shown that
-\lipsum[1]
+Traditional machine learning approaches for this task rely on handcrafted
+feature extraction followed by supervised classification. Although such methods
+are computationally efficient, their robustness is often limited by the
+expressiveness of manually designed features, and they may suffer from
+overfitting when image conditions vary. Convolutional neural networks (CNNs),
+in contrast, are able to automatically learn discriminative features and
+generally exhibit stronger robustness. However, this capability typically comes
+at the cost of increased data requirements, making CNN-based methods less
+effective in scenarios with limited training samples or strict efficiency
+constraints.
 
-\subsection{Research Gap}
-Despite existing research, there is little information on
-\lipsum[2]
+As a result, it remains unclear whether traditional machine learning methods or
+lightweight CNN architectures provide a better trade-off between robustness,
+accuracy, and data efficiency for segmentation-based image focus detection.
+This research addresses this question through a systematic comparative study of
+both approaches.

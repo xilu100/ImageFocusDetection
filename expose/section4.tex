@@ -1,10 +1,75 @@
 \section{Research Concept / Methodology}
-This section outlines the methods, data sources, and analytical approach used in this study.
+\begin{enumerate}
+    \item \textbf{Research Focus}
+          \begin{itemize}
+              \item Image focus detection as a classification problem:
+                    \begin{itemize}
+                        \item 2-class: focused vs unfocused
+                        \item 3-class: focused, edge, unfocused
+                    \end{itemize}
+              \item Compare traditional machine learning methods vs lightweight neural networks
+              \item Focus on low-sample scenarios
+          \end{itemize}
 
-\subsection{Methodology}
-The study will adopt a mixed-methods approach
-\lipsum[1]
+    \item \textbf{Data Processing \& Segmentation}
+          \begin{itemize}
+              \item Divide images into patches / regions for classification
+              \item Preprocessing: standardization, grayscale conversion
+              \item Data augmentation for neural networks: rotation, flipping, noise addition
+          \end{itemize}
 
-\subsection{Data Collection}
-Data will be collected through surveys and interviews
-\lipsum[2]
+    \item \textbf{Traditional Machine Learning Methods}
+          \begin{itemize}
+              \item \textbf{Algorithms:}
+                    \begin{itemize}
+                        \item Support Vector Machine (SVM)
+                        \item Decision Tree
+                        \item Random Forest
+                        \item Clustering (for feature exploration / unsupervised analysis)
+                    \end{itemize}
+              \item \textbf{Features:}
+                    \begin{itemize}
+                        \item Edge strength, gradients, Laplacian
+                        \item Texture descriptors (GLCM, LBP)
+                        \item Frequency-domain features (FFT, DCT)
+                    \end{itemize}
+              \item Advantages: fast training, interpretable
+              \item Limitations: dependent on handcrafted features, limited robustness
+          \end{itemize}
+
+    \item \textbf{Neural Network Methods}
+          \begin{itemize}
+              \item \textbf{Algorithms:}
+                    \begin{itemize}
+                        \item Lightweight Convolutional Neural Network (CNN)
+                        \item Transformer (attention mechanism for edge/blur focus)
+                    \end{itemize}
+              \item Characteristics:
+                    \begin{itemize}
+                        \item Automatic feature extraction
+                        \item Potentially higher robustness
+                        \item Sensitive to small sample sizes, mitigated by lightweight architecture \&
+                              augmentation
+                    \end{itemize}
+          \end{itemize}
+
+    \item \textbf{Experimental Design \& Comparison}
+          \begin{itemize}
+              \item Train both traditional and neural network models on the same dataset
+              \item Evaluate:
+                    \begin{itemize}
+                        \item Classification accuracy (2-class / 3-class)
+                        \item Robustness across image types and blur levels
+                        \item Training efficiency and data requirements
+                    \end{itemize}
+              \item Variables: sample size, classification type
+          \end{itemize}
+
+    \item \textbf{Expected Outcomes}
+          \begin{itemize}
+              \item Identify conditions where traditional ML is sufficient
+              \item Determine scenarios where lightweight neural networks provide clear advantages
+              \item Provide practical guidance for method selection in focus detection tasks
+          \end{itemize}
+
+\end{enumerate}
