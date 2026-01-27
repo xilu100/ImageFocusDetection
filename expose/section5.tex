@@ -1,65 +1,74 @@
 \section{Preliminary Outline}
 
 \begin{enumerate}
-    \item \textbf{Introduction and Research Motivation}
-    \begin{itemize}
-        \item Background: importance and applications of image focus detection (image enhancement, object recognition, quality assessment, etc.)
-        \item Research problem: performance comparison of traditional machine learning and lightweight neural networks under low-sample conditions
-        \item Research objectives and contributions
-    \end{itemize}
+      \item \textbf{Introduction and Research Motivation}
+            \begin{itemize}
+                  \item Background: importance and applications of image focus detection (image
+                        enhancement, object recognition, quality assessment, etc.)
+                  \item Research problem: performance comparison of traditional machine learning and
+                        lightweight neural networks under low-sample conditions
+                  \item Research objectives and contributions
+                  \item Thesis outline: briefly describe the structure of the thesis, including
+                        theoretical background, methodology, experiments, results, and conclusions
+            \end{itemize}
 
-    \item \textbf{Image Segmentation and Preprocessing}
-    \begin{itemize}
-        \item Divide images into patches or regions for classification
-        \item Preprocessing: standardization, grayscale conversion
-        \item Mapping classified patches back to the original image (visualization / optional)
-        \item Data augmentation techniques for neural network training: rotation, flipping, noise addition
-    \end{itemize}
+      \item \textbf{Theoretical Background}
+            \begin{itemize}
+                  \item \textbf{Traditional Machine Learning Methods}
+                        \begin{itemize}
+                              \item Algorithms: SVM, Decision Tree, Random Forest, Clustering (optional)
+                              \item Feature extraction:
+                                    \begin{itemize}
+                                          \item Edge strength, gradient, Laplacian
+                                          \item Texture descriptors (GLCM, LBP)
+                                          \item Frequency-domain features (FFT, DCT)
+                                    \end{itemize}
+                              \item Implementation and training procedure
+                              \item Evaluation strategy for 2-class and 3-class classification
+                        \end{itemize}
+                  \item \textbf{Lightweight Neural Network Methods}
+                        \begin{itemize}
+                              \item Algorithms: Lightweight CNN (mandatory), Transformer (optional)
+                              \item Architecture and training details
+                              \item Data augmentation and strategies for low-sample training
+                              \item Evaluation strategy for 2-class and 3-class classification
+                        \end{itemize}
+            \end{itemize}
 
-    \item \textbf{Traditional Machine Learning Methods}
-    \begin{itemize}
-        \item Algorithms: SVM, Decision Tree, Random Forest, Clustering (optional)
-        \item Feature extraction:
-        \begin{itemize}
-            \item Edge strength, gradient, Laplacian
-            \item Texture descriptors (GLCM, LBP)
-            \item Frequency-domain features (FFT, DCT)
-        \end{itemize}
-        \item Implementation and training procedure
-        \item Evaluation strategy for 2-class and 3-class classification
-    \end{itemize}
+      \item \textbf{Methodology: Image Segmentation and Preprocessing}
+            \begin{itemize}
+                  \item Divide images into patches or regions for classification
+                  \item Preprocessing: standardization, grayscale conversion
+                  \item Mapping classified patches back to the original image (visualization /
+                        optional)
+                  \item Data augmentation techniques for neural network training: rotation, flipping,
+                        noise addition
+            \end{itemize}
 
-    \item \textbf{Lightweight Neural Network Methods}
-    \begin{itemize}
-        \item Algorithms: Lightweight CNN (mandatory), Transformer (optional depending on time)
-        \item Architecture and training details
-        \item Data augmentation and strategies for low-sample training
-        \item Evaluation strategy for 2-class and 3-class classification
-    \end{itemize}
+      \item \textbf{Experiments and Performance Evaluation}
+            \begin{itemize}
+                  \item Compare traditional ML vs lightweight neural networks
+                  \item Variables:
+                        \begin{itemize}
+                              \item Sample size (low vs medium)
+                              \item Classification type (2-class vs 3-class)
+                        \end{itemize}
+                  \item Performance metrics:
+                        \begin{itemize}
+                              \item Accuracy, Precision, Recall, F1-score
+                              \item Confusion matrix
+                              \item Robustness across different image types and blur levels
+                              \item Training efficiency and computational cost
+                        \end{itemize}
+                  \item Summary of comparative results
+            \end{itemize}
 
-    \item \textbf{Experiments and Performance Evaluation}
-    \begin{itemize}
-        \item Compare traditional ML vs lightweight neural networks
-        \item Variables:
-        \begin{itemize}
-            \item Sample size (low vs medium)
-            \item Classification type (2-class vs 3-class)
-        \end{itemize}
-        \item Performance metrics:
-        \begin{itemize}
-            \item Accuracy, F1-score
-            \item Robustness across different image types and blur levels
-            \item Training efficiency and computational cost
-        \end{itemize}
-        \item Summary of comparative results
-    \end{itemize}
-
-    \item \textbf{Discussion, Practical Significance and Future Work}
-    \begin{itemize}
-        \item Analysis of strengths and limitations of each method
-        \item Practical applications of the research findings
-        \item Potential improvements and directions for future work
-    \end{itemize}
+      \item \textbf{Discussion, Practical Significance and Future Work}
+            \begin{itemize}
+                  \item Analysis of strengths and limitations of each method
+                  \item Practical applications of the research findings
+                  \item Potential improvements and directions for future work
+            \end{itemize}
 
 \end{enumerate}
 

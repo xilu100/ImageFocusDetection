@@ -3,5 +3,4 @@
 \contentsline {section}{\numberline {3}Literature Review / Theoretical Background}{2}{}%
 \contentsline {section}{\numberline {4}Research Concept / Methodology}{3}{}%
 \contentsline {section}{\numberline {5}Preliminary Outline}{4}{}%
-\contentsline {section}{\numberline {6}Timeline}{4}{}%
-\contentsline {section}{\numberline {7}References}{5}{}%
+\contentsline {section}{\numberline {6}Thesis Timeline}{5}{}%

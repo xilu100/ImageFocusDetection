@@ -22,15 +22,15 @@
           \begin{itemize}
               \item \textbf{Algorithms:}
                     \begin{itemize}
-                        \item Support Vector Machine (SVM)
-                        \item Decision Tree
-                        \item Random Forest
-                        \item Clustering (for feature exploration / unsupervised analysis)
+                        \item Support Vector Machine (SVM)\cite{murphy2022pml}
+                        \item Decision Tree\cite{murphy2022pml}
+                        \item Random Forest\cite{murphy2022pml}
+                        \item Optional: Clustering (for feature exploration / unsupervised analysis)
                     \end{itemize}
               \item \textbf{Features:}
                     \begin{itemize}
                         \item Edge strength, gradients, Laplacian
-                        \item Texture descriptors (GLCM, LBP)
+                        \item Texture descriptors (GLCM, LBP\cite{yi2016lbp})
                         \item Frequency-domain features (FFT, DCT)
                     \end{itemize}
               \item Advantages: fast training, interpretable
@@ -41,8 +41,8 @@
           \begin{itemize}
               \item \textbf{Algorithms:}
                     \begin{itemize}
-                        \item Lightweight Convolutional Neural Network (CNN)
-                        \item Transformer (attention mechanism for edge/blur focus)
+                        \item Lightweight Convolutional Neural Network (CNN)\cite{zeng2018localmetric}
+                        \item Optional: Transformer (attention mechanism for edge/blur focus)
                     \end{itemize}
               \item Characteristics:
                     \begin{itemize}
@@ -55,14 +55,21 @@
 
     \item \textbf{Experimental Design \& Comparison}
           \begin{itemize}
-              \item Train both traditional and neural network models on the same dataset
-              \item Evaluate:
+              \item Train both traditional and neural network models on the same dataset.
+              \item Evaluate using multiple metrics:
                     \begin{itemize}
                         \item Classification accuracy (2-class / 3-class)
-                        \item Robustness across image types and blur levels
+                        \item Precision, Recall, and F1-score
+                        \item Confusion matrix
+                        \item Robustness across different image types and blur levels
                         \item Training efficiency and data requirements
                     \end{itemize}
-              \item Variables: sample size, classification type
+              \item Variables to investigate:
+                    \begin{itemize}
+                        \item Sample size
+                        \item Classification type (binary vs multi-class)
+                        \item Model type (traditional vs neural network)
+                    \end{itemize}
           \end{itemize}
 
     \item \textbf{Expected Outcomes}

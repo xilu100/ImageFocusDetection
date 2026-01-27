@@ -1,0 +1,18 @@
+\begin{thebibliography}{1}
+
+\bibitem{murphy2022pml}
+Kevin~P. Murphy.
+\newblock {\em Probabilistic Machine Learning: An Introduction}.
+\newblock The MIT Press, Cambridge, MA, 2022.
+
+\bibitem{yi2016lbp}
+Xin Yi and Mark~G. Eramian.
+\newblock Lbp-based segmentation of defocus blur.
+\newblock {\em IEEE Transactions on Image Processing}, 25(4):1626--1638, 2016.
+
+\bibitem{zeng2018localmetric}
+Kai Zeng, Yaonan Wang, Jianxu Mao, Junyang Liu, Weixing Peng, and Nankai Chen.
+\newblock A local metric for defocus blur detection based on cnn feature learning.
+\newblock {\em IEEE Transactions on Image Processing}, 28(5):2107--2115, 2019.
+
+\end{thebibliography}

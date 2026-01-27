@@ -3,17 +3,41 @@ Image focus detection aims to distinguish sharp regions from blurred regions
 within an image, which is important for tasks such as image enhancement, object
 recognition, and quality assessment. Early approaches mainly relied on
 handcrafted image features, such as edge strength, gradient magnitude, or local
-texture, combined with classical machine learning classifiers. These methods
-are efficient and interpretable, but their performance depends heavily on the
-quality of feature design and can degrade under varying image conditions.
+texture, combined with classical machine learning classifiers.\cite{yi2016lbp}
+These methods are efficient and interpretable, but their performance depends
+heavily on the quality of feature design and can degrade under varying image
+conditions.
+
+Common traditional classifiers include\cite{murphy2022pml}:
+
+Support Vector Machines (SVMs) separate data points by finding the optimal
+hyperplane that maximizes the margin between classes. They are effective in
+high-dimensional spaces and small datasets. SVMs work well when classes are
+linearly separable or can be transformed to be so with kernel functions.
+
+Decision Trees classify samples by recursively splitting the data based on
+feature thresholds. Each internal node represents a feature decision, and each
+leaf node represents a class label. They are intuitive and easy to interpret
+but can overfit if the tree grows too deep.
+
+Random Forests are ensembles of decision trees that combine predictions from
+multiple trees. They reduce overfitting and improve generalization through
+majority voting (for classification) or averaging (for regression). Random
+forests are robust to noisy data and can handle high-dimensional features.
+
+Clustering Methods group similar data points based on a similarity metric,
+without using labeled data. They are often used for unsupervised segmentation
+or region grouping in images. Popular algorithms include K-means and
+hierarchical clustering.
 
 Convolutional neural networks (CNNs) have recently become popular in image
 analysis due to their ability to automatically learn hierarchical features from
 raw data. CNN-based methods can be more robust than traditional approaches, but
 they usually require a large number of labeled samples and substantial
-computational resources. Lightweight CNN architectures reduce the number of
-parameters and computational cost, but it is not clear whether they maintain an
-advantage over traditional methods when training data is limited.
+computational resources.\cite{zeng2018localmetric} Lightweight CNN
+architectures reduce the number of parameters and computational cost, but it is
+not clear whether they maintain an advantage over traditional methods when
+training data is limited.
 
 This study focuses on comparing traditional machine learning methods and
 lightweight CNNs for segmentation-based focus detection, particularly under
