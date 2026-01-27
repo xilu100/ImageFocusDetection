@@ -36,8 +36,9 @@ def standardize():
     processed_files = set(r["original_name"] for r in records)
     sample_counter = len(records) + 1
 
-    # Get all image files
+    # Get all image files and sort them to ensure order consistency
     image_files = [f for f in os.listdir(input_dir) if f.lower().endswith((".jpg", ".jpeg", ".png", ".bmp", ".tiff"))]
+    image_files = sorted(image_files)  # 确保 macOS 和 Windows 顺序一致
 
     for img_name in image_files:
         if img_name in processed_files:
