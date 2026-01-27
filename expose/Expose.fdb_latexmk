@@ -1,17 +1,17 @@
 # Fdb version 4
-["bibtex Expose"] 1769471801.48529 "Expose.aux" "Expose.bbl" "Expose" 1769471804.18736 0
+["bibtex Expose"] 1769473529.24747 "Expose.aux" "Expose.bbl" "Expose" 1769473531.86935 0
   "./references.bib" 1769389263 984 05855e5efed67ba2a5a33aedf58601ef ""
-  "Expose.aux" 1769471803 1039 6912d51e72ec79d7033ce5f5e23c6784 "pdflatex"
+  "Expose.aux" 1769473530 1039 6912d51e72ec79d7033ce5f5e23c6784 "pdflatex"
   "c:/texlive/2025/texmf-dist/bibtex/bst/base/plain.bst" 1762186884 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
   (generated)
   "Expose.bbl"
   "Expose.blg"
   (rewritten before read)
-["pdflatex"] 1769471802.05085 "c:/Users/x9047/Desktop/ImageFocusDetection/expose/Expose.tex" "Expose.pdf" "Expose" 1769471804.18802 0
-  "Expose.aux" 1769471803 1039 6912d51e72ec79d7033ce5f5e23c6784 "pdflatex"
-  "Expose.bbl" 1769471802 653 9f89cfa477576a6a5507b90ebd30deec "bibtex Expose"
+["pdflatex"] 1769473529.79552 "c:/Users/x9047/Desktop/ImageFocusDetection/expose/Expose.tex" "Expose.pdf" "Expose" 1769473531.86999 0
+  "Expose.aux" 1769473530 1039 6912d51e72ec79d7033ce5f5e23c6784 "pdflatex"
+  "Expose.bbl" 1769473529 653 9f89cfa477576a6a5507b90ebd30deec "bibtex Expose"
   "Expose.tex" 1769388628 302 57ad62d226ef6c05f12e42e06751b97e ""
-  "Expose.toc" 1769471803 436 e5ed75293bc512a0581986c04f924134 "pdflatex"
+  "Expose.toc" 1769473530 436 e5ed75293bc512a0581986c04f924134 "pdflatex"
   "HHU_Logo_WortBildMarke.png" 1768661161 29360 284453c0813ca8117acd7a3877a69d04 ""
   "c:/Users/x9047/Desktop/ImageFocusDetection/expose/Expose.tex" 1769388628 302 57ad62d226ef6c05f12e42e06751b97e ""
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1762187177 2971 def0b6c1f0b107b3b936def894055589 ""
