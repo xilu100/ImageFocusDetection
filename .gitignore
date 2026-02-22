@@ -3,7 +3,7 @@
 # MacOS
 .DS_Store
 # Pictures and Samples
-pictures
-normalised
-samples
-samples_labels
+data/raw
+data/normalized
+data/samples
+data/samples_labels
