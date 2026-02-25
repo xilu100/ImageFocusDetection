@@ -7,3 +7,6 @@ data/raw
 data/normalized
 data/samples
 data/samples_labels
+# Python
+__pycache__
+*.pyc
