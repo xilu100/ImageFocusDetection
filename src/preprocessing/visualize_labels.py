@@ -23,9 +23,7 @@ def visualize():
         for _, row in samples_info.iterrows()
     }
 
-    # Iterate over each sampleX_labels folder
     for folder in os.listdir(input_dir):
-
         if not folder.endswith("_labels"):
             continue
 
@@ -36,9 +34,7 @@ def visualize():
             continue
 
         print(f"Processing {sample_name}")
-
         df = pd.read_csv(csv_path)
-
         if len(df) == 0:
             continue
 
@@ -58,14 +54,9 @@ def visualize():
         original_img = cv2.imread(original_path)
         h, w = original_img.shape[:2]
 
-        # Infer patch size from current_size in samples_info
-        current_size = samples_info[samples_info["filename"] == original_key]["current_size"].values[0]
-        cur_w, cur_h = map(int, current_size.split("x"))
-
-        # Estimate grid size from max row/col
+        # Estimate grid size from max row/col in CSV
         rows = []
         cols = []
-
         for name in df["filename"]:
             parts = name.replace(".png", "").split("_")
             rows.append(int(parts[1]))
@@ -74,18 +65,14 @@ def visualize():
         max_row = max(rows)
         max_col = max(cols)
 
-        patch_h = cur_h // (max_row + 1)
-        patch_w = cur_w // (max_col + 1)
-
-        # Resize original to current_size for alignment
-        resized_img = cv2.resize(original_img, (cur_w, cur_h))
+        # Patch size based on 原图尺寸
+        patch_h = h // (max_row + 1)
+        patch_w = w // (max_col + 1)
 
         for thresh_id in range(1, 5):
-
-            mask = np.zeros_like(resized_img)
+            mask = np.zeros_like(original_img)
 
             for _, row in df.iterrows():
-
                 if row[f"y_thresh{thresh_id}"] == 1:
                     parts = row["filename"].replace(".png", "").split("_")
                     r = int(parts[1])
@@ -104,7 +91,7 @@ def visualize():
                         -1
                     )
 
-            overlay = cv2.addWeighted(resized_img, 0.7, mask, 0.3, 0)
+            overlay = cv2.addWeighted(original_img, 0.7, mask, 0.3, 0)
 
             output_path = os.path.join(
                 input_dir,
