@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -6,14 +6,14 @@ import pandas as pd
 
 
 def visualize():
-    current_file = os.path.abspath(__file__)
-    current_dir = os.path.dirname(current_file)
-    parent_dir = os.path.dirname(current_dir)
-    root_dir = os.path.dirname(parent_dir)
+    current_file = Path(__file__).resolve()
+    current_dir = current_file.parent
+    parent_dir = current_dir.parent
+    root_dir = parent_dir.parent
 
-    raw_dir = os.path.join(root_dir, "data/raw/train_img")
-    input_dir = os.path.join(root_dir, "data/samples_labels")
-    samples_info_path = os.path.join(root_dir, "data/normalized/samples_info.csv")
+    raw_dir = root_dir / "data/raw/train_img"
+    input_dir = root_dir / "data/samples_labels"
+    samples_info_path = root_dir / "data/normalized/samples_info.csv"
 
     samples_info = pd.read_csv(samples_info_path)
 
@@ -23,18 +23,19 @@ def visualize():
         for _, row in samples_info.iterrows()
     }
 
-    for folder in os.listdir(input_dir):
-        if not folder.endswith("_labels"):
+    for folder in input_dir.iterdir():
+        if not folder.is_dir() or not folder.name.endswith("_labels"):
             continue
 
-        sample_name = folder.replace("_labels", "")
-        csv_path = os.path.join(input_dir, folder, f"{sample_name}_laplacian.csv")
+        sample_name = folder.name.replace("_labels", "")
+        csv_path = folder / f"{sample_name}_laplacian.csv"
 
-        if not os.path.exists(csv_path):
+        if not csv_path.exists():
             continue
 
         print(f"Processing {sample_name}")
         df = pd.read_csv(csv_path)
+
         if len(df) == 0:
             continue
 
@@ -45,18 +46,19 @@ def visualize():
             continue
 
         original_filename = sample_to_original[original_key]
-        original_path = os.path.join(raw_dir, original_filename)
+        original_path = raw_dir / original_filename
 
-        if not os.path.exists(original_path):
+        if not original_path.exists():
             print(f"Original image not found: {original_path}")
             continue
 
-        original_img = cv2.imread(original_path)
+        original_img = cv2.imread(str(original_path))
         h, w = original_img.shape[:2]
 
         # Estimate grid size from max row/col in CSV
         rows = []
         cols = []
+
         for name in df["filename"]:
             parts = name.replace(".png", "").split("_")
             rows.append(int(parts[1]))
@@ -65,7 +67,7 @@ def visualize():
         max_row = max(rows)
         max_col = max(cols)
 
-        # Patch size based on 原图尺寸
+        # Patch size based on original image size
         patch_h = h // (max_row + 1)
         patch_w = w // (max_col + 1)
 
@@ -93,13 +95,9 @@ def visualize():
 
             overlay = cv2.addWeighted(original_img, 0.7, mask, 0.3, 0)
 
-            output_path = os.path.join(
-                input_dir,
-                folder,
-                f"{sample_name}_thresh{thresh_id}_overlay.png"
-            )
+            output_path = folder / f"{sample_name}_thresh{thresh_id}_overlay.png"
 
-            cv2.imwrite(output_path, overlay)
+            cv2.imwrite(str(output_path), overlay)
 
         print(f"Finished {sample_name}")
 

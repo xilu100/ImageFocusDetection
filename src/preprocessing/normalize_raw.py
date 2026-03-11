@@ -1,5 +1,5 @@
 import csv
-import os
+from pathlib import Path
 
 import cv2
 
@@ -50,68 +50,82 @@ def resize_image(image):
 
 def normalize_images():
     """Normalize all images: resize, convert to grayscale, save PNG, generate CSV."""
-    current_file = os.path.abspath(__file__)
-    current_dir = os.path.dirname(current_file)
-    parent_dir = os.path.dirname(current_dir)
-    root_dir = os.path.dirname(parent_dir)
+    current_file = Path(__file__).resolve()
+    current_dir = current_file.parent
+    parent_dir = current_dir.parent
+    root_dir = parent_dir.parent
 
-    raw_image_dir = os.path.join(root_dir, 'data/raw/train_img')
-    output_image_dir = os.path.join(root_dir, 'data/normalized')
-    os.makedirs(output_image_dir, exist_ok=True)
+    raw_image_dir = root_dir / "data/raw/train_img"
+    output_image_dir = root_dir / "data/normalized"
+    output_image_dir.mkdir(parents=True, exist_ok=True)
 
-    csv_path = os.path.join(output_image_dir, "samples_info.csv")
-    items = os.listdir(raw_image_dir)
+    csv_path = output_image_dir / "samples_info.csv"
+    items = list(raw_image_dir.iterdir())
 
-    # Determine the starting counter based on existing files
-    existing_files = [f for f in os.listdir(output_image_dir) if f.startswith("sample") and f.endswith(".png")]
+    # Determine starting counter
+    existing_files = [
+        f.name for f in output_image_dir.iterdir()
+        if f.name.startswith("sample") and f.suffix == ".png"
+    ]
+
     if existing_files:
-        existing_numbers = [int(f.replace("sample", "").replace(".png", "")) for f in existing_files]
+        existing_numbers = [
+            int(f.replace("sample", "").replace(".png", ""))
+            for f in existing_files
+        ]
         counter = max(existing_numbers) + 1
     else:
         counter = 1
 
-    with open(csv_path, mode='a', newline='', encoding='utf-8') as csvfile:
+    with csv_path.open(mode="a", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        # If CSV is empty, write header
-        if os.stat(csv_path).st_size == 0:
-            writer.writerow(['filename', 'original_size', 'current_size', 'aspect_ratio', 'original_filename'])
+
+        if not csv_path.exists() or csv_path.stat().st_size == 0:
+            writer.writerow([
+                "filename",
+                "original_size",
+                "current_size",
+                "aspect_ratio",
+                "original_filename"
+            ])
 
         for item in items:
-            img_path = os.path.join(raw_image_dir, item)
-            image = cv2.imread(img_path)
+            img_path = item
+            image = cv2.imread(str(img_path))
 
             if image is None:
-                print(f"Warning: Could not read image {item}")
+                print(f"Warning: Could not read image {item.name}")
                 continue
 
-            # Check if this image has already been processed by matching original filename in CSV
             skip = False
-            if os.path.exists(csv_path):
-                with open(csv_path, mode='r', encoding='utf-8') as f:
-                    if item in f.read():
-                        print(f"Skipped (already processed): {item}")
+            if csv_path.exists():
+                with csv_path.open("r", encoding="utf-8") as f:
+                    if item.name in f.read():
+                        print(f"Skipped (already processed): {item.name}")
                         skip = True
 
             if skip:
                 continue
 
-            # Convert to grayscale
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
             orig_height, orig_width = gray_image.shape[:2]
             resized_image, (new_width, new_height) = resize_image(gray_image)
             closest_ratio_key, _ = find_closest_ratio(orig_width, orig_height)
 
             output_filename = f"sample{counter}.png"
-            output_path = os.path.join(output_image_dir, output_filename)
-            cv2.imwrite(output_path, resized_image)
+            output_path = output_image_dir / output_filename
+
+            cv2.imwrite(str(output_path), resized_image)
 
             writer.writerow([
                 output_filename,
                 f"{orig_width}x{orig_height}",
                 f"{new_width}x{new_height}",
                 closest_ratio_key,
-                item  # original file name only
+                item.name
             ])
+
             counter += 1
             print(f"Saved: {output_filename}")
 

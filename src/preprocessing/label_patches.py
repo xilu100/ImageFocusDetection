@@ -1,5 +1,5 @@
 import csv
-import os
+from pathlib import Path
 
 import cv2
 
@@ -14,55 +14,48 @@ def compute_laplacian_score(gray_image):
 
 def label(thresholds=None):
     # ---- Define thresholds internally ----
-
     if thresholds is None:
         thresholds = [200, 210, 220, 230]
-    current_file = os.path.abspath(__file__)
-    current_dir = os.path.dirname(current_file)
-    parent_dir = os.path.dirname(current_dir)
-    root_dir = os.path.dirname(parent_dir)
 
-    input_dir = os.path.join(root_dir, 'data', 'samples')
-    output_root = os.path.join(root_dir, 'data', 'samples_labels')
+    current_file = Path(__file__).resolve()
+    current_dir = current_file.parent
+    parent_dir = current_dir.parent
+    root_dir = parent_dir.parent
 
-    os.makedirs(output_root, exist_ok=True)
+    input_dir = root_dir / "data" / "samples"
+    output_root = root_dir / "data" / "samples_labels"
 
-    for sample_folder in os.listdir(input_dir):
-        sample_path = os.path.join(input_dir, sample_folder)
+    output_root.mkdir(parents=True, exist_ok=True)
 
-        if not os.path.isdir(sample_path):
+    for sample_folder in input_dir.iterdir():
+        if not sample_folder.is_dir():
             continue
 
-        sample_output_dir = os.path.join(output_root, f"{sample_folder}_labels")
-        os.makedirs(sample_output_dir, exist_ok=True)
+        sample_output_dir = output_root / f"{sample_folder.name}_labels"
+        sample_output_dir.mkdir(parents=True, exist_ok=True)
 
-        csv_path = os.path.join(
-            sample_output_dir,
-            f"{sample_folder}_laplacian.csv"
-        )
+        csv_path = sample_output_dir / f"{sample_folder.name}_laplacian.csv"
 
-        with open(csv_path, mode='w', newline='') as csv_file:
+        with csv_path.open(mode="w", newline="") as csv_file:
             writer = csv.writer(csv_file)
 
             # Header
-            header = ['filename', 'laplacian_score']
+            header = ["filename", "laplacian_score"]
             for i in range(len(thresholds)):
-                header.append(f'y_thresh{i + 1}')
+                header.append(f"y_thresh{i + 1}")
             writer.writerow(header)
 
-            for file_name in os.listdir(sample_path):
-                file_path = os.path.join(sample_path, file_name)
-
-                if not os.path.isfile(file_path):
+            for file_path in sample_folder.iterdir():
+                if not file_path.is_file():
                     continue
 
-                image = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+                image = cv2.imread(str(file_path), cv2.IMREAD_GRAYSCALE)
                 if image is None:
                     continue
 
                 score = compute_laplacian_score(image)
 
-                row = [file_name, score]
+                row = [file_path.name, score]
 
                 for thresh in thresholds:
                     row.append(1 if score >= thresh else 0)
