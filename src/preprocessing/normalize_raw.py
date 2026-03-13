@@ -32,11 +32,14 @@ def find_closest_ratio(width, height):
     return closest_key, closest_ratio
 
 
-def resize_image(image):
-    """Resize image to the closest standard aspect ratio."""
+def resize_image(image, base):
+    """
+    Resize image so that width and height are multiples of `base`.
+    """
     height, width = image.shape[:2]
     _, target_ratio = find_closest_ratio(width, height)
 
+    # 按目标比例计算新尺寸
     new_width = width
     new_height = int(round(width / target_ratio))
 
@@ -44,16 +47,20 @@ def resize_image(image):
         new_height = height
         new_width = int(round(height * target_ratio))
 
+    # 调整到最接近的 base 倍数
+    new_width = max(base, round(new_width / base) * base)
+    new_height = max(base, round(new_height / base) * base)
+
     resized = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
     return resized, (new_width, new_height)
 
 
-def normalize_images():
-    """Normalize all images: resize, convert to grayscale, save PNG, generate CSV."""
+def normalize_images(patch_size=64):
+    """
+    Normalize images to multiples of patch_size.
+    """
     current_file = Path(__file__).resolve()
-    current_dir = current_file.parent
-    parent_dir = current_dir.parent
-    root_dir = parent_dir.parent
+    root_dir = current_file.parents[2]
 
     raw_image_dir = root_dir / "data/raw/train_img"
     output_image_dir = root_dir / "data/normalized"
@@ -62,20 +69,15 @@ def normalize_images():
     csv_path = output_image_dir / "samples_info.csv"
     items = list(raw_image_dir.iterdir())
 
-    # Determine starting counter
     existing_files = [
         f.name for f in output_image_dir.iterdir()
         if f.name.startswith("sample") and f.suffix == ".png"
     ]
 
-    if existing_files:
-        existing_numbers = [
-            int(f.replace("sample", "").replace(".png", ""))
-            for f in existing_files
-        ]
-        counter = max(existing_numbers) + 1
-    else:
-        counter = 1
+    counter = max(
+        [int(f.replace("sample", "").replace(".png", "")) for f in existing_files],
+        default=0
+    ) + 1
 
     with csv_path.open(mode="a", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
@@ -90,6 +92,7 @@ def normalize_images():
             ])
 
         for item in items:
+
             img_path = item
             image = cv2.imread(str(img_path))
 
@@ -97,6 +100,7 @@ def normalize_images():
                 print(f"Warning: Could not read image {item.name}")
                 continue
 
+            # Skip if already processed
             skip = False
             if csv_path.exists():
                 with csv_path.open("r", encoding="utf-8") as f:
@@ -110,7 +114,12 @@ def normalize_images():
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
             orig_height, orig_width = gray_image.shape[:2]
-            resized_image, (new_width, new_height) = resize_image(gray_image)
+
+            resized_image, (new_width, new_height) = resize_image(
+                gray_image,
+                patch_size
+            )
+
             closest_ratio_key, _ = find_closest_ratio(orig_width, orig_height)
 
             output_filename = f"sample{counter}.png"
@@ -131,4 +140,4 @@ def normalize_images():
 
 
 if __name__ == "__main__":
-    normalize_images()
+    normalize_images(patch_size=32)

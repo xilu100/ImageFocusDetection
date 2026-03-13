@@ -4,6 +4,14 @@ import cv2
 import numpy as np
 import pandas as pd
 
+PATCH_SIZE = 32
+
+
+def parse_row_col(filename: str):
+    name = filename.replace(".png", "")
+    parts = name.split("_")
+    return int(parts[-2]), int(parts[-1])
+
 
 def visualize():
     current_file = Path(__file__).resolve()
@@ -17,13 +25,13 @@ def visualize():
 
     samples_info = pd.read_csv(samples_info_path)
 
-    # Map sample name -> original filename
     sample_to_original = {
         row["filename"]: row["original_filename"]
         for _, row in samples_info.iterrows()
     }
 
     for folder in input_dir.iterdir():
+
         if not folder.is_dir() or not folder.name.endswith("_labels"):
             continue
 
@@ -33,73 +41,89 @@ def visualize():
         if not csv_path.exists():
             continue
 
-        print(f"Processing {sample_name}")
+        print(f"\nProcessing {sample_name}")
+
         df = pd.read_csv(csv_path)
 
         if len(df) == 0:
             continue
 
-        # Get original image path
-        original_key = f"{sample_name}.png"
-        if original_key not in sample_to_original:
-            print(f"Original mapping not found for {sample_name}")
+        key = f"{sample_name}.png"
+
+        if key not in sample_to_original:
+            print("Original mapping missing")
             continue
 
-        original_filename = sample_to_original[original_key]
-        original_path = raw_dir / original_filename
+        original_path = raw_dir / sample_to_original[key]
 
         if not original_path.exists():
-            print(f"Original image not found: {original_path}")
+            print("Original image missing")
             continue
 
         original_img = cv2.imread(str(original_path))
         h, w = original_img.shape[:2]
 
-        # Estimate grid size from max row/col in CSV
+        # =========================
+        # 解析 row / col
+        # =========================
+
         rows = []
         cols = []
 
         for name in df["filename"]:
-            parts = name.replace(".png", "").split("_")
-            rows.append(int(parts[1]))
-            cols.append(int(parts[2]))
+            r, c = parse_row_col(name)
+            rows.append(r)
+            cols.append(c)
 
-        max_row = max(rows)
-        max_col = max(cols)
+        grid_rows = max(rows) + 1
+        grid_cols = max(cols) + 1
 
-        # Patch size based on original image size
-        patch_h = h // (max_row + 1)
-        patch_w = w // (max_col + 1)
+        print("patch grid:", grid_rows, grid_cols)
+
+        # =========================
+        # 每个阈值生成 heatmap
+        # =========================
 
         for thresh_id in range(1, 5):
-            mask = np.zeros_like(original_img)
+
+            heatmap = np.zeros((grid_rows, grid_cols), dtype=np.uint8)
 
             for _, row in df.iterrows():
-                if row[f"y_thresh{thresh_id}"] == 1:
-                    parts = row["filename"].replace(".png", "").split("_")
-                    r = int(parts[1])
-                    c = int(parts[2])
 
-                    y1 = r * patch_h
-                    y2 = y1 + patch_h
-                    x1 = c * patch_w
-                    x2 = x1 + patch_w
+                if row[f"y_thresh{thresh_id}"] != 1:
+                    continue
 
-                    cv2.rectangle(
-                        mask,
-                        (x1, y1),
-                        (x2, y2),
-                        (0, 0, 255),
-                        -1
-                    )
+                r, c = parse_row_col(row["filename"])
 
-            overlay = cv2.addWeighted(original_img, 0.7, mask, 0.3, 0)
+                heatmap[r, c] = 1
+
+            # =========================
+            # resize 到原图尺寸
+            # =========================
+
+            heatmap_img = cv2.resize(
+                heatmap,
+                (w, h),
+                interpolation=cv2.INTER_NEAREST
+            )
+
+            mask = np.zeros_like(original_img)
+
+            mask[heatmap_img == 1] = (0, 0, 255)
+
+            overlay = cv2.addWeighted(
+                original_img,
+                0.7,
+                mask,
+                0.3,
+                0
+            )
 
             output_path = folder / f"{sample_name}_thresh{thresh_id}_overlay.png"
 
             cv2.imwrite(str(output_path), overlay)
 
-        print(f"Finished {sample_name}")
+        print("Finished")
 
 
 if __name__ == "__main__":

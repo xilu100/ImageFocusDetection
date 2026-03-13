@@ -1,13 +1,14 @@
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 from src.preprocessing import normalize_raw, segment_nor_img, label_patches, visualize_labels
 
 
 def main():
+    patch_size = 16
     delete_folder()
-    normalize_raw.normalize_images()
-    segment_nor_img.segment_images(estimated_patches=200)
+    normalize_raw.normalize_images(patch_size)
+    segment_nor_img.segment_images(patch_size)
     label_patches.label(thresholds=[200, 210, 220, 230])
     visualize_labels.visualize()
 
