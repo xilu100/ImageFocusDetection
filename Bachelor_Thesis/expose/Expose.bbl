@@ -12,7 +12,8 @@ Xin Yi and Mark~G. Eramian.
 
 \bibitem{zeng2018localmetric}
 Kai Zeng, Yaonan Wang, Jianxu Mao, Junyang Liu, Weixing Peng, and Nankai Chen.
-\newblock A local metric for defocus blur detection based on cnn feature learning.
+\newblock A local metric for defocus blur detection based on cnn feature
+  learning.
 \newblock {\em IEEE Transactions on Image Processing}, 28(5):2107--2115, 2019.
 
 \end{thebibliography}
