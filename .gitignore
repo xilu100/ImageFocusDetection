@@ -10,3 +10,5 @@ data/samples_labels
 # Python
 __pycache__
 *.pyc
+# Model
+src/training/model_save

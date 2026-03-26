@@ -2,15 +2,17 @@ import shutil
 from pathlib import Path
 
 from src.preprocessing import normalize_raw, segment_nor_img, label_patches, visualize_labels
+from src.training import train_all
 
 
 def main():
-    patch_size = 16
+    patch_size = 32
     delete_folder()
     normalize_raw.normalize_images(patch_size)
     segment_nor_img.segment_images(patch_size)
     label_patches.label(thresholds=[200, 210, 220, 230])
     visualize_labels.visualize()
+    train_all.train_models(patch_size)
 
 
 def delete_folder():
