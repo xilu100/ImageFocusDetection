@@ -3,10 +3,16 @@
 # MacOS
 .DS_Store
 # Pictures and Samples
+## raw
 data/raw
+## train set
 data/normalized
 data/samples
 data/samples_labels
+## valid set
+data/valid_normalized
+data/valid_samples
+data/valid_samples_labels
 # Python
 __pycache__
 *.pyc

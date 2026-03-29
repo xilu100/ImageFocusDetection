@@ -15,115 +15,109 @@ def parse_row_col(filename: str):
 
 def visualize():
     current_file = Path(__file__).resolve()
-    current_dir = current_file.parent
-    parent_dir = current_dir.parent
-    root_dir = parent_dir.parent
+    root_dir = current_file.parents[2]
 
-    raw_dir = root_dir / "data/raw/train_img"
-    input_dir = root_dir / "data/samples_labels"
-    samples_info_path = root_dir / "data/normalized/samples_info.csv"
+    # 原图路径
+    train_raw_dir = root_dir / "data/raw/train_img"
+    valid_raw_dir = root_dir / "data/raw/valid_img"
 
-    samples_info = pd.read_csv(samples_info_path)
+    # 映射表
+    train_info_path = root_dir / "data/normalized/samples_info.csv"
+    valid_info_path = root_dir / "data/valid_normalized/valid_samples_info.csv"
 
-    sample_to_original = {
-        row["filename"]: row["original_filename"]
-        for _, row in samples_info.iterrows()
-    }
+    # 读取映射表
+    train_info = pd.read_csv(train_info_path)
+    train_map = {row["filename"]: row["original_filename"] for _, row in train_info.iterrows()}
 
-    for folder in input_dir.iterdir():
+    valid_info = pd.read_csv(valid_info_path)
+    valid_map = {row["filename"]: row["original_filename"] for _, row in valid_info.iterrows()}
 
-        if not folder.is_dir() or not folder.name.endswith("_labels"):
-            continue
+    # 支持两套数据
+    input_dirs = [
+        (root_dir / "data/samples_labels", train_map, train_raw_dir),
+        (root_dir / "data/valid_samples_labels", valid_map, valid_raw_dir)
+    ]
 
-        sample_name = folder.name.replace("_labels", "")
-        csv_path = folder / f"{sample_name}_laplacian.csv"
+    for input_dir, sample_to_original, raw_dir in input_dirs:
+        for folder in input_dir.iterdir():
+            if not folder.is_dir() or not folder.name.endswith("_labels"):
+                continue
 
-        if not csv_path.exists():
-            continue
+            sample_name = folder.name.replace("_labels", "")
+            csv_path = folder / f"{sample_name}_laplacian.csv"
 
-        print(f"\nProcessing {sample_name}")
+            if not csv_path.exists():
+                continue
 
-        df = pd.read_csv(csv_path)
+            print(f"\nProcessing {sample_name}")
 
-        if len(df) == 0:
-            continue
+            df = pd.read_csv(csv_path)
+            if len(df) == 0:
+                continue
 
-        key = f"{sample_name}.png"
+            key = f"{sample_name}.png"
 
-        if key not in sample_to_original:
-            print("Original mapping missing")
-            continue
+            if key not in sample_to_original:
+                print("Original mapping missing")
+                continue
 
-        original_path = raw_dir / sample_to_original[key]
+            original_path = raw_dir / sample_to_original[key]
 
-        if not original_path.exists():
-            print("Original image missing")
-            continue
+            if not original_path.exists():
+                print("Original image missing")
+                continue
 
-        original_img = cv2.imread(str(original_path))
-        h, w = original_img.shape[:2]
-
-        # =========================
-        # 解析 row / col
-        # =========================
-
-        rows = []
-        cols = []
-
-        for name in df["filename"]:
-            r, c = parse_row_col(name)
-            rows.append(r)
-            cols.append(c)
-
-        grid_rows = max(rows) + 1
-        grid_cols = max(cols) + 1
-
-        print("patch grid:", grid_rows, grid_cols)
-
-        # =========================
-        # 每个阈值生成 heatmap
-        # =========================
-
-        for thresh_id in range(1, 5):
-
-            heatmap = np.zeros((grid_rows, grid_cols), dtype=np.uint8)
-
-            for _, row in df.iterrows():
-
-                if row[f"y_thresh{thresh_id}"] != 1:
-                    continue
-
-                r, c = parse_row_col(row["filename"])
-
-                heatmap[r, c] = 1
+            original_img = cv2.imread(str(original_path))
+            h, w = original_img.shape[:2]
 
             # =========================
-            # resize 到原图尺寸
+            # 解析 row / col
             # =========================
+            rows, cols = [], []
+            for name in df["filename"]:
+                r, c = parse_row_col(name)
+                rows.append(r)
+                cols.append(c)
 
-            heatmap_img = cv2.resize(
-                heatmap,
-                (w, h),
-                interpolation=cv2.INTER_NEAREST
-            )
+            grid_rows = max(rows) + 1
+            grid_cols = max(cols) + 1
 
-            mask = np.zeros_like(original_img)
+            print("patch grid:", grid_rows, grid_cols)
 
-            mask[heatmap_img == 1] = (0, 0, 255)
+            # =========================
+            # 每个阈值生成 heatmap
+            # =========================
+            for thresh_id in range(1, 5):
+                heatmap = np.zeros((grid_rows, grid_cols), dtype=np.uint8)
 
-            overlay = cv2.addWeighted(
-                original_img,
-                0.7,
-                mask,
-                0.3,
-                0
-            )
+                for _, row in df.iterrows():
+                    if row[f"y_thresh{thresh_id}"] != 1:
+                        continue
+                    r, c = parse_row_col(row["filename"])
+                    heatmap[r, c] = 1
 
-            output_path = folder / f"{sample_name}_thresh{thresh_id}_overlay.png"
+                # resize 到原图尺寸
+                heatmap_img = cv2.resize(
+                    heatmap,
+                    (w, h),
+                    interpolation=cv2.INTER_NEAREST
+                )
 
-            cv2.imwrite(str(output_path), overlay)
+                mask = np.zeros_like(original_img)
+                mask[heatmap_img == 1] = (0, 0, 255)
 
-        print("Finished")
+                overlay = cv2.addWeighted(
+                    original_img,
+                    0.7,
+                    mask,
+                    0.3,
+                    0
+                )
+
+                output_path = folder / f"{sample_name}_thresh{thresh_id}_overlay.png"
+                cv2.imwrite(str(output_path), overlay)
+
+            print("Finished")
 
 
 if __name__ == "__main__":

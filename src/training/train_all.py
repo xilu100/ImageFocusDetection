@@ -2,6 +2,7 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
+import torch
 
 from src.models.dl import cnn
 from src.models.ml import decision_tree, random_forest, svm
@@ -85,7 +86,11 @@ def train_models(patch_size=16):
     joblib.dump(decision_tree_model, model_dir / 'decision_tree_model.joblib')
     joblib.dump(random_forest_model, model_dir / 'random_forest_model.joblib')
     joblib.dump(svm_model, model_dir / 'svm_model.joblib')
-    joblib.dump(cnn_model, model_dir / 'cnn_model.joblib')
+    torch.save({
+        'model_state_dict': cnn_model.state_dict(),
+        'num_classes': cnn_model.num_classes,  # 或你自己传入的类别数
+        'patch_size': patch_size
+    }, model_dir / 'cnn_model.pth')
 
     print(f"Models saved to: {model_dir}")
 
