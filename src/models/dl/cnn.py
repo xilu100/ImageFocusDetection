@@ -47,7 +47,12 @@ def convert(img_path, patch_size):
 
 # ===== 主函数（接口保持一致）=====
 def train_cnn(img_paths, y, patch_size):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.backends.mps.is_available():  # 苹果 MPS
+        device = torch.device("mps")
+    elif torch.cuda.is_available():  # NVIDIA CUDA
+        device = torch.device("cuda")
+    else:  # CPU
+        device = torch.device("cpu")
     print(f"\nUsing device: {device}")
 
     X = [convert(p, patch_size) for p in img_paths]
