@@ -61,7 +61,7 @@ def load_csv_data(patch_size=16):
     df = pd.read_csv(csv_file)
 
     img_paths = [str(Path(row['source_folder']) / row['filename']) for _, row in df.iterrows()]
-    y = df['y_thresh2'].tolist()
+    y = df['y_thresh1'].tolist()
 
     return img_paths, y
 

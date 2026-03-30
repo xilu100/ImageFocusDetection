@@ -8,36 +8,40 @@ from src.training import train_all
 
 def main():
     patch_size = 32
-    delete_folder()
-    normalize_raw.normalize_images(patch_size)
-    segment_nor_img.segment_images(patch_size)
-    label_patches.label(thresholds=[200, 210, 220, 230])
-    visualize_labels.visualize()
-    train_all.train_models(patch_size)
-    evaluate_all.evaluate_valid_set()
+    process = 1
+    train = 0
+    evaluate = 0
+
+    if process:
+        print("=== Step 1: Preprocessing ===")
+        delete_folder()
+
+        normalize_raw.normalize_images(patch_size)
+        segment_nor_img.segment_images(patch_size)
+        label_patches.label(thresholds=[0.3, 0.4, 0.5, 0.6])
+        visualize_labels.visualize()
+
+    if train:
+        print("=== Step 2: Training ===")
+        train_all.train_models(patch_size)
+
+    if evaluate:
+        print("=== Step 3: Evaluation ===")
+        evaluate_all.evaluate_valid_set()
 
 
 def delete_folder():
     current_dir = Path(__file__).resolve().parent
     parent_dir = current_dir.parent
 
-    # 原来的 samples 目录
     samples_dir = parent_dir / "data" / "samples"
     samples_label_dir = parent_dir / "data" / "samples_labels"
 
-    # 新增 valid_samples 目录
     valid_samples_dir = parent_dir / "data" / "valid_samples"
     valid_samples_label_dir = parent_dir / "data" / "valid_samples_labels"
 
     model_dir = parent_dir / "src" / "training" / "model_save"
 
-    print(samples_dir)
-    print(samples_label_dir)
-    print(valid_samples_dir)
-    print(valid_samples_label_dir)
-    print(model_dir)
-
-    # 所有需要删除的文件夹
     folders_to_remove = [
         samples_label_dir,
         samples_dir,

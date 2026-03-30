@@ -1,10 +1,7 @@
 from pathlib import Path
-
 import cv2
 import numpy as np
 import pandas as pd
-
-PATCH_SIZE = 32
 
 
 def parse_row_col(filename: str):
@@ -44,7 +41,7 @@ def visualize():
                 continue
 
             sample_name = folder.name.replace("_labels", "")
-            csv_path = folder / f"{sample_name}_laplacian.csv"
+            csv_path = folder / f"{sample_name}_combined.csv"  # 改为 combined 文件
 
             if not csv_path.exists():
                 continue
@@ -85,7 +82,7 @@ def visualize():
             print("patch grid:", grid_rows, grid_cols)
 
             # =========================
-            # 每个阈值生成 heatmap
+            # 阈值图 heatmap
             # =========================
             for thresh_id in range(1, 5):
                 heatmap = np.zeros((grid_rows, grid_cols), dtype=np.uint8)
@@ -116,6 +113,37 @@ def visualize():
 
                 output_path = folder / f"{sample_name}_thresh{thresh_id}_overlay.png"
                 cv2.imwrite(str(output_path), overlay)
+
+            # =========================
+            # 连续图 heatmap
+            # =========================
+            score_map = np.zeros((grid_rows, grid_cols), dtype=np.float32)
+            for _, row in df.iterrows():
+                r, c = parse_row_col(row["filename"])
+                score_map[r, c] = row["combined_score"]
+
+            # 归一化到 0~255
+            score_map_norm = cv2.normalize(score_map, None, 0, 255, cv2.NORM_MINMAX)
+            score_map_norm = score_map_norm.astype(np.uint8)
+
+            heatmap_color = cv2.applyColorMap(score_map_norm, cv2.COLORMAP_JET)
+
+            heatmap_resized = cv2.resize(
+                heatmap_color,
+                (w, h),
+                interpolation=cv2.INTER_NEAREST
+            )
+
+            overlay_score = cv2.addWeighted(
+                original_img,
+                0.6,
+                heatmap_resized,
+                0.4,
+                0
+            )
+
+            output_path = folder / f"{sample_name}_score_overlay.png"
+            cv2.imwrite(str(output_path), overlay_score)
 
             print("Finished")
 
