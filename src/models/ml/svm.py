@@ -7,6 +7,7 @@ from src.models import img_to_X
 
 def train_svm(img_paths, y, patch_size):
     X = []
+    print("Start <SVM> images processing...")
     for p in tqdm(img_paths, desc="Processing images"):
         X.append(img_to_X.convert(p, patch_size))
 
@@ -14,6 +15,7 @@ def train_svm(img_paths, y, patch_size):
     y = np.array(y)
 
     model = SVC(kernel='linear')
+    print("Start <SVM> training...")
     model.fit(X, y)
 
     return model

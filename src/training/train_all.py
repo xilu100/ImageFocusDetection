@@ -6,11 +6,10 @@ import torch
 
 from src.models.dl import cnn
 from src.models.ml import decision_tree, random_forest, svm
-
+from src.tools import util
 
 def merge_samples_labels(source_subfolder: str = None):
-    current_file = Path(__file__).resolve()
-    root_dir = current_file.parents[2]  # project root directory
+    root_dir = util.get_root_dir()
     samples_labels_dir = root_dir / 'data/samples_labels'
     samples_dir = root_dir / 'data/samples'
     output_file = samples_labels_dir / 'merged_samples_labels.csv'
@@ -66,7 +65,7 @@ def load_csv_data(patch_size=16):
     return img_paths, y
 
 
-def train_models(patch_size=16):
+def train_models(patch_size=32):
     # Merge CSV files and load data
     merge_samples_labels()
     img_paths, y = load_csv_data(patch_size)
@@ -96,4 +95,4 @@ def train_models(patch_size=16):
 
 
 if __name__ == "__main__":
-    train_models(patch_size=16)
+    train_models(patch_size=32)

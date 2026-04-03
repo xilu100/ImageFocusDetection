@@ -2,167 +2,124 @@ import csv
 from pathlib import Path
 
 import cv2
+import numpy as np
 
-# 支持的宽高比
-IMAGE_RATIOS = {
-    '1:1': 1 / 1,
-    '3:2': 3 / 2,
-    '4:3': 4 / 3,
-    '16:9': 16 / 9,
-    '2:3': 2 / 3,
-    '3:4': 3 / 4,
-    '9:16': 9 / 16,
-}
+from src.tools import util
 
 
-def find_closest_ratio(width, height):
-    current_ratio = width / height
-    min_diff = float("inf")
-    closest_key = None
-    closest_ratio = None
-
-    for key, ratio in IMAGE_RATIOS.items():
-        diff = abs(current_ratio - ratio)
-        if diff < min_diff:
-            min_diff = diff
-            closest_key = key
-            closest_ratio = ratio
-
-    return closest_key, closest_ratio
+# Image processing
+def resize_img(img: np.ndarray, patch_size: int) -> np.ndarray:
+    h, w = img.shape[:2]
+    new_h = ((h + patch_size - 1) // patch_size) * patch_size
+    new_w = ((w + patch_size - 1) // patch_size) * patch_size
+    return cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
 
 
-def resize_image(image, base):
-    height, width = image.shape[:2]
-    _, target_ratio = find_closest_ratio(width, height)
-
-    new_width = width
-    new_height = int(round(width / target_ratio))
-
-    if abs(new_height - height) > abs(new_width - width):
-        new_height = height
-        new_width = int(round(height * target_ratio))
-
-    new_width = max(base, round(new_width / base) * base)
-    new_height = max(base, round(new_height / base) * base)
-
-    resized = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
-    return resized, (new_width, new_height)
+def grayscale(img: np.ndarray) -> np.ndarray:
+    return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
-def _load_processed_files(csv_path):
-    """
-    从 CSV 中读取已处理的 original_filename（第5列）
-    """
+# CSV processing
+def save_info(csv_path: Path, info: dict):
+    file_exists = csv_path.exists()
+    with open(csv_path, mode='a', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=['filename', 'original_size', 'current_size', 'original_filename'])
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(info)
+
+
+def load_processed_files(csv_path: Path) -> set:
     processed = set()
-
-    if not csv_path.exists():
-        return processed
-
-    with csv_path.open("r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)  # skip header
-
-        for row in reader:
-            if len(row) >= 5:
-                processed.add(row[4])
-
+    if csv_path.exists():
+        with open(csv_path, newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                processed.add(row['original_filename'])
     return processed
 
 
-def _get_start_counter(output_dir, prefix):
-    """
-    根据已有文件确定 counter 起始值
-    """
-    existing_files = [
-        f.name for f in output_dir.iterdir()
-        if f.is_file() and f.name.startswith(prefix) and f.suffix == ".png"
-    ]
-
-    return max(
-        [int(f.replace(prefix, "").replace(".png", "")) for f in existing_files],
-        default=0
-    ) + 1
+# Path processing
+def get_image_paths(input_dir: Path, extensions=None):
+    if extensions is None:
+        extensions = ["*.jpg", "*.jpeg", "*.png"]
+    paths = []
+    for ext in extensions:
+        paths.extend(sorted(input_dir.glob(ext)))
+    return paths
 
 
-def _process_dataset(root_dir, input_dir, output_dir, patch_size, prefix, csv_name="samples_info.csv"):
-    """
-    核心处理函数
-    """
-    raw_image_dir = root_dir / input_dir
-    output_image_dir = root_dir / output_dir
-    output_image_dir.mkdir(parents=True, exist_ok=True)
-
-    csv_path = output_image_dir / csv_name
-
-    items = [p for p in raw_image_dir.iterdir() if p.is_file()]
-
-    processed_files = _load_processed_files(csv_path)
-    counter = _get_start_counter(output_image_dir, prefix)
-
-    file_exists = csv_path.exists()
-
-    with csv_path.open(mode="a", newline="", encoding="utf-8") as csvfile:
-        writer = csv.writer(csvfile)
-
-        # 写表头（仅一次）
-        if not file_exists or csv_path.stat().st_size == 0:
-            writer.writerow([
-                "filename",
-                "original_size",
-                "current_size",
-                "aspect_ratio",
-                "original_filename"
-            ])
-
-        for item in items:
-            # 跳过已处理
-            if item.name in processed_files:
-                print(f"Skipped: {item.name}")
-                continue
-
-            image = cv2.imread(str(item))
-            if image is None:
-                print(f"Warning: Could not read image {item.name}")
-                continue
-
-            gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            orig_height, orig_width = gray_image.shape[:2]
-
-            resized_image, (new_width, new_height) = resize_image(gray_image, patch_size)
-            closest_ratio_key, _ = find_closest_ratio(orig_width, orig_height)
-
-            output_filename = f"{prefix}{counter}.png"
-            output_path = output_image_dir / output_filename
-
-            cv2.imwrite(str(output_path), resized_image)
-
-            writer.writerow([
-                output_filename,
-                f"{orig_width}x{orig_height}",
-                f"{new_width}x{new_height}",
-                closest_ratio_key,
-                item.name
-            ])
-
-            counter += 1
-            print(f"Saved: {output_filename}")
+def prepare_output_dir(output_dir: Path):
+    output_dir.mkdir(parents=True, exist_ok=True)
 
 
-def normalize_images(patch_size=64):
-    """
-    对外接口（可直接调用）
-    """
-    current_file = Path(__file__).resolve()
-    root_dir = current_file.parents[2]
+# Single image processing
+def process_single_image(img_path: Path,
+                         output_dir: Path,
+                         sample_counter: int,
+                         patch_size: int,
+                         csv_path: Path,
+                         prefix: str = "sample"):
+    img = cv2.imread(str(img_path))
+    if img is None:
+        print(f"Can not read: {img_path}")
+        return False
 
-    # 数据集配置：input_dir, output_dir, prefix, csv_name
-    datasets = [
-        ("data/raw/train_img", "data/normalized", "sample", "samples_info.csv"),
-        ("data/raw/valid_img", "data/valid_normalized", "valid_sample", "valid_samples_info.csv"),
-    ]
+    original_h, original_w = img.shape[:2]
+    img = resize_img(img, patch_size)
+    img = grayscale(img)
+    current_h, current_w = img.shape[:2]
 
-    for input_dir, output_dir, prefix, csv_name in datasets:
-        _process_dataset(root_dir, input_dir, output_dir, patch_size, prefix, csv_name)
+    output_filename = f"{prefix}{sample_counter}.png"
+    output_path = output_dir / output_filename
+    cv2.imwrite(str(output_path), img)
+
+    info = {
+        'filename': output_filename,
+        'original_size': f"{original_w}x{original_h}",
+        'current_size': f"{current_w}x{current_h}",
+        'original_filename': img_path.name
+    }
+    save_info(csv_path, info)
+    print(f"Processed {img_path.name} -> {output_filename}")
+    return True
+
+
+# Batch Image Processing
+def process_image_set(input_dir: Path,
+                      output_dir: Path,
+                      csv_path: Path,
+                      patch_size: int,
+                      prefix: str):
+    prepare_output_dir(output_dir)
+    processed_files = load_processed_files(csv_path)
+    img_paths = get_image_paths(input_dir)
+
+    sample_counter = 1
+    for img_path in img_paths:
+        if img_path.name in processed_files:
+            print(f"Skip already processed: {img_path.name}")
+            continue
+        success = process_single_image(img_path, output_dir, sample_counter, patch_size, csv_path, prefix)
+        if success:
+            sample_counter += 1
+
+
+# Interface
+def normalize_images(patch_size=32):
+    root_dir = util.get_root_dir()
+
+    # Train set
+    train_input_dir = root_dir / "data" / "raw" / "train_img"
+    train_output_dir = root_dir / "data" / "normalized"
+    train_csv_path = train_output_dir / "samples_info.csv"
+    process_image_set(train_input_dir, train_output_dir, train_csv_path, patch_size, prefix="sample")
+
+    # Valid set
+    valid_input_dir = root_dir / "data" / "raw" / "valid_img"
+    valid_output_dir = root_dir / "data" / "valid_normalized"
+    valid_csv_path = valid_output_dir / "valid_samples_info.csv"
+    process_image_set(valid_input_dir, valid_output_dir, valid_csv_path, patch_size, prefix="valid_sample")
 
 
 if __name__ == "__main__":
