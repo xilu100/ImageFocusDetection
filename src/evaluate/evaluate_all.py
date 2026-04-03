@@ -8,7 +8,8 @@ import torch
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 from src.models.dl.cnn import SimpleCNN  # 你的CNN类
-from src.models.img_to_X import convert
+
+from src.tools import util
 
 
 # =========================
@@ -62,7 +63,7 @@ def load_valid_data():
 # 3. 构建 ML 特征
 # =========================
 def build_X(img_paths, patch_size):
-    X = [convert(p, patch_size) for p in img_paths]
+    X = [util.img_to_X(p, patch_size) for p in img_paths]
     return np.array(X, dtype=np.float32)
 
 
@@ -72,7 +73,7 @@ def build_X(img_paths, patch_size):
 def load_img_for_cnn(path, patch_size):
     img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     if img is None:
-        raise ValueError(f"Cannot read image: {path}")
+        raise ValueError(f"Can not read image: {path}")
     if img.shape != (patch_size, patch_size):
         img = cv2.resize(img, (patch_size, patch_size))
     img = img.astype(np.float32) / 255.0

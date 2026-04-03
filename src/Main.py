@@ -9,8 +9,8 @@ from src.training import train_all
 def main():
     patch_size = 32
     process = 1
-    train = 0
-    evaluate = 0
+    train = 1
+    evaluate = 1
 
     if process:
         print("=== Step 1: Preprocessing ===")

@@ -8,6 +8,7 @@ from src.models.dl import cnn
 from src.models.ml import decision_tree, random_forest, svm
 from src.tools import util
 
+
 def merge_samples_labels(source_subfolder: str = None):
     root_dir = util.get_root_dir()
     samples_labels_dir = root_dir / 'data/samples_labels'

@@ -1,16 +1,15 @@
+import time
+
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
-from tqdm import tqdm
 
-from src.models import img_to_X
+from src.tools import util
 
 
 def train_tree(img_paths, y, patch_size):
     X = []
-    print("Start <Decision Tree> images processing...")
-    for p in tqdm(img_paths, desc="Processing images"):
-        X.append(img_to_X.convert(p, patch_size))
-
+    for p in img_paths:
+        X.append(util.img_to_X(p, patch_size))
     X = np.array(X)
     y = np.array(y)
 
@@ -18,7 +17,11 @@ def train_tree(img_paths, y, patch_size):
         max_depth=None,
         random_state=42
     )
-    print("Start <Decision Tree> training...")
+
+    print("[Decision Tree] Start training ...")
+    start_time = time.time()
     model.fit(X, y)
+    end_time = time.time()
+    print(f"[Decision Tree] Training time: {end_time - start_time:.4f} seconds")
 
     return model
