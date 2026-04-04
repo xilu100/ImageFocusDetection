@@ -9,8 +9,8 @@ from src.training import train_all
 def main():
     patch_size = 32
     process = 1
-    train = 1
-    evaluate = 1
+    train = 0
+    evaluate = 0
 
     if process:
         print("=== Step 1: Preprocessing ===")
@@ -18,7 +18,7 @@ def main():
 
         normalize_raw.normalize_images(patch_size)
         segment_nor_img.segment_images(patch_size)
-        label_patches.label(thresholds=[0.3, 0.4, 0.5, 0.6])
+        label_patches.label(top_percent=75)
         visualize_labels.visualize()
 
     if train:
