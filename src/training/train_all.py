@@ -15,6 +15,10 @@ def merge_samples_labels(source_subfolder: str = None):
     samples_dir = root_dir / 'data/samples'
     output_file = samples_labels_dir / 'merged_samples_labels.csv'
 
+    if output_file.exists():
+        output_file.unlink()
+        print(f"Existing merged CSV deleted: {output_file}")
+
     all_dfs = []
 
     # Determine which subfolders to process
@@ -61,7 +65,7 @@ def load_csv_data(patch_size=16):
     df = pd.read_csv(csv_file)
 
     img_paths = [str(Path(row['source_folder']) / row['filename']) for _, row in df.iterrows()]
-    y = df['y_thresh1'].tolist()
+    y = df['label'].tolist()
 
     return img_paths, y
 
@@ -75,7 +79,7 @@ def train_models(patch_size=32):
     decision_tree_model = decision_tree.train_tree(img_paths, y, patch_size)
     random_forest_model = random_forest.train_random_forest(img_paths, y, patch_size)
     svm_model = svm.train_svm(img_paths, y, patch_size)
-    cnn_model = cnn.train_cnn(img_paths, y, patch_size)
+    #cnn_model = cnn.train_cnn(img_paths, y, patch_size)
 
     # model_save folder in the current directory
     current_file = Path(__file__).resolve()
@@ -86,11 +90,11 @@ def train_models(patch_size=32):
     joblib.dump(decision_tree_model, model_dir / 'decision_tree_model.joblib')
     joblib.dump(random_forest_model, model_dir / 'random_forest_model.joblib')
     joblib.dump(svm_model, model_dir / 'svm_model.joblib')
-    torch.save({
+    '''torch.save({
         'model_state_dict': cnn_model.state_dict(),
         'num_classes': cnn_model.num_classes,  # 或你自己传入的类别数
         'patch_size': patch_size
-    }, model_dir / 'cnn_model.pth')
+    }, model_dir / 'cnn_model.pth')'''
 
     print(f"Models saved to: {model_dir}")
 

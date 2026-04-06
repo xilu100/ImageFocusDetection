@@ -8,7 +8,6 @@ import torch
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 from src.models.dl.cnn import SimpleCNN  # 你的CNN类
-
 from src.tools import util
 
 

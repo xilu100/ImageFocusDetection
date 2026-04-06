@@ -1,9 +1,11 @@
 from pathlib import Path
+
 import cv2
 import numpy as np
 import pandas as pd
 
 from src.tools import util
+
 
 # =============================
 # 1. Functional modules
@@ -38,7 +40,7 @@ def generate_score_heatmap(df: pd.DataFrame, grid_rows: int, grid_cols: int) -> 
     score_map = np.zeros((grid_rows, grid_cols), dtype=np.float32)
     for _, row in df.iterrows():
         r, c = parse_row_col(row["filename"])
-        score_map[r, c] = row["score"]
+        score_map[r, c] = row["total_score"]
     return score_map
 
 

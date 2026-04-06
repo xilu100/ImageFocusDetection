@@ -8,8 +8,8 @@ from src.training import train_all
 
 def main():
     patch_size = 32
-    process = 1
-    train = 0
+    process = 0
+    train = 1
     evaluate = 0
 
     if process:

@@ -7,86 +7,92 @@ import numpy as np
 from src.tools import util
 
 
-# =============================
-# 1. Score Components
-# =============================
-
-def tenengrad_score(gray: np.ndarray) -> float:
-    gx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
-    gy = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
-    g2 = gx**2 + gy**2
-    return np.mean(g2)
+def compute_laplacian_var(img: np.ndarray) -> float:
+    img = img.astype(np.float32)
+    lap = cv2.Laplacian(img, cv2.CV_32F)
+    return float(lap.var())
 
 
-def fft_bandpass_score(gray: np.ndarray) -> float:
-    f = np.fft.fft2(gray)
+def compute_sobel_energy(img: np.ndarray) -> float:
+    img = img.astype(np.float32)
+    gx = cv2.Sobel(img, cv2.CV_32F, 1, 0, ksize=3)
+    gy = cv2.Sobel(img, cv2.CV_32F, 0, 1, ksize=3)
+    mag = np.sqrt(gx ** 2 + gy ** 2)
+    return float(np.mean(mag))
+
+
+def compute_fft_highfreq(img: np.ndarray) -> float:
+    img = img.astype(np.float32)
+
+    img = (img - img.mean()) / (img.std() + 1e-8)
+
+    f = np.fft.fft2(img)
     fshift = np.fft.fftshift(f)
-    mag = np.log(1 + np.abs(fshift))
 
-    h, w = gray.shape
+    magnitude = np.log1p(np.abs(fshift))
+
+    h, w = img.shape
     cy, cx = h // 2, w // 2
 
-    Y, X = np.ogrid[:h, :w]
-    dist = np.sqrt((Y - cy)**2 + (X - cx)**2)
+    radius = int(min(cy, cx) * 0.3)
 
-    r_low = min(h, w) // 20
-    r_high = min(h, w) // 5
+    y, x = np.ogrid[:h, :w]
+    mask = ((y - cy) ** 2 + (x - cx) ** 2) >= radius ** 2
 
-    mask = (dist > r_low) & (dist < r_high)
-
-    return mag[mask].mean()
+    return float(magnitude[mask].sum() / (magnitude.sum() + 1e-8))
 
 
-def local_contrast_score(gray: np.ndarray) -> float:
-    mean = cv2.GaussianBlur(gray, (9, 9), 0)
-    contrast = (gray - mean) ** 2
-    return np.mean(contrast)
+def normalize(arr):
+    arr = np.array(arr, dtype=np.float32)
+    return (arr - arr.min()) / (arr.max() - arr.min() + 1e-8)
 
 
-# =============================
-# 2. Robust Normalize
-# =============================
+def fuse_score(size, lap, sobel, fft):
+    if size < 32:
+        return 0.7 * sobel + 0.3 * lap
 
-def robust_normalize_array(values: np.ndarray) -> np.ndarray:
-    if len(values) < 10:
-        return values
+    elif size <= 128:
+        return 0.5 * lap + 0.5 * fft
 
-    p1, p99 = np.percentile(values, [1, 99])
-    return np.clip((values - p1) / (p99 - p1 + 1e-8), 0, 1)
-
-
-# =============================
-# 3. Compute Scores (Batch)
-# =============================
-
-def compute_scores_batch(images: list):
-    grad_list = []
-    fft_list = []
-    contrast_list = []
-
-    for gray in images:
-        grad_list.append(tenengrad_score(gray))
-        fft_list.append(fft_bandpass_score(gray))
-        contrast_list.append(local_contrast_score(gray))
-
-    grad_arr = np.array(grad_list)
-    fft_arr = np.array(fft_list)
-    contrast_arr = np.array(contrast_list)
-
-    # --- normalize ---
-    grad_n = robust_normalize_array(grad_arr)
-    fft_n = robust_normalize_array(fft_arr)
-    contrast_n = robust_normalize_array(contrast_arr)
-
-    # --- fusion（非线性）---
-    scores = (grad_n * fft_n * contrast_n) ** (1 / 3)
-
-    return scores, grad_arr, fft_arr, contrast_arr
+    else:
+        return 0.7 * fft + 0.3 * lap
 
 
-# =============================
-# 4. CSV Writing
-# =============================
+def score_cal(images):
+    lap_scores = []
+    sobel_scores = []
+    fft_scores = []
+    sizes = []
+
+    for img in images:
+        h, w = img.shape
+        size = min(h, w)
+        sizes.append(size)
+
+        lap_scores.append(compute_laplacian_var(img))
+        sobel_scores.append(compute_sobel_energy(img))
+
+        if size >= 32:
+            fft_scores.append(compute_fft_highfreq(img))
+        else:
+            fft_scores.append(0.0)
+
+    lap_n = normalize(lap_scores)
+    sobel_n = normalize(sobel_scores)
+    fft_n = normalize(fft_scores)
+
+    total_scores = []
+    for i in range(len(images)):
+        score = fuse_score(
+            sizes[i],
+            lap_n[i],
+            sobel_n[i],
+            fft_n[i]
+        )
+        total_scores.append(score)
+
+    return lap_scores, fft_scores, total_scores
+
 
 def write_scores_csv(csv_path: Path, rows: list):
     csv_path.parent.mkdir(parents=True, exist_ok=True)
@@ -95,18 +101,13 @@ def write_scores_csv(csv_path: Path, rows: list):
         writer = csv.writer(f)
         writer.writerow([
             "filename",
-            "score",
-            "grad",
-            "fft",
-            "contrast",
+            "lap_score",
+            "fft_score",
+            "total_score",
             "label"
         ])
         writer.writerows(rows)
 
-
-# =============================
-# 5. Dataset Processing
-# =============================
 
 def process_dataset(input_dir: Path, output_dir: Path, top_percent=85):
     for sample_folder in input_dir.iterdir():
@@ -123,7 +124,6 @@ def process_dataset(input_dir: Path, output_dir: Path, top_percent=85):
         images = []
         filenames = []
 
-        # --- load images ---
         for file_path in sample_folder.iterdir():
             if not file_path.is_file():
                 continue
@@ -138,34 +138,25 @@ def process_dataset(input_dir: Path, output_dir: Path, top_percent=85):
         if len(images) == 0:
             continue
 
-        # --- compute scores ---
-        scores, grads, ffts, contrasts = compute_scores_batch(images)
+        lap_scores, fft_scores, total_scores = score_cal(images)
 
-        # --- dynamic threshold（核心）---
-        threshold = np.percentile(scores, top_percent)
+        threshold = np.percentile(total_scores, top_percent)
 
-        # --- build rows ---
         rows = []
         for i in range(len(images)):
-            label = 1 if scores[i] >= threshold else 0
+            label = 1 if total_scores[i] >= threshold else 0
 
             rows.append([
                 filenames[i],
-                float(scores[i]),
-                float(grads[i]),
-                float(ffts[i]),
-                float(contrasts[i]),
+                float(lap_scores[i]),
+                float(fft_scores[i]),
+                float(total_scores[i]),
                 label
             ])
 
-        # --- save ---
         write_scores_csv(csv_path, rows)
         print(f"Saved: {csv_path}")
 
-
-# =============================
-# 6. Interface
-# =============================
 
 def label(top_percent=85):
     root_dir = util.get_root_dir()
@@ -179,10 +170,6 @@ def label(top_percent=85):
     process_dataset(train_input_dir, train_output_dir, top_percent)
     process_dataset(valid_input_dir, valid_output_dir, top_percent)
 
-
-# =============================
-# 7. Main
-# =============================
 
 if __name__ == "__main__":
     label(top_percent=85)
