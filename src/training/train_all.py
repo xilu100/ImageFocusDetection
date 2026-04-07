@@ -75,26 +75,36 @@ def train_models(patch_size=32):
     merge_samples_labels()
     img_paths, y = load_csv_data(patch_size)
 
-    # Train models
-    decision_tree_model = decision_tree.train_tree(img_paths, y, patch_size)
-    random_forest_model = random_forest.train_random_forest(img_paths, y, patch_size)
-    svm_model = svm.train_svm(img_paths, y, patch_size)
-    #cnn_model = cnn.train_cnn(img_paths, y, patch_size)
-
     # model_save folder in the current directory
     current_file = Path(__file__).resolve()
     model_dir = current_file.parent / 'model_save'
     model_dir.mkdir(exist_ok=True)
 
-    # Save three models separately
-    joblib.dump(decision_tree_model, model_dir / 'decision_tree_model.joblib')
-    joblib.dump(random_forest_model, model_dir / 'random_forest_model.joblib')
-    joblib.dump(svm_model, model_dir / 'svm_model.joblib')
-    '''torch.save({
+    # # Train models
+    #
+    # # ===== Decision Tree =====
+    # decision_tree_model, decision_tree_pca = decision_tree.train_tree(img_paths, y, patch_size)
+    # joblib.dump(decision_tree_model, model_dir / 'decision_tree_model.joblib')
+    # joblib.dump(decision_tree_pca, model_dir / 'decision_tree_pca.joblib')
+    #
+    # # ===== Random Forest =====
+    # random_forest_model, random_forest_pca = random_forest.train_random_forest(img_paths, y, patch_size)
+    # joblib.dump(random_forest_model, model_dir / 'random_forest_model.joblib')
+    # joblib.dump(random_forest_pca, model_dir / 'random_forest_pca.joblib')
+    #
+    # # ===== SVM =====
+    # svm_model, svm_pca = svm.train_svm(img_paths, y, patch_size)
+    # joblib.dump(svm_model, model_dir / 'svm_model.joblib')
+    # joblib.dump(svm_pca, model_dir / 'svm_pca.joblib')
+
+    # ===== CNN =====
+
+    cnn_model = cnn.train_cnn(img_paths, y, patch_size)
+    torch.save({
         'model_state_dict': cnn_model.state_dict(),
         'num_classes': cnn_model.num_classes,  # 或你自己传入的类别数
         'patch_size': patch_size
-    }, model_dir / 'cnn_model.pth')'''
+    }, model_dir / 'cnn_model.pth')
 
     print(f"Models saved to: {model_dir}")
 
