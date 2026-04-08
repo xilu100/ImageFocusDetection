@@ -10,7 +10,7 @@ def main():
     patch_size = 32
     process = 0
     train = 1
-    evaluate = 0
+    evaluate = 1
 
     if process:
         print("=== Step 1: Preprocessing ===")

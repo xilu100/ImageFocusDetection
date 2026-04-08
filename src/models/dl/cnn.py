@@ -147,7 +147,7 @@ def auto_device_and_params(batch_base: int = 64):
 
 
 # ====================== CNN Training Function ======================
-def train_cnn(img_paths, y, patch_size, epochs: int = 20, batch_base: int = 64):
+def train_cnn(img_paths, y, patch_size, epochs: int = 5, batch_base: int = 64):
     """
     Train a CNN on given image paths and labels.
 

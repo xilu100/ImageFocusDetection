@@ -38,6 +38,7 @@ def train_tree(img_paths, y, patch_size, n_components=100, n_jobs=None):
         max_depth=16,
         min_samples_split=50,
         min_samples_leaf=20,
+        class_weight='balanced',
         random_state=42
     )
     print("[Decision Tree] Start training ...")

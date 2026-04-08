@@ -38,6 +38,7 @@ def train_random_forest(img_paths, y, patch_size, n_estimators=50, max_depth=10,
         n_estimators=n_estimators,
         max_depth=max_depth,
         random_state=42,
+        class_weight='balanced_subsample',
         n_jobs=-1
     )
     print("[Random Forest] Start training ...")

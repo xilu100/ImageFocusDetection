@@ -98,7 +98,7 @@ def train_models(patch_size: int = 32):
     model_dir = current_file.parent / 'model_save'
     model_dir.mkdir(exist_ok=True)
 
-    '''# ================= Decision Tree =================
+    # ================= Decision Tree =================
     decision_tree_model, decision_tree_pca = decision_tree.train_tree(img_paths, y, patch_size)
     joblib.dump(decision_tree_model, model_dir / 'decision_tree_model.joblib')
     joblib.dump(decision_tree_pca, model_dir / 'decision_tree_pca.joblib')
@@ -111,7 +111,7 @@ def train_models(patch_size: int = 32):
     # ================= SVM =================
     svm_model, svm_pca = svm.train_svm(img_paths, y, patch_size)
     joblib.dump(svm_model, model_dir / 'svm_model.joblib')
-    joblib.dump(svm_pca, model_dir / 'svm_pca.joblib')'''
+    joblib.dump(svm_pca, model_dir / 'svm_pca.joblib')
 
     # ================= CNN =================
     cnn_model = cnn.train_cnn(img_paths, y, patch_size)
