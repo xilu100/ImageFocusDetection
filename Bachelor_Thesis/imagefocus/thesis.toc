@@ -1,6 +1,0 @@
-\contentsline {section}{\numberline {1}Introduction and Research Motivation}{2}{}%
-\contentsline {section}{\numberline {2}Theoretical Background}{2}{}%
-\contentsline {subsection}{\numberline {2.1}Traditional Machine Learning Methods}{2}{}%
-\contentsline {section}{\numberline {3}Methodology: Image Segmentation and Preprocessing}{2}{}%
-\contentsline {section}{\numberline {4}Experiments and Performance Evaluation}{2}{}%
-\contentsline {section}{\numberline {5}Discussion, Practical Significance and Future Work}{2}{}%

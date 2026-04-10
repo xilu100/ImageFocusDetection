@@ -1,6 +1,0 @@
-\contentsline {section}{\numberline {1}Problem Statement}{2}{}%
-\contentsline {section}{\numberline {2}Objective and Research Interest}{2}{}%
-\contentsline {section}{\numberline {3}Literature Review / Theoretical Background}{2}{}%
-\contentsline {section}{\numberline {4}Research Concept / Methodology}{3}{}%
-\contentsline {section}{\numberline {5}Preliminary Outline}{4}{}%
-\contentsline {section}{\numberline {6}Thesis Timeline}{5}{}%
