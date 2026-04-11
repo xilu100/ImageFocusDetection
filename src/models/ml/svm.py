@@ -3,8 +3,9 @@ import time
 
 import numpy as np
 from joblib import Parallel, delayed
-from sklearn.linear_model import SGDClassifier
-from sklearn.svm import LinearSVC
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
 
 from src.tools import util, pca
 
@@ -13,10 +14,7 @@ def train_svm(
         img_paths,
         y,
         patch_size,
-        use_sgd=False,
         n_components=100,
-        batch_size=10000,
-        n_epochs=20,
         n_jobs=None
 ):
     y = np.array(y)
@@ -39,63 +37,29 @@ def train_svm(
     print(f"[SVM] Image loading done, time: {end_load - start_load:.2f}s")
     print(f"X shape before PCA: {X.shape}")
 
-    if n_components is not None:
-        print(f"[SVM] Start PCA to {n_components} ...")
-        start_pca = time.time()
+    print("[SVM] Start PCA preprocessing ...")
+    start_pca = time.time()
+    X_reduced, pca_model = pca.reduce_dimensions(X, n_components)
+    end_pca = time.time()
+    print(f"[SVM] PCA preprocessing done, time: {end_pca - start_pca:.2f}s")
+    print(f"X shape after PCA: {X_reduced.shape}")
 
-        X_reduced, pca_model = pca.reduce_dimensions(X, n_components)
-
-        end_pca = time.time()
-        print(f"[SVM] PCA done, time: {end_pca - start_pca:.2f}s")
-        print(f"X shape after PCA: {X_reduced.shape}")
-    else:
-        X_reduced = X
-        pca_model = None
-
-    classes = np.unique(y)
-
-    if use_sgd:
-        print("[SGD] Start training ...")
-
-        model = SGDClassifier(
-            loss='hinge',
-            max_iter=1,
-            tol=None,
+    model = make_pipeline(
+        StandardScaler(),
+        SVC(
+            kernel='rbf',
+            C=2.0,
+            gamma='scale',
             class_weight='balanced',
-            learning_rate='optimal'
+            max_iter=-1
         )
+    )
+    print("[SVM] Start training ...")
 
-        start_train = time.time()
+    start_train = time.time()
+    model.fit(X_reduced, y)
+    end_train = time.time()
 
-        for epoch in range(n_epochs):
-            perm = np.random.permutation(len(X_reduced))
-            X_shuffled = X_reduced[perm]
-            y_shuffled = y[perm]
-
-            for i in range(0, len(X_reduced), batch_size):
-                batch_X = X_shuffled[i:i + batch_size]
-                batch_y = y_shuffled[i:i + batch_size]
-
-                model.partial_fit(batch_X, batch_y, classes=classes)
-
-        end_train = time.time()
-        print(f"[SGD] Training done, time: {end_train - start_train:.2f}s")
-
-    else:
-        print("[LinearSVC] Start training ...")
-
-        model = LinearSVC(
-            dual=False,
-            max_iter=5000,
-            tol=1e-4,
-            class_weight='balanced',
-            C=1.0
-        )
-
-        start_train = time.time()
-        model.fit(X_reduced, y)
-        end_train = time.time()
-
-        print(f"[LinearSVC] Training done, time: {end_train - start_train:.2f}s")
+    print(f"[SVM] Training done, time: {end_train - start_train:.2f}s")
 
     return model, pca_model
