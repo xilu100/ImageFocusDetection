@@ -1,26 +1,24 @@
 import os
-import cv2
-import time
 import random
-import numpy as np
+import time
 from collections import Counter
+from pathlib import Path
+from typing import Optional
 
+import cv2
+import lmdb
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
-# ====================== Simple CNN Model ======================
+
 class SimpleCNN(nn.Module):
-    """
-    A flexible CNN model for grayscale image patches.
-    Adjusts depth according to patch size.
-    """
     def __init__(self, patch_size: int, num_classes: int = 2):
         super().__init__()
         self.num_classes = num_classes
 
-        # Dynamically build convolutional layers based on patch size
         if patch_size <= 16:
             self.convs = nn.ModuleList([nn.Conv2d(1, 16, 3, padding=1)])
             self.pools = nn.ModuleList([nn.MaxPool2d(2, 2)])
@@ -42,7 +40,6 @@ class SimpleCNN(nn.Module):
                 nn.MaxPool2d(2, 2)
             ])
 
-        # Calculate flattened feature size for fully connected layer
         with torch.no_grad():
             dummy = torch.zeros(1, 1, patch_size, patch_size)
             for conv, pool in zip(self.convs, self.pools):
@@ -58,58 +55,128 @@ class SimpleCNN(nn.Module):
         return self.fc(x)
 
 
-# ====================== Data Preprocessing ======================
-def convert(img_path: str, patch_size: int) -> torch.Tensor:
-    """
-    Read and preprocess a grayscale image.
-
-    Args:
-        img_path (str): Path to image file.
-        patch_size (int): Desired patch size.
-
-    Returns:
-        torch.Tensor: Normalized image tensor with shape [1, H, W].
-    """
+def convert(img_path: str, patch_size: int, assume_fixed_size: bool = True) -> torch.Tensor:
     img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
     if img is None:
         raise ValueError(f"Cannot read image: {img_path}")
-    if img.shape != (patch_size, patch_size):
+    if not assume_fixed_size and img.shape != (patch_size, patch_size):
         img = cv2.resize(img, (patch_size, patch_size), interpolation=cv2.INTER_AREA)
-    img = img.astype(np.float32) / 255.0
-    img = np.expand_dims(img, axis=0)  # Add channel dimension
-    return torch.tensor(img, dtype=torch.float32)
+    if assume_fixed_size and img.shape != (patch_size, patch_size):
+        raise ValueError(f"Unexpected patch shape {img.shape}, expected {(patch_size, patch_size)}: {img_path}")
+    return torch.from_numpy(img).unsqueeze(0).to(torch.float32).div_(255.0)
 
 
 class PatchDataset(Dataset):
-    """
-    Custom PyTorch Dataset for image patches and labels.
-    """
-    def __init__(self, img_paths, labels, patch_size):
+    def __init__(self, img_paths, labels, patch_size, assume_fixed_size: bool = True):
         self.img_paths = img_paths
         self.labels = labels
         self.patch_size = patch_size
+        self.assume_fixed_size = assume_fixed_size
 
     def __len__(self):
         return len(self.img_paths)
 
     def __getitem__(self, idx):
-        img = convert(self.img_paths[idx], self.patch_size)
+        img = convert(self.img_paths[idx], self.patch_size, assume_fixed_size=self.assume_fixed_size)
         label = self.labels[idx]
         return img, label
 
 
-# ====================== Device & Training Parameters ======================
-def auto_device_and_params(batch_base: int = 64):
-    """
-    Automatically detect device and determine training parameters.
+def build_lmdb_from_paths(
+        img_paths,
+        labels,
+        patch_size: int,
+        lmdb_path: Path,
+        assume_fixed_size: bool = True,
+        commit_interval: int = 10000
+):
+    lmdb_path = Path(lmdb_path)
+    lmdb_path.parent.mkdir(parents=True, exist_ok=True)
 
-    Returns:
-        device (torch.device): Selected device.
-        amp (bool): Whether automatic mixed precision is enabled.
-        batch_size (int): Calculated batch size.
-        num_workers (int): Number of data loader workers.
-    """
-    # Device selection
+    bytes_per_sample = patch_size * patch_size + 8
+    map_size = int(max(1 << 30, len(img_paths) * bytes_per_sample * 1.5))
+    env = lmdb.open(str(lmdb_path), map_size=map_size, subdir=False, lock=True)
+
+    print(f"[LMDB] Building cache: {lmdb_path}")
+    start = time.perf_counter()
+    txn = env.begin(write=True)
+
+    for idx, (img_path, label) in enumerate(zip(img_paths, labels)):
+        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+        if img is None:
+            raise ValueError(f"Cannot read image: {img_path}")
+        if not assume_fixed_size and img.shape != (patch_size, patch_size):
+            img = cv2.resize(img, (patch_size, patch_size), interpolation=cv2.INTER_AREA)
+        if assume_fixed_size and img.shape != (patch_size, patch_size):
+            raise ValueError(f"Unexpected patch shape {img.shape}, expected {(patch_size, patch_size)}: {img_path}")
+
+        key_img = f"img-{idx:09d}".encode("ascii")
+        key_lbl = f"lbl-{idx:09d}".encode("ascii")
+        txn.put(key_img, img.tobytes())
+        txn.put(key_lbl, int(label).to_bytes(4, byteorder="little", signed=True))
+
+        if (idx + 1) % commit_interval == 0:
+            txn.commit()
+            txn = env.begin(write=True)
+            print(f"[LMDB] Processed {idx + 1}/{len(img_paths)}")
+
+    txn.put(b"__len__", str(len(img_paths)).encode("ascii"))
+    txn.put(b"__patch_size__", str(patch_size).encode("ascii"))
+    txn.commit()
+    env.sync()
+    env.close()
+
+    elapsed = time.perf_counter() - start
+    print(f"[LMDB] Build done in {elapsed:.2f}s")
+
+
+class LmdbPatchDataset(Dataset):
+    def __init__(self, lmdb_path: Path):
+        self.lmdb_path = str(lmdb_path)
+        self.env = None
+        self.txn = None
+        with lmdb.open(self.lmdb_path, subdir=False, readonly=True, lock=False, readahead=False, meminit=False) as env:
+            with env.begin(write=False) as txn:
+                len_raw = txn.get(b"__len__")
+                patch_raw = txn.get(b"__patch_size__")
+                if len_raw is None or patch_raw is None:
+                    raise ValueError(f"LMDB metadata missing in {self.lmdb_path}")
+                self.length = int(len_raw.decode("ascii"))
+                self.patch_size = int(patch_raw.decode("ascii"))
+
+    def _lazy_init(self):
+        if self.env is None:
+            self.env = lmdb.open(
+                self.lmdb_path,
+                subdir=False,
+                readonly=True,
+                lock=False,
+                readahead=False,
+                meminit=False,
+                max_readers=256
+            )
+            self.txn = self.env.begin(write=False)
+
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, idx):
+        self._lazy_init()
+        key_img = f"img-{idx:09d}".encode("ascii")
+        key_lbl = f"lbl-{idx:09d}".encode("ascii")
+        img_raw = self.txn.get(key_img)
+        lbl_raw = self.txn.get(key_lbl)
+
+        if img_raw is None or lbl_raw is None:
+            raise IndexError(f"Missing sample at index {idx} in LMDB")
+
+        img = np.frombuffer(img_raw, dtype=np.uint8).reshape(self.patch_size, self.patch_size).copy()
+        img = torch.from_numpy(img).unsqueeze(0).to(torch.float32).div_(255.0)
+        label = int.from_bytes(lbl_raw, byteorder="little", signed=True)
+        return img, label
+
+
+def auto_device_and_params(batch_base: int = 64):
     if torch.backends.mps.is_available():
         device = torch.device("mps")
         amp = False
@@ -127,7 +194,7 @@ def auto_device_and_params(batch_base: int = 64):
     device_info = ""
     if device.type == "cuda":
         props = torch.cuda.get_device_properties(0)
-        total_mem_gb = props.total_memory / 1024**3
+        total_mem_gb = props.total_memory / 1024 ** 3
         batch_size = min(batch_base * int(total_mem_gb / 4), 1024)
         device_info = f"CUDA Device: {props.name}, Total Memory: {total_mem_gb:.2f} GB"
     elif device.type == "mps":
@@ -136,7 +203,6 @@ def auto_device_and_params(batch_base: int = 64):
         device_info = f"CPU detected, {cpu_count} cores"
         batch_size = batch_base // 2
 
-    # Print configuration
     print("==== Device & Training Configuration ====")
     print(device_info)
     print(f"Using device: {device}, AMP enabled: {amp}")
@@ -146,41 +212,56 @@ def auto_device_and_params(batch_base: int = 64):
     return device, amp, batch_size, num_workers
 
 
-# ====================== CNN Training Function ======================
-def train_cnn(img_paths, y, patch_size, epochs: int = 5, batch_base: int = 64):
-    """
-    Train a CNN on given image paths and labels.
-
-    Args:
-        img_paths (list[str]): Paths to images.
-        y (list[int]): Corresponding labels.
-        patch_size (int): Patch size for input images.
-        epochs (int): Number of training epochs.
-        batch_base (int): Base batch size.
-    """
-    # Fix random seeds for reproducibility
+def train_cnn(
+        img_paths,
+        y,
+        patch_size,
+        epochs: int = 5,
+        batch_base: int = 64,
+        lmdb_path: Optional[str] = None,
+        build_lmdb_if_missing: bool = True,
+        assume_fixed_size: bool = True
+):
     seed = 42
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
 
-    # Get device and training parameters
     device, use_amp, batch_size, num_workers = auto_device_and_params(batch_base)
 
-    # Dataset and DataLoader
-    dataset = PatchDataset(img_paths, y, patch_size)
-    loader = DataLoader(
-        dataset,
+    dataset = None
+    if lmdb_path is not None:
+        lmdb_file = Path(lmdb_path)
+        if build_lmdb_if_missing and not lmdb_file.exists():
+            build_lmdb_from_paths(
+                img_paths=img_paths,
+                labels=y,
+                patch_size=patch_size,
+                lmdb_path=lmdb_file,
+                assume_fixed_size=assume_fixed_size
+            )
+        if lmdb_file.exists():
+            dataset = LmdbPatchDataset(lmdb_file)
+            print(f"[CNN] Using LMDB dataset: {lmdb_file}")
+
+    if dataset is None:
+        dataset = PatchDataset(img_paths, y, patch_size, assume_fixed_size=assume_fixed_size)
+        print("[CNN] Using file-path dataset")
+
+    loader_kwargs = dict(
+        dataset=dataset,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
         pin_memory=(device.type == "cuda")
     )
+    if num_workers > 0:
+        loader_kwargs["persistent_workers"] = True
+        loader_kwargs["prefetch_factor"] = 4
+    loader = DataLoader(**loader_kwargs)
 
-    # Initialize model
     model = SimpleCNN(patch_size).to(device)
 
-    # Compute class weights to handle imbalance
     counter = Counter(y)
     w0 = 1.0
     w1 = counter[0] / counter[1] if counter[1] > 0 else 1.0
@@ -189,10 +270,8 @@ def train_cnn(img_paths, y, patch_size, epochs: int = 5, batch_base: int = 64):
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-    # Automatic Mixed Precision (AMP) scaler
     scaler = torch.amp.GradScaler('cuda') if use_amp else None
 
-    # Training loop
     print("[CNN] Start training ...")
     start_time = time.perf_counter()
     model.train()
@@ -200,7 +279,8 @@ def train_cnn(img_paths, y, patch_size, epochs: int = 5, batch_base: int = 64):
     for epoch in range(epochs):
         total_loss = 0
         for batch_X, batch_y in loader:
-            batch_X, batch_y = batch_X.to(device), batch_y.to(device)
+            batch_X = batch_X.to(device, non_blocking=(device.type == "cuda"))
+            batch_y = batch_y.to(device, non_blocking=(device.type == "cuda"))
             optimizer.zero_grad()
 
             if use_amp:
@@ -218,7 +298,7 @@ def train_cnn(img_paths, y, patch_size, epochs: int = 5, batch_base: int = 64):
 
             total_loss += loss.item()
 
-        print(f"Epoch {epoch+1}/{epochs}, Loss: {total_loss:.4f}")
+        print(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss:.4f}")
 
     end_time = time.perf_counter()
     print(f"[CNN] Training time: {end_time - start_time:.2f} seconds")

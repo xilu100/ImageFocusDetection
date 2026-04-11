@@ -7,12 +7,14 @@ import numpy as np
 from src.tools import util
 
 
+# Measure sharpness using Laplacian response variance.
 def compute_laplacian_var(img: np.ndarray) -> float:
     img = img.astype(np.float32)
     lap = cv2.Laplacian(img, cv2.CV_32F)
     return float(lap.var())
 
 
+# Estimate edge strength from Sobel gradient magnitude.
 def compute_sobel_energy(img: np.ndarray) -> float:
     img = img.astype(np.float32)
     gx = cv2.Sobel(img, cv2.CV_32F, 1, 0, ksize=3)
@@ -21,6 +23,7 @@ def compute_sobel_energy(img: np.ndarray) -> float:
     return float(np.mean(mag))
 
 
+# Compute the ratio of high-frequency energy in the Fourier domain.
 def compute_fft_highfreq(img: np.ndarray) -> float:
     img = img.astype(np.float32)
 
@@ -42,11 +45,13 @@ def compute_fft_highfreq(img: np.ndarray) -> float:
     return float(magnitude[mask].sum() / (magnitude.sum() + 1e-8))
 
 
+# Scale score arrays to [0, 1] for fair fusion.
 def normalize(arr):
     arr = np.array(arr, dtype=np.float32)
     return (arr - arr.min()) / (arr.max() - arr.min() + 1e-8)
 
 
+# Fuse multiple focus cues with size-aware weighting rules.
 def fuse_score(size, lap, sobel, fft):
     if size < 32:
         return 0.7 * sobel + 0.3 * lap
@@ -58,6 +63,7 @@ def fuse_score(size, lap, sobel, fft):
         return 0.7 * fft + 0.3 * lap
 
 
+# Generate per-patch focus metrics and fused scores.
 def score_cal(images):
     lap_scores = []
     sobel_scores = []
@@ -94,6 +100,7 @@ def score_cal(images):
     return lap_scores, fft_scores, total_scores
 
 
+# Write patch scores and labels into a structured CSV file.
 def write_scores_csv(csv_path: Path, rows: list):
     csv_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -109,6 +116,7 @@ def write_scores_csv(csv_path: Path, rows: list):
         writer.writerows(rows)
 
 
+# Label patches in each sample folder using percentile thresholding.
 def process_dataset(input_dir: Path, output_dir: Path, top_percent=85):
     for sample_folder in input_dir.iterdir():
         if not sample_folder.is_dir():
@@ -158,6 +166,7 @@ def process_dataset(input_dir: Path, output_dir: Path, top_percent=85):
         print(f"Saved: {csv_path}")
 
 
+# Run automatic labeling for train and validation sample sets.
 def label(top_percent=85):
     root_dir = util.get_root_dir()
 

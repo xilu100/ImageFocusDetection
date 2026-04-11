@@ -1,38 +1,32 @@
 import os
 import time
+
 import numpy as np
 from joblib import Parallel, delayed
-
-from sklearn.svm import LinearSVC
 from sklearn.linear_model import SGDClassifier
+from sklearn.svm import LinearSVC
 
 from src.tools import util, pca
 
 
 def train_svm(
-    img_paths,
-    y,
-    patch_size,
-    use_sgd=False,
-    n_components=100,
-    batch_size=10000,
-    n_epochs=20,
-    n_jobs=None
+        img_paths,
+        y,
+        patch_size,
+        use_sgd=False,
+        n_components=100,
+        batch_size=10000,
+        n_epochs=20,
+        n_jobs=None
 ):
     y = np.array(y)
 
-    # =========================
-    # CPU 核心数
-    # =========================
     if n_jobs is None:
         cpu_count = os.cpu_count() or 2
         n_jobs = max(1, cpu_count // 2)
 
     print(f"[SVM] Using {n_jobs} CPU cores for image loading.")
 
-    # =========================
-    # 加载图片
-    # =========================
     print("[SVM] Start loading images ...")
     start_load = time.time()
 
@@ -45,9 +39,6 @@ def train_svm(
     print(f"[SVM] Image loading done, time: {end_load - start_load:.2f}s")
     print(f"X shape before PCA: {X.shape}")
 
-    # =========================
-    # PCA（保持和你原来一致）
-    # =========================
     if n_components is not None:
         print(f"[SVM] Start PCA to {n_components} ...")
         start_pca = time.time()
@@ -63,9 +54,6 @@ def train_svm(
 
     classes = np.unique(y)
 
-    # =========================
-    # 模型训练
-    # =========================
     if use_sgd:
         print("[SGD] Start training ...")
 

@@ -7,6 +7,7 @@ from src.tools import util
 
 
 # Image slices
+# Split one image into a grid of fixed-size patches and keep coordinates.
 def slice_image(img, patch_size: int):
     h, w = img.shape[:2]
     n_rows = h // patch_size
@@ -26,6 +27,7 @@ def slice_image(img, patch_size: int):
 
 
 # Single image processing
+# Save all patches from one image into its own output folder.
 def process_single_image(img_path: Path,
                          output_dir: Path,
                          prefix: str,
@@ -55,6 +57,7 @@ def process_single_image(img_path: Path,
 
 
 # Dataset processing
+# Iterate over normalized images listed in CSV and segment them.
 def process_dataset(input_dir: Path,
                     output_dir: Path,
                     prefix: str,
@@ -70,6 +73,7 @@ def process_dataset(input_dir: Path,
 
 
 # Interface
+# Execute patch extraction for train and validation splits.
 def segment_images(patch_size=32):
     root_dir = util.get_root_dir()
 

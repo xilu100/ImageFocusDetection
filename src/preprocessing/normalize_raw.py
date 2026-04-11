@@ -7,7 +7,7 @@ import numpy as np
 from src.tools import util
 
 
-# Image processing
+# Pad image dimensions to be divisible by patch size.
 def resize_img(img: np.ndarray, patch_size: int) -> np.ndarray:
     h, w = img.shape[:2]
     new_h = ((h + patch_size - 1) // patch_size) * patch_size
@@ -15,11 +15,12 @@ def resize_img(img: np.ndarray, patch_size: int) -> np.ndarray:
     return cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
 
 
+# Convert a BGR image to single-channel grayscale.
 def grayscale(img: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
-# CSV processing
+# Append one processing record to the metadata CSV.
 def save_info(csv_path: Path, info: dict):
     file_exists = csv_path.exists()
     with open(csv_path, mode='a', newline='', encoding='utf-8') as f:
@@ -29,6 +30,7 @@ def save_info(csv_path: Path, info: dict):
         writer.writerow(info)
 
 
+# Read already processed original filenames to support resume runs.
 def load_processed_files(csv_path: Path) -> set:
     processed = set()
     if csv_path.exists():
@@ -39,7 +41,7 @@ def load_processed_files(csv_path: Path) -> set:
     return processed
 
 
-# Path processing
+# Collect image files with supported extensions in stable order.
 def get_image_paths(input_dir: Path, extensions=None):
     if extensions is None:
         extensions = ["*.jpg", "*.jpeg", "*.png"]
@@ -49,11 +51,12 @@ def get_image_paths(input_dir: Path, extensions=None):
     return paths
 
 
+# Ensure the target directory exists before writing outputs.
 def prepare_output_dir(output_dir: Path):
     output_dir.mkdir(parents=True, exist_ok=True)
 
 
-# Single image processing
+# Normalize one source image and record its metadata.
 def process_single_image(img_path: Path,
                          output_dir: Path,
                          sample_counter: int,
@@ -85,7 +88,7 @@ def process_single_image(img_path: Path,
     return True
 
 
-# Batch Image Processing
+# Process all images in one split and skip previously finished files.
 def process_image_set(input_dir: Path,
                       output_dir: Path,
                       csv_path: Path,
@@ -105,7 +108,7 @@ def process_image_set(input_dir: Path,
             sample_counter += 1
 
 
-# Interface
+# Run normalization for both training and validation datasets.
 def normalize_images(patch_size=32):
     root_dir = util.get_root_dir()
 

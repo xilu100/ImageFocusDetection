@@ -1,5 +1,7 @@
 # idea
 .idea
+# VS Code
+.vscode
 # MacOS
 .DS_Store
 # Pictures and Samples
