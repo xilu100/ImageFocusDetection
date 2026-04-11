@@ -3,9 +3,10 @@ import time
 
 import numpy as np
 from joblib import Parallel, delayed
+from sklearn.kernel_approximation import Nystroem
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
 
 from src.tools import util, pca
 
@@ -15,6 +16,7 @@ def train_svm(
         y,
         patch_size,
         n_components=100,
+        nystroem_components=300,
         n_jobs=None
 ):
     y = np.array(y)
@@ -46,13 +48,17 @@ def train_svm(
 
     model = make_pipeline(
         StandardScaler(),
-        SVC(
+        Nystroem(
             kernel='rbf',
+            gamma=None,
+            n_components=nystroem_components,
+            random_state=42
+        ),
+        LinearSVC(
             C=2.0,
-            gamma='scale',
             class_weight='balanced',
-            max_iter=-1
-        )
+            max_iter=5000
+        ),
     )
     print("[SVM] Start training ...")
 
