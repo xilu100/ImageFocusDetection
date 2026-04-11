@@ -39,3 +39,5 @@ src/training/model_save
 *.vrb
 *.pdfsync
 *.pdf
+# Log files
+/logs
