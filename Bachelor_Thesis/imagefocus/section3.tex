@@ -10,39 +10,48 @@
 
 The entire preprocessing pipeline depends on a predefined patch size, which is
 determined prior to all processing steps. This parameter influences multiple
-stages of the pipeline, including image resizing, segmentation, and dataset size.
+stages of the pipeline, including image resizing, segmentation, and dataset
+size.
 
 \subsection{Patch Size Configuration}
-This subsection defines the global patch size used throughout the preprocessing pipeline.
+This subsection defines the global patch size used throughout the preprocessing
+pipeline.
 
-Before the preprocessing pipeline, a fixed patch size must be determined.
-The patch size is a global parameter that influences multiple stages of the
-pipeline, including image resizing, segmentation, and the total number of samples.
+Before the preprocessing pipeline, a fixed patch size must be determined. The
+patch size is a global parameter that influences multiple stages of the
+pipeline, including image resizing, segmentation, and the total number of
+samples.
 
 The number of image-segmented patches depends on the patch size. If the patch
 size is small, the number of patches will be large, which increases the dataset
 size. Therefore, the patch size directly affects the feasibility and performance
 of the ML and DL models.
 
+[Needed:Why patch size's choice is important]
+
+
 \subsection{Image Normalization}
 This step ensures that all images are transformed into a consistent format
 compatible with the predefined patch size.
 
-In this step, all images are resized to match the predefined patch size.
-This guarantees that subsequent segmentation can be performed consistently
-across all samples.
+In this step, all images are resized to match the predefined patch size. This
+guarantees that subsequent segmentation can be performed consistently across all
+samples.
 
 \subsection{Image Segmentation}
-This step divides normalized images into smaller patches based on the predefined patch size.
+This step divides normalized images into smaller patches based on the predefined
+patch size.
 
-Images are segmented into fixed-size patches according to the predefined patch size.
-The segmentation process directly depends on the patch configuration defined earlier.
+Images are segmented into fixed-size patches according to the predefined patch
+size. The segmentation process directly depends on the patch configuration
+defined earlier.
 
 \subsection{Patch Labeling}
 This step assigns labels to each segmented image patch for supervised learning.
 
-Each image patch is assigned a label according to the selected labeling strategy.
-These labels are used as ground truth for training the ML and DL models.
+Each image patch is assigned a label according to the selected labeling
+strategy. These labels are used as ground truth for training the ML and DL
+models.
 
 \subsection{Image Reconstruction}
 This step maps patch-level predictions back to the original image space.
@@ -54,8 +63,8 @@ evaluation at the image level.
 \subsection{Labeling Strategy}
 This subsection defines how labels are assigned to image patches.
 
-We decided to use machine auto-labeling instead of manual labeling, even though we
-are training with small samples. The reason is that the original image is large,
-and the number of patches increases as the patch size decreases. One of the
-subsections will prove the correctness of this decision. In other words, machine
-auto-labeling will not influence the experimental result.
+We decided to use machine auto-labeling instead of manual labeling, even though
+we are training with small samples. The reason is that the original image is
+large, and the number of patches increases as the patch size decreases. One of
+the subsections will prove the correctness of this decision. In other words,
+machine auto-labeling will not influence the experimental result.
