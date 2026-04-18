@@ -94,6 +94,15 @@ def build_lmdb_from_paths(
 ):
     lmdb_path = Path(lmdb_path)
     lmdb_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_file = Path(f"{lmdb_path}-lock")
+
+    # Always rebuild LMDB from scratch to avoid stale cache.
+    if lmdb_path.exists():
+        lmdb_path.unlink()
+        print_and_save(f"[LMDB] Removed existing cache: {lmdb_path}")
+    if lock_file.exists():
+        lock_file.unlink()
+        print_and_save(f"[LMDB] Removed existing lock: {lock_file}")
 
     bytes_per_sample = patch_size * patch_size + 8
     map_size = int(max(1 << 30, len(img_paths) * bytes_per_sample * 1.5))
@@ -233,7 +242,7 @@ def train_cnn(
     dataset = None
     if lmdb_path is not None:
         lmdb_file = Path(lmdb_path)
-        if build_lmdb_if_missing and not lmdb_file.exists():
+        if build_lmdb_if_missing:
             build_lmdb_from_paths(
                 img_paths=img_paths,
                 labels=y,
