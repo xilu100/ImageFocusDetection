@@ -4,7 +4,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from src.tools import util
+from tools import util
 
 
 # Measure sharpness using Laplacian response variance.
@@ -193,3 +193,4 @@ def label(top_percent=85, low_percent=10):
 
 if __name__ == "__main__":
     label(top_percent=85, low_percent=10)
+

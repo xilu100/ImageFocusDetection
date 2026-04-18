@@ -8,7 +8,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 
-from src.tools import util, pca
+from tools import util, pca
 
 
 def train_svm(
@@ -69,3 +69,4 @@ def train_svm(
     print(f"[SVM] Training done, time: {end_train - start_train:.2f}s")
 
     return model, pca_model
+

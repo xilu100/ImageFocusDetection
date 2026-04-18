@@ -5,7 +5,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.tree import DecisionTreeClassifier
 
-from src.tools import util, pca
+from tools import util, pca
 
 
 def train_tree(img_paths, y, patch_size, n_components=100, n_jobs=None):
@@ -47,3 +47,4 @@ def train_tree(img_paths, y, patch_size, n_components=100, n_jobs=None):
     print(f"[Decision Tree] Training done, time: {end_train - start_train:.2f}s")
 
     return model, pca_model
+

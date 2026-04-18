@@ -4,9 +4,9 @@ import joblib
 import pandas as pd
 import torch
 
-from src.models.dl import cnn
-from src.models.ml import decision_tree, random_forest, svm
-from src.tools import util
+from models.dl import cnn
+from models.ml import decision_tree, random_forest, svm
+from tools import util
 
 
 def merge_samples_labels(
@@ -126,3 +126,4 @@ def train_models(
 
 if __name__ == "__main__":
     train_models(patch_size=32, PCA_components=100, sample_percentage=100.0)
+

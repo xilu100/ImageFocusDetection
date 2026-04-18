@@ -3,7 +3,7 @@ from pathlib import Path
 import cv2
 import pandas as pd
 
-from src.tools import util
+from tools import util
 
 
 # Image slices
@@ -94,3 +94,4 @@ def segment_images(patch_size=32):
 
 if __name__ == "__main__":
     segment_images(patch_size=32)
+

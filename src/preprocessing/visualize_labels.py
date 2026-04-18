@@ -1,12 +1,14 @@
 from pathlib import Path
 
 import cv2
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
-from src.tools import pca, util
+from tools import pca, util
 
 
 # Extract patch grid coordinates encoded in a patch filename.
@@ -42,13 +44,20 @@ def generate_score_heatmap(df: pd.DataFrame, grid_rows: int, grid_cols: int) -> 
 
 # Blend a tri-state label mask onto the original image for inspection.
 def overlay_heatmap_on_image(image: np.ndarray, heatmap: np.ndarray,
-                             sharp_color=(0, 0, 255), blurry_color=(0, 255, 255), uncertain_color=(255, 0, 0),
-                             alpha=0.3, beta=0.7) -> np.ndarray:
-    mask = np.zeros_like(image)
-    mask[heatmap == 1] = sharp_color
-    mask[heatmap == 0] = blurry_color
-    mask[heatmap == -1] = uncertain_color
-    overlay = cv2.addWeighted(image, beta, mask, alpha, 0)
+                             sharp_color=(0, 0, 255), uncertain_color=(255, 0, 0),
+                             alpha=0.3) -> np.ndarray:
+    overlay = image.copy()
+
+    for label, color in ((1, sharp_color), (-1, uncertain_color)):
+        region = heatmap == label
+        if not np.any(region):
+            continue
+
+        color_patch = np.zeros_like(image, dtype=np.uint8)
+        color_patch[:] = color
+        blended = cv2.addWeighted(image, 1 - alpha, color_patch, alpha, 0)
+        overlay[region] = blended[region]
+
     return overlay
 
 
@@ -267,3 +276,4 @@ def visualize():
 
 if __name__ == "__main__":
     visualize()
+

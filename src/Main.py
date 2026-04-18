@@ -4,9 +4,9 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from src.evaluate import evaluate_all
-from src.preprocessing import normalize_raw, segment_nor_img, label_patches, visualize_labels
-from src.training import train_all
+from evaluate import evaluate_all
+from preprocessing import normalize_raw, segment_nor_img, label_patches
+from training import train_all
 
 
 class StreamToLogger:
@@ -102,6 +102,7 @@ def main():
         normalize_raw.normalize_images(patch_size)
         segment_nor_img.segment_images(patch_size)
         label_patches.label(top_percent, low_percent)
+        from preprocessing import visualize_labels
         visualize_labels.visualize()
 
     if train:

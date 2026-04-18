@@ -4,7 +4,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from src.tools import util
+from tools import util
 
 
 # Pad image dimensions to be divisible by patch size.
@@ -127,3 +127,4 @@ def normalize_images(patch_size=32):
 
 if __name__ == "__main__":
     normalize_images(patch_size=32)
+

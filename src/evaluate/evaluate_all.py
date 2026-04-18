@@ -7,8 +7,8 @@ import pandas as pd
 import torch
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
-from src.models.dl import cnn
-from src.tools import util
+from models.dl import cnn
+from tools import util
 
 
 def merge_valid_samples_labels(source_subfolder: str = None):
@@ -193,3 +193,4 @@ def evaluate_valid_set(patch_size: int = 32):
 
 if __name__ == "__main__":
     evaluate_valid_set(patch_size=32)
+
