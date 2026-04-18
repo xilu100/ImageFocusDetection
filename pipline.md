@@ -161,6 +161,32 @@
 
 # Model selection - Machine Learning
 
+## 0. Principal Component Analysis
+
+```yaml
+- Title: "Inference on the Proportion of Variance Explained in Principal Component Analysis"
+  Field: "explained variance"
+  URL: "https://www.tandfonline.com/doi/abs/10.1080/01621459.2025.2538895"
+  BibTeX: |
+    @article{perry2025inference,
+    title={Inference on the proportion of variance explained in principal component analysis},
+    author={Perry, Ronan and Panigrahi, Snigdha and Bien, Jacob and Witten, Daniela},
+    journal={Journal of the American Statistical Association},
+    pages={1--11},
+    year={2025},
+    publisher={Taylor \& Francis}
+    }
+- Title: "On the Application of Principal Component Analysis to Classification Problems"
+  Field: "explained variance is not always good"
+  URL: "https://digitalcommons.chapman.edu/scs_articles/729/"
+  BibTeX: |
+    @article{zheng2021application,
+    title={On the application of principal component analysis to classification problems},
+    author={Zheng, Jianwei and Rakovski, Cyril},
+    year={2021}
+    }
+```
+
 ## 1. Decision Tree
 
 ```yaml
