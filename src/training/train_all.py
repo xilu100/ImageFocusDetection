@@ -9,7 +9,10 @@ from src.models.ml import decision_tree, random_forest, svm
 from src.tools import util
 
 
-def merge_samples_labels(source_subfolder: str = None):
+def merge_samples_labels(
+        source_subfolder: str = None,
+        sample_percentage: float = 100.0
+):
     root_dir = util.get_root_dir()
     samples_labels_dir = root_dir / 'data/samples_labels'
     samples_dir = root_dir / 'data/samples'
@@ -36,11 +39,27 @@ def merge_samples_labels(source_subfolder: str = None):
 
         for csv_file in subfolder.glob('*.csv'):
             df = pd.read_csv(csv_file)
+            before_count = len(df)
+            if 'label' in df.columns:
+                df = df[df['label'] != -1].copy()
+            removed_count = before_count - len(df)
+            if removed_count > 0:
+                print(f"Removed {removed_count} rows with label=-1 from: {csv_file}")
             df['source_folder'] = str(source_folder_path)
             all_dfs.append(df)
 
+    if not (0 < sample_percentage <= 100):
+        raise ValueError(f"sample_percentage must be in (0, 100], got {sample_percentage}")
+
     if all_dfs:
         combined_df = pd.concat(all_dfs, ignore_index=True)
+        if sample_percentage < 100:
+            seed = 42
+            combined_df = combined_df.sample(
+                frac=sample_percentage / 100,
+                random_state=seed
+            ).reset_index(drop=True)
+            print(f"Randomly kept {sample_percentage}% samples. Remaining rows: {len(combined_df)}")
         combined_df.to_csv(output_file, index=False)
         print(f"Merged CSV saved: {output_file}")
     else:
@@ -62,8 +81,12 @@ def load_csv_data(patch_size: int = 16):
     return img_paths, y
 
 
-def train_models(patch_size: int = 32):
-    merge_samples_labels()
+def train_models(
+        patch_size: int = 32,
+        PCA_components=100,
+        sample_percentage: float = 100.0
+):
+    merge_samples_labels(sample_percentage=sample_percentage)
     img_paths, y = load_csv_data(patch_size)
     root_dir = util.get_root_dir()
 
@@ -71,15 +94,15 @@ def train_models(patch_size: int = 32):
     model_dir = current_file.parent / 'model_save'
     model_dir.mkdir(exist_ok=True)
 
-    decision_tree_model, decision_tree_pca = decision_tree.train_tree(img_paths, y, patch_size)
+    decision_tree_model, decision_tree_pca = decision_tree.train_tree(img_paths, y, patch_size,PCA_components)
     joblib.dump(decision_tree_model, model_dir / 'decision_tree_model.joblib')
     joblib.dump(decision_tree_pca, model_dir / 'decision_tree_pca.joblib')
 
-    random_forest_model, random_forest_pca = random_forest.train_random_forest(img_paths, y, patch_size)
+    random_forest_model, random_forest_pca = random_forest.train_random_forest(img_paths, y, patch_size,PCA_components)
     joblib.dump(random_forest_model, model_dir / 'random_forest_model.joblib')
     joblib.dump(random_forest_pca, model_dir / 'random_forest_pca.joblib')
 
-    svm_model, svm_pca = svm.train_svm(img_paths, y, patch_size)
+    svm_model, svm_pca = svm.train_svm(img_paths, y, patch_size,PCA_components)
     joblib.dump(svm_model, model_dir / 'svm_model.joblib')
     joblib.dump(svm_pca, model_dir / 'svm_pca.joblib')
 
@@ -102,4 +125,4 @@ def train_models(patch_size: int = 32):
 
 
 if __name__ == "__main__":
-    train_models(patch_size=32)
+    train_models(patch_size=32, PCA_components=100, sample_percentage=100.0)

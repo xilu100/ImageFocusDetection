@@ -8,7 +8,7 @@ from sklearn.ensemble import RandomForestClassifier
 from src.tools import util, pca
 
 
-def train_random_forest(img_paths, y, patch_size, n_estimators=50, max_depth=10, n_components=100, n_jobs=None):
+def train_random_forest(img_paths, y, patch_size, n_components=100, n_estimators=50, max_depth=10, n_jobs=None):
     y = np.array(y)
 
     if n_jobs is None:

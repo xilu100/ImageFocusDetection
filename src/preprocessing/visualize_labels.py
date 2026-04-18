@@ -1,10 +1,12 @@
 from pathlib import Path
 
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
-from src.tools import util
+from src.tools import pca, util
 
 
 # Extract patch grid coordinates encoded in a patch filename.
@@ -20,14 +22,12 @@ def load_mapping(csv_path: Path) -> dict:
     return {row["filename"]: row["original_filename"] for _, row in df.iterrows()}
 
 
-# Create a binary map that marks only positive-labeled patches.
+# Create a tri-state map: -1 (uncertain / very blurry), 0 (blurry), 1 (sharp).
 def generate_label_heatmap(df: pd.DataFrame, grid_rows: int, grid_cols: int) -> np.ndarray:
-    heatmap = np.zeros((grid_rows, grid_cols), dtype=np.uint8)
+    heatmap = np.full((grid_rows, grid_cols), fill_value=99, dtype=np.int16)
     for _, row in df.iterrows():
-        if row["label"] != 1:
-            continue
         r, c = parse_row_col(row["filename"])
-        heatmap[r, c] = 1
+        heatmap[r, c] = int(row["label"])
     return heatmap
 
 
@@ -40,11 +40,14 @@ def generate_score_heatmap(df: pd.DataFrame, grid_rows: int, grid_cols: int) -> 
     return score_map
 
 
-# Blend a binary label mask onto the original image for inspection.
+# Blend a tri-state label mask onto the original image for inspection.
 def overlay_heatmap_on_image(image: np.ndarray, heatmap: np.ndarray,
-                             color=(0, 0, 255), alpha=0.3, beta=0.7) -> np.ndarray:
+                             sharp_color=(0, 0, 255), blurry_color=(0, 255, 255), uncertain_color=(255, 0, 0),
+                             alpha=0.3, beta=0.7) -> np.ndarray:
     mask = np.zeros_like(image)
-    mask[heatmap == 1] = color
+    mask[heatmap == 1] = sharp_color
+    mask[heatmap == 0] = blurry_color
+    mask[heatmap == -1] = uncertain_color
     overlay = cv2.addWeighted(image, beta, mask, alpha, 0)
     return overlay
 
@@ -59,7 +62,7 @@ def overlay_score_map_on_image(image: np.ndarray, score_map: np.ndarray,
 
 
 # Generate visual overlays for every labeled sample folder.
-def process_dataset(input_dir: Path, raw_dir: Path, sample_map: dict):
+def process_dataset(input_dir: Path, raw_dir: Path, samples_dir: Path, sample_map: dict, patch_size: int = 32):
     for folder in input_dir.iterdir():
         if not folder.is_dir() or not folder.name.endswith("_labels"):
             continue
@@ -110,7 +113,137 @@ def process_dataset(input_dir: Path, raw_dir: Path, sample_map: dict):
         output_path = folder / f"{sample_name}_score_overlay.png"
         cv2.imwrite(str(output_path), score_overlay)
 
+        sample_folder = samples_dir / sample_name
+        X, y = collect_sample_features_for_pca(df, sample_folder, patch_size)
+        if X is not None:
+            save_pca_2d_plot(
+                X=X,
+                y=y,
+                output_path=folder / f"{sample_name}_pca_2d_distribution.png",
+                title=f"{sample_name} Patch Distribution (PCA 2D)"
+            )
+            save_pca_3d_plot(
+                X=X,
+                y=y,
+                output_path=folder / f"{sample_name}_pca_3d_distribution.png",
+                title=f"{sample_name} Patch Distribution (PCA 3D)"
+            )
+
         print("Finished")
+
+
+def collect_sample_features_for_pca(df: pd.DataFrame, sample_folder: Path, patch_size: int = 32):
+    X_list = []
+    y_list = []
+
+    if "label" not in df.columns or "filename" not in df.columns:
+        return None, None
+
+    if not sample_folder.exists():
+        return None, None
+
+    for _, row in df.iterrows():
+        img_path = sample_folder / str(row["filename"])
+        if not img_path.exists():
+            continue
+
+        try:
+            x = util.img_to_X(str(img_path), patch_size)
+        except ValueError:
+            continue
+
+        X_list.append(x)
+        y_list.append(int(row["label"]))
+
+    if not X_list:
+        return None, None
+
+    X = np.array(X_list, dtype=np.float32)
+    y = np.array(y_list, dtype=np.int32)
+    return X, y
+
+
+def save_pca_3d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str):
+    if len(X) < 3:
+        print(f"Skip PCA plot (need at least 3 samples): {output_path}")
+        return
+
+    X_3d, _ = pca.reduce_dimensions(X, n_components=3)
+
+    fig = plt.figure(figsize=(9, 7))
+    ax = fig.add_subplot(111, projection="3d")
+    label_style = {
+        -1: ("Uncertain / Very Blurry (-1)", "tab:blue"),
+        0: ("Blurry (0)", "tab:gray"),
+        1: ("Sharp (1)", "tab:red"),
+    }
+
+    unique_labels = sorted(np.unique(y).tolist())
+    for lbl in unique_labels:
+        idx = y == lbl
+        label_name, color = label_style.get(lbl, (f"Label {lbl}", "black"))
+        ax.scatter(
+            X_3d[idx, 0],
+            X_3d[idx, 1],
+            X_3d[idx, 2],
+            s=8,
+            alpha=0.7,
+            c=color,
+            label=label_name
+        )
+
+    ax.set_title(title)
+    ax.set_xlabel("PC1")
+    ax.set_ylabel("PC2")
+    ax.set_zlabel("PC3")
+    ax.legend()
+    ax.grid(alpha=0.2)
+    plt.tight_layout()
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_path, dpi=200)
+    plt.close()
+    print(f"Saved PCA 3D plot: {output_path}")
+
+
+def save_pca_2d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str):
+    if len(X) < 2:
+        print(f"Skip PCA plot (need at least 2 samples): {output_path}")
+        return
+
+    X_2d, _ = pca.reduce_dimensions(X, n_components=2)
+
+    plt.figure(figsize=(8, 6))
+    label_style = {
+        -1: ("Uncertain / Very Blurry (-1)", "tab:blue"),
+        0: ("Blurry (0)", "tab:gray"),
+        1: ("Sharp (1)", "tab:red"),
+    }
+
+    unique_labels = sorted(np.unique(y).tolist())
+    for lbl in unique_labels:
+        idx = y == lbl
+        label_name, color = label_style.get(lbl, (f"Label {lbl}", "black"))
+        plt.scatter(
+            X_2d[idx, 0],
+            X_2d[idx, 1],
+            s=8,
+            alpha=0.7,
+            c=color,
+            label=label_name
+        )
+
+    plt.title(title)
+    plt.xlabel("PC1")
+    plt.ylabel("PC2")
+    plt.legend()
+    plt.grid(alpha=0.2)
+    plt.tight_layout()
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_path, dpi=200)
+    plt.close()
+    print(f"Saved PCA 2D plot: {output_path}")
 
 
 # Run visualization for both train and validation labeling outputs.
@@ -119,15 +252,17 @@ def visualize():
 
     train_raw_dir = root_dir / "data/raw/train_img"
     train_labels_dir = root_dir / "data/samples_labels"
+    train_samples_dir = root_dir / "data/samples"
     train_info_path = root_dir / "data/normalized/samples_info.csv"
     train_map = load_mapping(train_info_path)
-    process_dataset(train_labels_dir, train_raw_dir, train_map)
+    process_dataset(train_labels_dir, train_raw_dir, train_samples_dir, train_map)
 
     valid_raw_dir = root_dir / "data/raw/valid_img"
     valid_labels_dir = root_dir / "data/valid_samples_labels"
+    valid_samples_dir = root_dir / "data/valid_samples"
     valid_info_path = root_dir / "data/valid_normalized/valid_samples_info.csv"
     valid_map = load_mapping(valid_info_path)
-    process_dataset(valid_labels_dir, valid_raw_dir, valid_map)
+    process_dataset(valid_labels_dir, valid_raw_dir, valid_samples_dir, valid_map)
 
 
 if __name__ == "__main__":

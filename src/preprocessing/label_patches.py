@@ -53,7 +53,7 @@ def normalize(arr):
 
 # Fuse multiple focus cues with size-aware weighting rules.
 def fuse_score(size, lap, sobel, fft):
-    if size < 32:
+    if size <= 32:
         return 0.7 * sobel + 0.3 * lap
 
     elif size <= 128:
@@ -117,7 +117,12 @@ def write_scores_csv(csv_path: Path, rows: list):
 
 
 # Label patches in each sample folder using percentile thresholding.
-def process_dataset(input_dir: Path, output_dir: Path, top_percent=85):
+def process_dataset(input_dir: Path, output_dir: Path, top_percent=85, low_percent=10):
+    if not (0 <= low_percent <= 100 and 0 <= top_percent <= 100):
+        raise ValueError("low_percent and top_percent must be in [0, 100].")
+    if low_percent >= top_percent:
+        raise ValueError("low_percent must be smaller than top_percent.")
+
     for sample_folder in input_dir.iterdir():
         if not sample_folder.is_dir():
             continue
@@ -148,11 +153,17 @@ def process_dataset(input_dir: Path, output_dir: Path, top_percent=85):
 
         lap_scores, fft_scores, total_scores = score_cal(images)
 
-        threshold = np.percentile(total_scores, top_percent)
+        top_threshold = np.percentile(total_scores, top_percent)
+        low_threshold = np.percentile(total_scores, low_percent)
 
         rows = []
         for i in range(len(images)):
-            label = 1 if total_scores[i] >= threshold else 0
+            if total_scores[i] >= top_threshold:
+                label = 1
+            elif total_scores[i] <= low_threshold:
+                label = -1
+            else:
+                label = 0
 
             rows.append([
                 filenames[i],
@@ -167,7 +178,7 @@ def process_dataset(input_dir: Path, output_dir: Path, top_percent=85):
 
 
 # Run automatic labeling for train and validation sample sets.
-def label(top_percent=85):
+def label(top_percent=85, low_percent=10):
     root_dir = util.get_root_dir()
 
     train_input_dir = root_dir / "data/samples"
@@ -176,9 +187,9 @@ def label(top_percent=85):
     valid_input_dir = root_dir / "data/valid_samples"
     valid_output_dir = root_dir / "data/valid_samples_labels"
 
-    process_dataset(train_input_dir, train_output_dir, top_percent)
-    process_dataset(valid_input_dir, valid_output_dir, top_percent)
+    process_dataset(train_input_dir, train_output_dir, top_percent, low_percent)
+    process_dataset(valid_input_dir, valid_output_dir, top_percent, low_percent)
 
 
 if __name__ == "__main__":
-    label(top_percent=85)
+    label(top_percent=85, low_percent=10)

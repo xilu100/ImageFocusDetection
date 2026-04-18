@@ -1,5 +1,5 @@
-import shutil
 import logging
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -10,6 +10,10 @@ from src.training import train_all
 
 
 class StreamToLogger:
+    """
+    Redirect stdout/stderr streams to the logging system while still printing to console.
+    """
+
     def __init__(self, logger, level, stream):
         self.logger = logger
         self.level = level
@@ -34,6 +38,9 @@ class StreamToLogger:
 
 
 def setup_logging():
+    """
+    Configure logging to both file and console.
+    """
     project_root = Path(__file__).resolve().parent.parent
     log_dir = project_root / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -63,8 +70,28 @@ def setup_logging():
 def main():
     setup_logging()
 
+    # =========================
+    # Hyperparameters
+    # =========================
+
+    # Patch size; recommended values: [16, 32, 64, 128]; must be a multiple of 16
     patch_size = 32
-    process = 0
+
+    # Scoring thresholds; range: [0, 100]
+    top_percent = 75
+    low_percent = 10
+
+    # Number of PCA components; use -1 to disable PCA; otherwise range: [1, patch_size**2]
+    PCA_components = 100
+
+    # Sampling percentage; range: [0, 100]
+    samples_percentage = 80
+
+    # =========================
+    # Pipeline switches
+    # =========================
+
+    process = 1
     train = 1
     evaluate = 1
 
@@ -74,19 +101,22 @@ def main():
 
         normalize_raw.normalize_images(patch_size)
         segment_nor_img.segment_images(patch_size)
-        label_patches.label(top_percent=75)
+        label_patches.label(top_percent, low_percent)
         visualize_labels.visualize()
 
     if train:
         print("=== Step 2: Training ===")
-        train_all.train_models(patch_size)
+        train_all.train_models(patch_size, PCA_components, samples_percentage)
 
     if evaluate:
         print("=== Step 3: Evaluation ===")
-        evaluate_all.evaluate_valid_set()
+        evaluate_all.evaluate_valid_set(patch_size)
 
 
 def delete_folder():
+    """
+    Remove intermediate data folders and saved models to ensure a clean run.
+    """
     current_dir = Path(__file__).resolve().parent
     parent_dir = current_dir.parent
 
@@ -111,7 +141,7 @@ def delete_folder():
             shutil.rmtree(folder)
             print(f"Deleted folder: {folder}")
         else:
-            print(f"The folder does not exist: {folder}")
+            print(f"Folder does not exist: {folder}")
 
 
 if __name__ == "__main__":

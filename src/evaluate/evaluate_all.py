@@ -39,6 +39,12 @@ def merge_valid_samples_labels(source_subfolder: str = None):
 
         for csv_file in subfolder.glob('*.csv'):
             df = pd.read_csv(csv_file)
+            before_count = len(df)
+            if 'label' in df.columns:
+                df = df[df['label'] != -1].copy()
+            removed_count = before_count - len(df)
+            if removed_count > 0:
+                print(f"Removed {removed_count} rows with label=-1 from: {csv_file}")
             df['source_folder'] = str(source_folder_path)
             all_dfs.append(df)
 
@@ -137,9 +143,16 @@ def evaluate_valid_set(patch_size: int = 32):
     svm_model = joblib.load(model_dir / 'svm_model.joblib')
     svm_pca = joblib.load(model_dir / 'svm_pca.joblib')
 
-    X_dt = decision_tree_pca.transform(X)
-    X_rf = random_forest_pca.transform(X)
-    X_svm = svm_pca.transform(X)
+    if decision_tree_pca is None:
+        print("[Decision Tree] No PCA model found, evaluate with original features.")
+    if random_forest_pca is None:
+        print("[Random Forest] No PCA model found, evaluate with original features.")
+    if svm_pca is None:
+        print("[SVM] No PCA model found, evaluate with original features.")
+
+    X_dt = X if decision_tree_pca is None else decision_tree_pca.transform(X)
+    X_rf = X if random_forest_pca is None else random_forest_pca.transform(X)
+    X_svm = X if svm_pca is None else svm_pca.transform(X)
 
     y_pred_dt = decision_tree_model.predict(X_dt)
     evaluate("Decision Tree", y, y_pred_dt)
