@@ -3,7 +3,7 @@ import random
 import time
 from collections import Counter
 from pathlib import Path
-from typing import Optional
+from typing import Optional, cast
 
 import cv2
 import lmdb
@@ -141,8 +141,8 @@ class LmdbPatchDataset(Dataset):
                 patch_raw = txn.get(b"__patch_size__")
                 if len_raw is None or patch_raw is None:
                     raise ValueError(f"LMDB metadata missing in {self.lmdb_path}")
-                self.length = int(len_raw.decode("ascii"))
-                self.patch_size = int(patch_raw.decode("ascii"))
+                self.length = int(bytes(len_raw).decode("ascii"))
+                self.patch_size = int(bytes(patch_raw).decode("ascii"))
 
     def _lazy_init(self):
         if self.env is None:
@@ -191,7 +191,6 @@ def auto_device_and_params(batch_base: int = 64):
     num_workers = min(8, max(1, cpu_count // 2))
     batch_size = batch_base
 
-    device_info = ""
     if device.type == "cuda":
         props = torch.cuda.get_device_properties(0)
         total_mem_gb = props.total_memory / 1024 ** 3
@@ -284,10 +283,12 @@ def train_cnn(
             optimizer.zero_grad()
 
             if use_amp:
+                assert scaler is not None
                 with torch.amp.autocast(device_type='cuda'):
                     outputs = model(batch_X)
                     loss = criterion(outputs, batch_y)
-                scaler.scale(loss).backward()
+                scaled_loss = cast(torch.Tensor, scaler.scale(loss))
+                scaled_loss.backward()
                 scaler.step(optimizer)
                 scaler.update()
             else:

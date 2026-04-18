@@ -22,7 +22,7 @@ def merge_valid_samples_labels(source_subfolder: str = None):
         output_file.unlink()
         print(f"Deleted existing merged CSV: {output_file}")
 
-    all_dfs = []
+    all_dfs: list[pd.DataFrame] = []
 
     if source_subfolder:
         folders_to_process = [labels_dir / f"{source_subfolder}_labels"]
@@ -49,14 +49,14 @@ def merge_valid_samples_labels(source_subfolder: str = None):
             all_dfs.append(df)
 
     if all_dfs:
-        combined_df = pd.concat(all_dfs, ignore_index=True)
+        combined_df: pd.DataFrame = pd.concat(all_dfs, ignore_index=True)
         combined_df.to_csv(output_file, index=False)
         print(f"Merged CSV saved: {output_file}")
     else:
         print("No CSV files found to merge.")
 
 
-def load_valid_data(patch_size: int = 16):
+def load_valid_data():
     current_file = Path(__file__).resolve()
     root_dir = current_file.parents[2]
     csv_file = root_dir / 'data/valid_samples_labels/merged_valid_samples_labels.csv'
@@ -128,7 +128,7 @@ def evaluate(name, y, y_pred):
 def evaluate_valid_set(patch_size: int = 32):
     merge_valid_samples_labels()
 
-    img_paths, y = load_valid_data(patch_size)
+    img_paths, y = load_valid_data()
     X = build_X(img_paths, patch_size)
 
     current_file = Path(__file__).resolve()

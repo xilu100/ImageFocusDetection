@@ -8,14 +8,14 @@ from tools import util
 
 
 # Measure sharpness using Laplacian response variance.
-def compute_laplacian_var(img: np.ndarray) -> float:
+def compute_laplacian(img: np.ndarray) -> float:
     img = img.astype(np.float32)
     lap = cv2.Laplacian(img, cv2.CV_32F)
     return float(lap.var())
 
 
 # Estimate edge strength from Sobel gradient magnitude.
-def compute_sobel_energy(img: np.ndarray) -> float:
+def compute_sobel(img: np.ndarray) -> float:
     img = img.astype(np.float32)
     gx = cv2.Sobel(img, cv2.CV_32F, 1, 0, ksize=3)
     gy = cv2.Sobel(img, cv2.CV_32F, 0, 1, ksize=3)
@@ -24,15 +24,15 @@ def compute_sobel_energy(img: np.ndarray) -> float:
 
 
 # Compute the ratio of high-frequency energy in the Fourier domain.
-def compute_fft_highfreq(img: np.ndarray) -> float:
+def compute_fft(img: np.ndarray) -> float:
     img = img.astype(np.float32)
 
     img = (img - img.mean()) / (img.std() + 1e-8)
 
     f = np.fft.fft2(img)
-    fshift = np.fft.fftshift(f)
+    f_shift = np.fft.fftshift(f)
 
-    magnitude = np.log1p(np.abs(fshift))
+    magnitude = np.log1p(np.abs(f_shift))
 
     h, w = img.shape
     cy, cx = h // 2, w // 2
@@ -72,14 +72,14 @@ def score_cal(images):
 
     for img in images:
         h, w = img.shape
-        size = min(h, w)
+        size = int(min(h, w))
         sizes.append(size)
 
-        lap_scores.append(compute_laplacian_var(img))
-        sobel_scores.append(compute_sobel_energy(img))
+        lap_scores.append(compute_laplacian(img))
+        sobel_scores.append(compute_sobel(img))
 
         if size >= 32:
-            fft_scores.append(compute_fft_highfreq(img))
+            fft_scores.append(compute_fft(img))
         else:
             fft_scores.append(0.0)
 
@@ -159,18 +159,18 @@ def process_dataset(input_dir: Path, output_dir: Path, top_percent=85, low_perce
         rows = []
         for i in range(len(images)):
             if total_scores[i] >= top_threshold:
-                label = 1
+                patch_label = 1
             elif total_scores[i] <= low_threshold:
-                label = -1
+                patch_label = -1
             else:
-                label = 0
+                patch_label = 0
 
             rows.append([
                 filenames[i],
                 float(lap_scores[i]),
                 float(fft_scores[i]),
                 float(total_scores[i]),
-                label
+                patch_label
             ])
 
         write_scores_csv(csv_path, rows)

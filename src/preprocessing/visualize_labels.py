@@ -172,6 +172,13 @@ def collect_sample_features_for_pca(df: pd.DataFrame, sample_folder: Path, patch
     return X, y
 
 
+def finalize_and_save_plot(output_path: Path, message_prefix: str):
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_path, dpi=200)
+    plt.close()
+    print(f"Saved {message_prefix}: {output_path}")
+
+
 def save_pca_3d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str):
     if len(X) < 3:
         print(f"Skip PCA plot (need at least 3 samples): {output_path}")
@@ -187,7 +194,7 @@ def save_pca_3d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str
         1: ("Sharp (1)", "tab:red"),
     }
 
-    unique_labels = sorted(np.unique(y).tolist())
+    unique_labels = sorted(int(lbl) for lbl in np.unique(y).tolist())
     for lbl in unique_labels:
         idx = y == lbl
         label_name, color = label_style.get(lbl, (f"Label {lbl}", "black"))
@@ -208,11 +215,7 @@ def save_pca_3d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str
     ax.legend()
     ax.grid(alpha=0.2)
     plt.tight_layout()
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(output_path, dpi=200)
-    plt.close()
-    print(f"Saved PCA 3D plot: {output_path}")
+    finalize_and_save_plot(output_path, "PCA 3D plot")
 
 
 def save_pca_2d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str):
@@ -229,7 +232,7 @@ def save_pca_2d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str
         1: ("Sharp (1)", "tab:red"),
     }
 
-    unique_labels = sorted(np.unique(y).tolist())
+    unique_labels = sorted(int(lbl) for lbl in np.unique(y).tolist())
     for lbl in unique_labels:
         idx = y == lbl
         label_name, color = label_style.get(lbl, (f"Label {lbl}", "black"))
@@ -248,11 +251,7 @@ def save_pca_2d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str
     plt.legend()
     plt.grid(alpha=0.2)
     plt.tight_layout()
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(output_path, dpi=200)
-    plt.close()
-    print(f"Saved PCA 2D plot: {output_path}")
+    finalize_and_save_plot(output_path, "PCA 2D plot")
 
 
 # Run visualization for both train and validation labeling outputs.

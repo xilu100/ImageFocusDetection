@@ -22,7 +22,7 @@ def merge_samples_labels(
         output_file.unlink()
         print(f"Deleted existing merged CSV: {output_file}")
 
-    all_dfs = []
+    all_dfs: list[pd.DataFrame] = []
 
     if source_subfolder:
         folders_to_process = [samples_labels_dir / f"{source_subfolder}_labels"]
@@ -66,7 +66,7 @@ def merge_samples_labels(
         print("No CSV files found to merge.")
 
 
-def load_csv_data(patch_size: int = 16):
+def load_csv_data():
     current_file = Path(__file__).resolve()
     root_dir = current_file.parents[2]
     csv_file = root_dir / 'data/samples_labels/merged_samples_labels.csv'
@@ -87,14 +87,14 @@ def train_models(
         sample_percentage: float = 100.0
 ):
     merge_samples_labels(sample_percentage=sample_percentage)
-    img_paths, y = load_csv_data(patch_size)
+    img_paths, y = load_csv_data()
     root_dir = util.get_root_dir()
 
     current_file = Path(__file__).resolve()
     model_dir = current_file.parent / 'model_save'
     model_dir.mkdir(exist_ok=True)
 
-    decision_tree_model, decision_tree_pca = decision_tree.train_tree(img_paths, y, patch_size,PCA_components)
+    decision_tree_model, decision_tree_pca = decision_tree.train_decision_tree(img_paths, y, patch_size,PCA_components)
     joblib.dump(decision_tree_model, model_dir / 'decision_tree_model.joblib')
     joblib.dump(decision_tree_pca, model_dir / 'decision_tree_pca.joblib')
 
