@@ -164,43 +164,58 @@
 ## 1. Decision Tree
 
 ```yaml
-- Title: ""
-  Field: ""
-  URL: ""
+- Title: "Classification and Regression Trees"
+  Field: "Decision Tree"
+  URL: "https://www.taylorfrancis.com/books/mono/10.1201/9781315139470/classification-regression-trees-leo-breiman-jerome-friedman-olshen-charles-stone"
   BibTeX: |
-- Title: ""
-  Field: ""
-  URL: ""
-  BibTeX: |
+    @book{breiman2017classification,
+    title={Classification and regression trees},
+    author={Breiman, Leo and Friedman, Jerome and Olshen, Richard A and Stone, Charles J},
+    year={2017},
+    publisher={Chapman and Hall/CRC}
+    }
 ```
 
 ## 2. Random Forest
 
 ```yaml
-- Title: ""
-  Field: ""
-  URL: ""
+- Title: "Random Forests"
+  Field: "Random Forest"
+  URL: "https://link.springer.com/article/10.1023/a:1010933404324"
   BibTeX: |
-- Title: ""
-  Field: ""
-  URL: ""
-  BibTeX: |
+    @article{breiman2001random,
+    title={Random forests},
+    author={Breiman, Leo},
+    journal={Machine learning},
+    volume={45},
+    number={1},
+    pages={5--32},
+    year={2001},
+    publisher={Springer}
+    }
 ```
 
 ## 3. Support Vector Machine (SVM)
 
 ```yaml
-- Title: ""
-  Field: ""
-  URL: ""
+- Title: "Support-Vector Networks"
+  Field: "SVM"
+  URL: "https://link.springer.com/article/10.1007/Bf00994018"
   BibTeX: |
-- Title: ""
-  Field: ""
-  URL: ""
-  BibTeX: |
+    @article{cortes1995support,
+    title   = {Support-Vector Networks},
+    author  = {Cortes, Corinna and Vapnik, Vladimir},
+    journal = {Machine Learning},
+    volume  = {20},
+    number  = {3},
+    pages   = {273--297},
+    year    = {1995},
+    publisher = {Springer},
+    doi     = {10.1007/BF00994018}
+    }
 ```
 
-## 4. Clustering
+## 4. Clustering(Optional)
 
 ```yaml
 - Title: ""
@@ -218,17 +233,34 @@
 ## 1. Convolutional Neural Networks (CNN)
 
 ```yaml
-- Title: ""
-  Field: ""
-  URL: ""
+- Title: "ImageNet Classification with Deep Convolutional Neural Networks"
+  Field: "CNN Use"
+  URL: "https://proceedings.neurips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html"
   BibTeX: |
-- Title: ""
-  Field: ""
-  URL: ""
+    @article{krizhevsky2012imagenet,
+    title={Imagenet classification with deep convolutional neural networks},
+    author={Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey E},
+    journal={Advances in neural information processing systems},
+    volume={25},
+    year={2012}
+    }
+- Title: "Gradient-based learning applied to document recognition"
+  Field: "CNN LeNet"
+  URL: "https://ieeexplore.ieee.org/abstract/document/726791/"
   BibTeX: |
+    @article{lecun2002gradient,
+    title={Gradient-based learning applied to document recognition},
+    author={LeCun, Yann and Bottou, L{\'e}on and Bengio, Yoshua and Haffner, Patrick},
+    journal={Proceedings of the IEEE},
+    volume={86},
+    number={11},
+    pages={2278--2324},
+    year={2002},
+    publisher={Ieee}
+    }
 ```
 
-## 2. Transformer
+## 2. Transformer (Optional)
 
 ```yaml
 - Title: ""
@@ -246,27 +278,33 @@
 ## 1. Accuracy, Precision, Recall, F1-score
 
 ```yaml
-- Title: ""
-  Field: ""
-  URL: ""
+- Title: "Introduction to information retrieval"
+  Field: "Defined Precision, Recall, F1-score"
+  URL: "https://web.cs.hacettepe.edu.tr/~pinar/courses/VBM681/lectures/Shutze-19web.pdf"
   BibTeX: |
-- Title: ""
-  Field: ""
-  URL: ""
-  BibTeX: |
+    @book{schutze2008introduction,
+    title={Introduction to information retrieval},
+    author={Sch{\"u}tze, Hinrich and Manning, Christopher D and Raghavan, Prabhakar},
+    volume={39},
+    year={2008},
+    publisher={Cambridge University Press Cambridge}
+    }
 ```
 
 ## 2. Confusion matrix
 
 ```yaml
-- Title: ""
-  Field: ""
-  URL: ""
+- Title: "Introduction to information retrieval"
+  Field: "Defined Confusion matrix"
+  URL: "https://web.cs.hacettepe.edu.tr/~pinar/courses/VBM681/lectures/Shutze-19web.pdf"
   BibTeX: |
-- Title: ""
-  Field: ""
-  URL: ""
-  BibTeX: |
+    @book{schutze2008introduction,
+    title={Introduction to information retrieval},
+    author={Sch{\"u}tze, Hinrich and Manning, Christopher D and Raghavan, Prabhakar},
+    volume={39},
+    year={2008},
+    publisher={Cambridge University Press Cambridge}
+    }
 ```
 
 ## 3. Robustness across different image types and blur levels (Optional)
@@ -285,14 +323,18 @@
 ## 4. Training efficiency and computational cost (Time , Speed)
 
 ```yaml
-- Title: ""
-  Field: ""
-  URL: ""
+- Title: "Stochastic Gradient Descent Tricks"
+  Field: "mini-batch,learning rate"
+  URL: "https://link.springer.com/chapter/10.1007/978-3-642-35289-8_25"
   BibTeX: |
-- Title: ""
-  Field: ""
-  URL: ""
-  BibTeX: |
+    @incollection{bottou2012stochastic,
+    title={Stochastic gradient descent tricks},
+    author={Bottou, L{\'e}on},
+    booktitle={Neural networks: tricks of the trade: second edition},
+    pages={421--436},
+    year={2012},
+    publisher={Springer}
+    }
 ```
 
 # Other metrics
@@ -313,14 +355,33 @@
 ## 2. GLCM, LBP
 
 ```yaml
-- Title: ""
-  Field: ""
-  URL: ""
+- Title: "Textural Features for Image Classification"
+  Field: "GLCM"
+  URL: "https://ieeexplore.ieee.org/abstract/document/4309314"
   BibTeX: |
-- Title: ""
-  Field: ""
-  URL: ""
+    @article{haralick2007textural,
+    title={Textural features for image classification},
+    author={Haralick, Robert M and Shanmugam, Karthikeyan and Dinstein, Its' Hak},
+    journal={IEEE Transactions on systems, man, and cybernetics},
+    number={6},
+    pages={610--621},
+    year={2007},
+    publisher={Ieee}
+    }
+- Title: "Multiresolution gray-scale and rotation invariant texture classification with local binary patterns"
+  Field: "LBP"
+  URL: "https://ieeexplore.ieee.org/abstract/document/1017623"
   BibTeX: |
+    @article{ojala2002multiresolution,
+    title={Multiresolution gray-scale and rotation invariant texture classification with local binary patterns},
+    author={Ojala, Timo and Pietikainen, Matti and Maenpaa, Topi},
+    journal={IEEE Transactions on pattern analysis and machine intelligence},
+    volume={24},
+    number={7},
+    pages={971--987},
+    year={2002},
+    publisher={IEEE}
+    }
 ```
 
 ## 3. FFT, DCT (Optional Reference)
