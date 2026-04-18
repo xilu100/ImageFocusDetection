@@ -165,7 +165,12 @@ def evaluate_valid_set(patch_size: int = 32):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    checkpoint = torch.load(model_dir / 'cnn_model.pth', map_location=device)
+    checkpoint_path = model_dir / 'cnn_model.pth'
+    try:
+        checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
+    except TypeError:
+        # Backward compatibility for older PyTorch versions without `weights_only`.
+        checkpoint = torch.load(checkpoint_path, map_location=device)
 
     cnn_model = cnn.SimpleCNN(
         patch_size=checkpoint['patch_size'],
