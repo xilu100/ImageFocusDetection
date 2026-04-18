@@ -13,6 +13,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
+from tools.log import print_and_save,save
+
 
 class SimpleCNN(nn.Module):
     def __init__(self, patch_size: int, num_classes: int = 2):
@@ -127,7 +129,7 @@ def build_lmdb_from_paths(
     env.close()
 
     elapsed = time.perf_counter() - start
-    print(f"[LMDB] Build done in {elapsed:.2f}s")
+    print_and_save(f"[LMDB] Build done in {elapsed:.2f}s")
 
 
 class LmdbPatchDataset(Dataset):
@@ -202,11 +204,11 @@ def auto_device_and_params(batch_base: int = 64):
         device_info = f"CPU detected, {cpu_count} cores"
         batch_size = batch_base // 2
 
-    print("==== Device & Training Configuration ====")
-    print(device_info)
-    print(f"Using device: {device}, AMP enabled: {amp}")
-    print(f"Batch size: {batch_size}, num_workers: {num_workers}")
-    print("========================================")
+    print_and_save("==== Device & Training Configuration ====")
+    print_and_save(device_info)
+    print_and_save(f"Using device: {device}, AMP enabled: {amp}")
+    print_and_save(f"Batch size: {batch_size}, num_workers: {num_workers}")
+    print_and_save("========================================")
 
     return device, amp, batch_size, num_workers
 
@@ -241,7 +243,7 @@ def train_cnn(
             )
         if lmdb_file.exists():
             dataset = LmdbPatchDataset(lmdb_file)
-            print(f"[CNN] Using LMDB dataset: {lmdb_file}")
+            print_and_save(f"[CNN] Using LMDB dataset: {lmdb_file}")
 
     if dataset is None:
         dataset = PatchDataset(img_paths, y, patch_size, assume_fixed_size=assume_fixed_size)
@@ -299,8 +301,9 @@ def train_cnn(
 
             total_loss += loss.item()
 
-        print(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss:.4f}")
+        print_and_save(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss:.4f}")
 
     end_time = time.perf_counter()
-    print(f"[CNN] Training time: {end_time - start_time:.2f} seconds")
+    print_and_save(f"[CNN] Training time: {end_time - start_time:.2f} seconds")
+    save("\n")
     return model

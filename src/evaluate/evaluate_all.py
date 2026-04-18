@@ -9,6 +9,7 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 
 from models.dl import cnn
 from tools import util
+from tools.log import print_and_save
 
 
 def merge_valid_samples_labels(source_subfolder: str = None):
@@ -113,16 +114,16 @@ def cnn_predict_batch(model, img_paths, patch_size: int, device, batch_size: int
 
 
 def evaluate(name, y, y_pred):
-    print(f"\n========== {name} ==========")
+    print_and_save(f"========== {name} ==========")
 
     acc = accuracy_score(y, y_pred)
-    print(f"Accuracy: {acc:.4f}")
+    print_and_save(f"Accuracy: {acc:.4f}")
 
-    print("\nClassification Report:")
-    print(classification_report(y, y_pred))
+    print_and_save("Classification Report:")
+    print_and_save("\n",classification_report(y, y_pred))
 
-    print("Confusion Matrix:")
-    print(confusion_matrix(y, y_pred))
+    print_and_save("Confusion Matrix:")
+    print_and_save("\n",confusion_matrix(y, y_pred))
 
 
 def evaluate_valid_set(patch_size: int = 32):

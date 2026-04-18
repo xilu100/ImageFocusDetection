@@ -9,6 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 
 from tools import util, pca
+from tools.log import print_and_save, save
 
 
 def train_svm(img_paths, y, patch_size, n_components=100, n_jobs=None):
@@ -18,7 +19,7 @@ def train_svm(img_paths, y, patch_size, n_components=100, n_jobs=None):
     if n_jobs is None:
         cpu_count = os.cpu_count() or 2
         n_jobs = max(1, cpu_count // 2)
-    print(f"[SVM] Using {n_jobs} CPU cores for image loading.")
+    print_and_save(f"[SVM] Using {n_jobs} CPU cores for image loading.")
 
     # Load image features in parallel.
     print("[SVM] Start loading images ...")
@@ -28,16 +29,16 @@ def train_svm(img_paths, y, patch_size, n_components=100, n_jobs=None):
     )
     X = np.array(X, dtype=np.float32)
     end_load = time.time()
-    print(f"[SVM] Image loading done, time: {end_load - start_load:.2f}s")
-    print(f"X shape before PCA: {X.shape}")
+    print_and_save(f"[SVM] Image loading done, time: {end_load - start_load:.2f}s")
+    print_and_save(f"[SVM] X shape before PCA: {X.shape}")
 
     # Reduce feature dimensions with PCA.
     print("[SVM] Start PCA preprocessing ...")
     start_pca = time.time()
     X_reduced, pca_model = pca.reduce_dimensions(X, n_components)
     end_pca = time.time()
-    print(f"[SVM] PCA preprocessing done, time: {end_pca - start_pca:.2f}s")
-    print(f"X shape after PCA: {X_reduced.shape}")
+    print_and_save(f"[SVM] PCA preprocessing done, time: {end_pca - start_pca:.2f}s")
+    print_and_save(f"[SVM] X shape after PCA: {X_reduced.shape}")
 
     # Define model hyperparameters and train.
     nystroem_components = 300  # Nystroem映射后的特征维度，越大越能近似核方法但开销更高。
@@ -47,6 +48,15 @@ def train_svm(img_paths, y, patch_size, n_components=100, n_jobs=None):
     svc_c = 2.0  # 线性SVM正则化系数，越大越强调训练集拟合。
     class_weight = 'balanced'  # 按类别频率自动加权，缓解类别不平衡。
     max_iter = 5000  # 求解器最大迭代次数，防止未收敛时无限迭代。
+
+    save("---- SVM ----")
+    save(nystroem_components)
+    save(nystroem_kernel)
+    save(nystroem_gamma)
+    save(random_state)
+    save(svc_c)
+    save(class_weight)
+    save(max_iter)
 
     model = make_pipeline(
         StandardScaler(),
@@ -66,6 +76,6 @@ def train_svm(img_paths, y, patch_size, n_components=100, n_jobs=None):
     start_train = time.time()
     model.fit(X_reduced, y)
     end_train = time.time()
-    print(f"[SVM] Training done, time: {end_train - start_train:.2f}s")
-
+    print_and_save(f"[SVM] Training done, time: {end_train - start_train:.2f}s")
+    save("---- SVM ----\n")
     return model, pca_model
