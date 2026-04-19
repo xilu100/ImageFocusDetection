@@ -15,7 +15,7 @@ _COMPLETE_LOG_FILE_PATH = None
 _FILE_HANDLER = None
 
 
-class _TeeStream:
+class TeeStream:
     def __init__(self, *streams):
         self.streams = streams
 
@@ -32,7 +32,7 @@ class _TeeStream:
         return any(getattr(stream, "isatty", lambda: False)() for stream in self.streams)
 
 
-def _ensure_logging_initialized():
+def ensure_logging_initialized():
     global _LOG_INITIALIZED, _COMPLETE_LOG_STREAM, _ORIGINAL_STDOUT, _ORIGINAL_STDERR
     global _LOG_FILE_PATH, _COMPLETE_LOG_FILE_PATH, _FILE_HANDLER
     if _LOG_INITIALIZED:
@@ -71,13 +71,13 @@ def _ensure_logging_initialized():
     if _ORIGINAL_STDERR is None:
         _ORIGINAL_STDERR = sys.stderr
 
-    sys.stdout = _TeeStream(_ORIGINAL_STDOUT, _COMPLETE_LOG_STREAM)
-    sys.stderr = _TeeStream(_ORIGINAL_STDERR, _COMPLETE_LOG_STREAM)
+    sys.stdout = TeeStream(_ORIGINAL_STDOUT, _COMPLETE_LOG_STREAM)
+    sys.stderr = TeeStream(_ORIGINAL_STDERR, _COMPLETE_LOG_STREAM)
 
     _LOG_INITIALIZED = True
 
 
-def _infer_save_argument_name():
+def infer_save_argument_name():
     frame = inspect.currentframe()
     if frame is None or frame.f_back is None:
         return "value"
@@ -113,7 +113,7 @@ def _infer_save_argument_name():
     return "value"
 
 
-def _is_string_literal_expression(expr):
+def is_string_literal_expression(expr):
     try:
         tree = ast.parse(expr, mode="eval")
     except (SyntaxError, ValueError, TypeError):
@@ -122,23 +122,23 @@ def _is_string_literal_expression(expr):
 
 
 def save(value):
-    _ensure_logging_initialized()
-    arg_name = _infer_save_argument_name()
-    if isinstance(value, str) and _is_string_literal_expression(arg_name):
+    ensure_logging_initialized()
+    arg_name = infer_save_argument_name()
+    if isinstance(value, str) and is_string_literal_expression(arg_name):
         logging.info("%s", value)
         return
     logging.info("%s = %s", arg_name, value)
 
 
 def print_and_save(*args, sep=" ", end="\n", flush=False):
-    _ensure_logging_initialized()
+    ensure_logging_initialized()
     print(*args, sep=sep, end=end, flush=flush)
     message = sep.join(str(arg) for arg in args)
     logging.info("%s", message)
 
 
 def flush_logs():
-    _ensure_logging_initialized()
+    ensure_logging_initialized()
     root_logger = logging.getLogger()
     for handler in root_logger.handlers:
         try:
@@ -150,13 +150,13 @@ def flush_logs():
 
 
 def get_current_log_paths():
-    _ensure_logging_initialized()
+    ensure_logging_initialized()
     return _LOG_FILE_PATH, _COMPLETE_LOG_FILE_PATH
 
 
 def close_logs():
     global _LOG_INITIALIZED, _COMPLETE_LOG_STREAM, _FILE_HANDLER
-    _ensure_logging_initialized()
+    ensure_logging_initialized()
     flush_logs()
 
     root_logger = logging.getLogger()
@@ -184,3 +184,23 @@ def close_logs():
         sys.stderr = _ORIGINAL_STDERR
 
     _LOG_INITIALIZED = False
+
+
+class LogApi:
+    def save(self, value):
+        save(value)
+
+    def print_and_save(self, *args, sep=" ", end="\n", flush=False):
+        print_and_save(*args, sep=sep, end=end, flush=flush)
+
+    def flush_logs(self):
+        flush_logs()
+
+    def get_current_log_paths(self):
+        return get_current_log_paths()
+
+    def close_logs(self):
+        close_logs()
+
+
+log_api = LogApi()

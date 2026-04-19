@@ -6,7 +6,8 @@ from typing import Any, TypedDict
 from evaluate import evaluate_all
 from preprocessing import normalize_raw, segment_nor_img, label_patches
 from tools.log import print_and_save, save, flush_logs, get_current_log_paths, close_logs
-from tools.log_tools import log_to_model_csv
+from tools.log_tools import run_log_tools
+from tools.plot_csv import run_plot_cli
 from training import train_all
 
 
@@ -87,6 +88,59 @@ def get_experiment_config():
     }
 
 
+def get_plot_config():
+    return {
+        "modules": {
+            # Plot time chart. Options: {0, 1}, default: 1
+            "time": 1,
+            # Plot evaluation chart. Options: {0, 1}, default: 1
+            "evaluate": 1,
+        },
+        "time_metrics": {
+            # Time metrics switches. Options: {0, 1}
+            "img_load_time": 1,
+            "pca_time": 1,
+            "lmdb_time": 1,
+            "train_time": 1,
+        },
+        "evaluate_metrics": {
+            # class 0 row
+            "class0_precision": 0,
+            "class0_recall": 0,
+            "class0_f1": 0,
+            "class0_support": 0,
+
+            # class 1 row
+            "class1_precision": 1,
+            "class1_recall": 1,
+            "class1_f1": 1,
+            "class1_support": 0,
+
+            # accuracy row
+            "accuracy": 0,
+            "accuracy_support": 0,
+
+            # macro avg row
+            "macro_p": 0,
+            "macro_r": 0,
+            "macro_f1": 1,
+            "macro_support": 0,
+
+            # weighted avg row
+            "weighted_precision": 0,
+            "weighted_recall": 0,
+            "weighted_f1": 0,
+            "weighted_support": 0,
+
+            # confusion matrix entries
+            "cm_tn": 0,
+            "cm_fp": 0,
+            "cm_fn": 0,
+            "cm_tp": 0,
+        },
+    }
+
+
 def main():
     # Preprocessing switch. Options: {0, 1}, default: 1
     process = 1
@@ -94,12 +148,13 @@ def main():
     train_and_evaluate = 1
 
     experiment_cfg = get_experiment_config()
+    plot_cfg = get_plot_config()
 
     save(experiment_cfg)
     save("\n")
 
     training_cfg = experiment_cfg["training"]
-    sweep_targets = _find_sweep_targets(experiment_cfg)
+    sweep_targets = find_sweep_targets(experiment_cfg)
 
     if len(sweep_targets) > 1:
         target_names = [target["path_str"] for target in sweep_targets]
@@ -145,7 +200,7 @@ def main():
 
     for run_idx, run_value in enumerate(run_values, start=1):
         if target is not None:
-            _set_nested_value(experiment_cfg, target["path"], run_value)
+            set_nested_value(experiment_cfg, target["path"], run_value)
             print_and_save(
                 f"=== Run {run_idx}/{len(run_values)} | {target['path_str']}={run_value} ==="
             )
@@ -159,7 +214,9 @@ def main():
             train_and_evaluate=1,
         )
 
-    _package_run_outputs()
+    out_dir = package_run_outputs()
+    plot_paths = run_plot_cli(sweep_dir=out_dir, plot_config=plot_cfg)
+    print(f"Generated plots: {len(plot_paths)}")
 
 
 class SweepTarget(TypedDict):
@@ -199,13 +256,13 @@ def run_pipeline_once(
         evaluate_all.evaluate_valid_set(patch_size)
 
 
-def _find_sweep_targets(
+def find_sweep_targets(
         node: Any, path: tuple[str, ...] = ()
 ) -> list[SweepTarget]:
     targets: list[SweepTarget] = []
     if isinstance(node, dict):
         for key, value in node.items():
-            targets.extend(_find_sweep_targets(value, path + (key,)))
+            targets.extend(find_sweep_targets(value, path + (key,)))
     elif isinstance(node, (list, tuple)):
         if len(path) > 0:
             targets.append(
@@ -218,7 +275,7 @@ def _find_sweep_targets(
     return targets
 
 
-def _set_nested_value(node, path, value):
+def set_nested_value(node, path, value):
     current = node
     for key in path[:-1]:
         current = current[key]
@@ -253,13 +310,13 @@ def delete_folder():
             print(f"Folder does not exist: {folder}")
 
 
-def _package_run_outputs():
+def package_run_outputs():
     flush_logs()
     log_path, complete_log_path = get_current_log_paths()
     if log_path is None or complete_log_path is None:
         raise RuntimeError("Current log paths are unavailable.")
 
-    out_dir = log_to_model_csv(log_path)
+    out_dir = run_log_tools(log_path)
     close_logs()
 
     target_log = out_dir / log_path.name
@@ -276,6 +333,7 @@ def _package_run_outputs():
     os.utime(out_dir, (log_mtime, log_mtime))
 
     print(f"Packaged outputs: {out_dir}")
+    return out_dir
 
 
 if __name__ == "__main__":

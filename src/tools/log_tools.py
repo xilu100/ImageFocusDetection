@@ -6,6 +6,11 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
+try:
+    from tools.util import get_root_dir
+except ModuleNotFoundError:
+    from util import get_root_dir
+
 ALLOWED_MODES = {
     "=== Mode: Process Once + Train + Evaluate Sweep ===",
     "=== Mode: Train + Evaluate Only ===",
@@ -49,13 +54,13 @@ MODEL_STATS_COLUMNS = [
     "amp",
     "batch",
     "worker",
-    "lmdb_s",
+    "lmdb_time",
     "cpu_core",
-    "img_load_s",
+    "img_load_time",
     "x_before",
-    "pca_s",
+    "pca_time",
     "x_after",
-    "train_s",
+    "train_time",
 ]
 EVAL_COLUMNS = [
     "accuracy",
@@ -95,7 +100,7 @@ class RunRecord:
     model_eval: dict[str, dict[str, object]] = field(default_factory=dict)
 
 
-def _extract_payload(line: str) -> str:
+def extract_payload(line: str) -> str:
     marker = " [INFO] "
     idx = line.find(marker)
     if idx >= 0:
@@ -103,7 +108,7 @@ def _extract_payload(line: str) -> str:
     return line.strip()
 
 
-def _safe_parse_dict(raw: str) -> dict[str, object]:
+def safe_parse_dict(raw: str) -> dict[str, object]:
     try:
         value = ast.literal_eval(raw)
     except (ValueError, SyntaxError):
@@ -113,15 +118,11 @@ def _safe_parse_dict(raw: str) -> dict[str, object]:
     return {}
 
 
-def _sanitize_filename_part(name: str) -> str:
+def sanitize_filename_part(name: str) -> str:
     return re.sub(r"[^A-Za-z0-9_]+", "_", name).strip("_")
 
 
-def _project_root() -> Path:
-    return Path(__file__).resolve().parent.parent.parent
-
-
-def _control_prefix(control_path: str) -> str:
+def control_prefix(control_path: str) -> str:
     if control_path.startswith("training."):
         return "TR"
     if control_path.startswith("models.decision_tree."):
@@ -135,16 +136,16 @@ def _control_prefix(control_path: str) -> str:
     return "CTRL"
 
 
-def _flatten_plain(data: dict[str, object]) -> dict[str, object]:
+def flatten_plain(data: dict[str, object]) -> dict[str, object]:
     flat: dict[str, object] = {}
     for key, value in data.items():
         flat[str(key)] = value
     return flat
 
 
-def _pick_mode(lines: list[str]) -> str:
+def pick_mode(lines: list[str]) -> str:
     for line in lines:
-        payload = _extract_payload(line)
+        payload = extract_payload(line)
         match = MODE_LINE_RE.search(payload)
         if not match:
             continue
@@ -157,19 +158,19 @@ def _pick_mode(lines: list[str]) -> str:
     )
 
 
-def _extract_experiment_cfg(lines: list[str]) -> dict[str, object]:
+def extract_experiment_cfg(lines: list[str]) -> dict[str, object]:
     for line in lines:
-        payload = _extract_payload(line)
+        payload = extract_payload(line)
         match = EXPERIMENT_CFG_RE.search(payload)
         if not match:
             continue
-        parsed = _safe_parse_dict(match.group(1).strip())
+        parsed = safe_parse_dict(match.group(1).strip())
         if parsed:
             return parsed
     return {}
 
 
-def _extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
+def extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
     runs: list[RunRecord] = []
     first_run_time: datetime | None = None
     current_run: RunRecord | None = None
@@ -180,7 +181,7 @@ def _extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
     confusion_rows: list[list[int]] = []
 
     for line in lines:
-        payload = _extract_payload(line)
+        payload = extract_payload(line)
 
         run_match = RUN_LINE_RE.search(payload)
         if run_match:
@@ -247,7 +248,7 @@ def _extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
 
         params_match = FINAL_MODEL_PARAMS_RE.search(payload)
         if params_match and current_model_name is not None:
-            current_run.model_params[current_model_name] = _safe_parse_dict(
+            current_run.model_params[current_model_name] = safe_parse_dict(
                 params_match.group(1).strip()
             )
             continue
@@ -333,7 +334,7 @@ def _extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
         lmdb_match = LMDB_BUILD_DONE_RE.search(payload)
         if lmdb_match:
             cnn_stats = current_run.model_stats.setdefault("CNN", {})
-            cnn_stats["lmdb_s"] = float(lmdb_match.group(1))
+            cnn_stats["lmdb_time"] = float(lmdb_match.group(1))
             continue
 
         epoch_match = EPOCH_LOSS_RE.search(payload)
@@ -377,7 +378,7 @@ def _extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
 
         load_done_match = IMAGE_LOADING_DONE_RE.search(message)
         if load_done_match:
-            stats["img_load_s"] = float(load_done_match.group(1))
+            stats["img_load_time"] = float(load_done_match.group(1))
             continue
 
         x_before_match = X_SHAPE_BEFORE_RE.search(message)
@@ -387,7 +388,7 @@ def _extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
 
         pca_done_match = PCA_DONE_RE.search(message)
         if pca_done_match:
-            stats["pca_s"] = float(pca_done_match.group(1))
+            stats["pca_time"] = float(pca_done_match.group(1))
             continue
 
         x_after_match = X_SHAPE_AFTER_RE.search(message)
@@ -397,12 +398,12 @@ def _extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
 
         training_done_match = TRAINING_DONE_RE.search(message)
         if training_done_match:
-            stats["train_s"] = float(training_done_match.group(1))
+            stats["train_time"] = float(training_done_match.group(1))
             continue
 
         cnn_training_time_match = CNN_TRAINING_TIME_RE.search(message)
         if cnn_training_time_match:
-            stats["train_s"] = float(cnn_training_time_match.group(1))
+            stats["train_time"] = float(cnn_training_time_match.group(1))
 
     if not runs:
         raise ValueError("No run section found in log.")
@@ -424,9 +425,9 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
         raise FileNotFoundError(f"Log file not found: {src_path}")
 
     lines = src_path.read_text(encoding="utf-8").splitlines()
-    _pick_mode(lines)
+    pick_mode(lines)
 
-    experiment_cfg = _extract_experiment_cfg(lines)
+    experiment_cfg = extract_experiment_cfg(lines)
     training_params = {}
     if isinstance(experiment_cfg.get("training"), dict):
         training_params = experiment_cfg["training"]
@@ -441,7 +442,7 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
         display_name = MODEL_KEY_TO_DISPLAY.get(model_key, model_key)
         fallback_model_params_by_name[display_name] = params
 
-    runs, first_run_time = _extract_runs(lines)
+    runs, first_run_time = extract_runs(lines)
     control_name = runs[0].control_name
     control_path = runs[0].control_path
     for run in runs[1:]:
@@ -454,13 +455,12 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
     if control_path == "__normal__":
         folder_name = f"NM_{stamp}"
     else:
-        prefix = _control_prefix(control_path)
-        folder_name = f"{prefix}_{_sanitize_filename_part(control_name)}_{stamp}"
+        prefix = control_prefix(control_path)
+        folder_name = f"{prefix}_{sanitize_filename_part(control_name)}_{stamp}"
     if output_root:
         base_dir = Path(output_root).resolve()
     else:
-        project_root = _project_root()
-        base_dir = project_root / "logs"
+        base_dir = get_root_dir() / "logs"
         base_dir.mkdir(parents=True, exist_ok=True)
     out_dir = base_dir / folder_name
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -472,8 +472,8 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
 
     for model_name in sorted(model_names):
         file_name = (
-            f"{_sanitize_filename_part(model_name)}_"
-            f"{_sanitize_filename_part(control_name)}.csv"
+            f"{sanitize_filename_part(model_name)}_"
+            f"{sanitize_filename_part(control_name)}.csv"
         )
         csv_path = out_dir / file_name
         rows: list[dict[str, object]] = []
@@ -495,8 +495,8 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
             if run.control_path != "__normal__":
                 run_training[control_name] = run.control_value
 
-            flat_training = _flatten_plain(run_training)
-            flat_model = _flatten_plain(model_params)
+            flat_training = flatten_plain(run_training)
+            flat_model = flatten_plain(model_params)
             if model_name == "CNN":
                 # Keep LMDB timing metric, drop config flag about whether to build LMDB.
                 flat_model.pop("build_lmdb_if_missing", None)
@@ -545,8 +545,8 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
             c for c in dynamic_stats_columns_present if not c.startswith("loss_e")
         ]
 
-        stats_columns_without_train = [c for c in stats_columns_present if c != "train_s"]
-        train_s_columns = [c for c in stats_columns_present if c == "train_s"]
+        stats_columns_without_train = [c for c in stats_columns_present if c != "train_time"]
+        train_time_columns = [c for c in stats_columns_present if c == "train_time"]
 
         ordered_columns: list[str] = []
         for col in (
@@ -556,7 +556,7 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
                 + stats_columns_without_train
                 + epoch_loss_columns
                 + other_dynamic_stats_columns
-                + train_s_columns
+                + train_time_columns
                 + eval_columns_present
         ):
             if col not in ordered_columns:
@@ -573,7 +573,11 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
     return out_dir
 
 
-def _build_cli_parser() -> argparse.ArgumentParser:
+def run_log_tools(log_path: str | Path, output_root: str | Path | None = None) -> Path:
+    return log_to_model_csv(log_path, output_root=output_root)
+
+
+def build_cli_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Convert training log to per-model CSV files.")
     parser.add_argument(
         "log_path",
@@ -584,9 +588,8 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _find_latest_log_file() -> Path:
-    project_root = _project_root()
-    logs_dir = project_root / "logs"
+def find_latest_log_file() -> Path:
+    logs_dir = get_root_dir() / "logs"
     if not logs_dir.exists():
         raise FileNotFoundError(f"Logs directory not found: {logs_dir}")
 
@@ -602,7 +605,7 @@ def _find_latest_log_file() -> Path:
 
 
 if __name__ == "__main__":
-    args = _build_cli_parser().parse_args()
-    selected_log = args.log_path if args.log_path else _find_latest_log_file()
-    output_dir = log_to_model_csv(selected_log)
+    args = build_cli_parser().parse_args()
+    selected_log = args.log_path if args.log_path else find_latest_log_file()
+    output_dir = run_log_tools(selected_log)
     print(output_dir)
