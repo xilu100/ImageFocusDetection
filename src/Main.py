@@ -1,84 +1,86 @@
+import os
 import shutil
 from pathlib import Path
 from typing import Any, TypedDict
 
 from evaluate import evaluate_all
 from preprocessing import normalize_raw, segment_nor_img, label_patches
-from tools.log import print_and_save, save
+from tools.log import print_and_save, save, flush_logs, get_current_log_paths, close_logs
+from tools.log_tools import log_to_model_csv
 from training import train_all
 
 
 def get_experiment_config():
     return {
         "training": {
-            # Patch size (px). Options: [16, 32, 64, 128]
+            # Patch size (px). Options: [16, 32, 64, 128], default: 32
             "patch_size": 32,
-            # Sharp threshold (%). Range: [0, 100]
+            # Sharp threshold (%). Range: [0, 100], default: 75
             "top_percent": 75,
-            # Blur threshold (%). Range: [0, 100]
+            # Blur threshold (%). Range: [0, 100], default: 10
             "low_percent": 10,
-            # PCA components (-1 disables PCA). Options: [-1, 64, 100, 256]
-            "PCA_components": [100, 200],
-            # Train sample ratio (%). Range: (0, 100]
+            # PCA components (-1 disables PCA). Options: [-1, 64, 100, 256], default: 100
+            "PCA_components": 100,
+            # Train sample ratio (%). Range: (0, 100], default: 80
             "sample_percentage": 80,
         },
         "models": {
             # Decision Tree params
             "decision_tree": {
-                # Max depth. Options: [8, 12, 16, 24]
+                # Max depth. Options: [8, 12, 16, 24], default: 16
                 "max_depth": 16,
-                # Min split samples. Range: int >= 2 or float in (0, 1]
+                # Min split samples. Range: int >= 2 or float in (0, 1], default: 50
                 "min_samples_split": 50,
-                # Min leaf samples. Range: int >= 1 or float in (0, 0.5]
+                # Min leaf samples. Range: int >= 1 or float in (0, 0.5], default: 20
                 "min_samples_leaf": 20,
-                # Class weight. Options: {"balanced", None}
+                # Class weight. Options: {"balanced", None}, default: "balanced"
                 "class_weight": "balanced",
-                # Random seed. Options: [42, 123, 2024, 3407]
+                # Random seed. Options: [42, 123, 2024, 3407], default: 42
                 "random_state": 42,
             },
             # Random Forest params
             "random_forest": {
-                # Trees count. Options: [50, 100, 200, 300]
+                # Trees count. Options: [50, 100, 200, 300], default: 50
                 "n_estimators": 50,
-                # Max depth. Options: [8, 10, 16, None]
+                # Max depth. Options: [8, 10, 16, None], default: 10
                 "max_depth": 10,
-                # Random seed. Options: [42, 123, 2024, 3407]
+                # Random seed. Options: [42, 123, 2024, 3407], default: 42
                 "random_state": 42,
-                # Class weight. Options: {"balanced_subsample", "balanced", None}
+                # Class weight. Options: {"balanced_subsample", "balanced", None}, default: "balanced_subsample"
                 "class_weight": "balanced_subsample",
-                # Parallel workers. Options: [-1, 1, 2, 4]
+                # Parallel workers. Options: [-1, 1, 2, 4], default: -1
                 "n_jobs": -1,
             },
             # SVM + Nystroem params
             "svm": {
-                # Nystroem components. Options: [100, 200, 300, 500]
+                # Nystroem components. Options: [100, 200, 300, 500], default: 300
                 "nystroem_components": 300,
-                # Nystroem kernel. Options: {"rbf", "cosine", "poly", "sigmoid"}
+                # Nystroem kernel. Options: {"rbf", "cosine", "poly", "sigmoid"}, default: "rbf"
                 "nystroem_kernel": "rbf",
-                # Gamma. Options: [None, 1e-4, 1e-3, 1e-2]
+                # Gamma. Options: [None, 1e-4, 1e-3, 1e-2], default: None
                 "nystroem_gamma": None,
-                # Random seed. Options: [42, 123, 2024, 3407]
+                # Random seed. Options: [42, 123, 2024, 3407], default: 42
                 "random_state": 42,
-                # C. Range: float > 0
+                # C. Range: float > 0, default: 2.0
                 "svc_c": 2.0,
-                # Class weight. Options: {"balanced", None}
+                # Class weight. Options: {"balanced", None}, default: "balanced"
                 "class_weight": "balanced",
-                # Max iterations. Options: [2000, 5000, 10000, 20000]
+                # Max iterations. Options: [2000, 5000, 10000, 20000], default: 5000
                 "max_iter": 5000,
             },
             # CNN params
             "cnn": {
-                # Epochs. Options: [5, 10, 15, 20]
+                # Epochs. Options: [5, 10, 15, 20], default: 5
                 "epochs": 5,
-                # Base batch size. Options: [32, 64, 128, 256]
+                # Base batch size. Options: [32, 64, 128, 256], default: 64
                 "batch_base": 64,
-                # Random seed. Options: [42, 123, 2024, 3407]
+                # Random seed. Options: [42, 123, 2024, 3407], default: 42
                 "seed": 42,
-                # Learning rate. Range: float > 0
+                # Learning rate. Range: float > 0, default: 1e-3
                 "learning_rate": 1e-3,
-                # Build LMDB if missing. Options: {True, False}
+                # Build LMDB if missing. Options: {True, False}, default: True
                 "build_lmdb_if_missing": True,
-                # Enforce fixed patch size. Options: {True, False}
+                # Enforce fixed patch size. Options: {True, False}, default: True
                 "assume_fixed_size": True,
             },
         },
@@ -86,9 +88,9 @@ def get_experiment_config():
 
 
 def main():
-    # Preprocessing switch. Options: {0, 1}
+    # Preprocessing switch. Options: {0, 1}, default: 1
     process = 1
-    # Train + Evaluation switch. Options: {0, 1}
+    # Train + Evaluation switch. Options: {0, 1}, default: 1
     train_and_evaluate = 1
 
     experiment_cfg = get_experiment_config()
@@ -156,6 +158,8 @@ def main():
             process=0,
             train_and_evaluate=1,
         )
+
+    _package_run_outputs()
 
 
 class SweepTarget(TypedDict):
@@ -247,6 +251,31 @@ def delete_folder():
             print(f"Deleted folder: {folder}")
         else:
             print(f"Folder does not exist: {folder}")
+
+
+def _package_run_outputs():
+    flush_logs()
+    log_path, complete_log_path = get_current_log_paths()
+    if log_path is None or complete_log_path is None:
+        raise RuntimeError("Current log paths are unavailable.")
+
+    out_dir = log_to_model_csv(log_path)
+    close_logs()
+
+    target_log = out_dir / log_path.name
+    target_complete_log = out_dir / complete_log_path.name
+    if target_log.exists():
+        target_log.unlink()
+    if target_complete_log.exists():
+        target_complete_log.unlink()
+    shutil.move(str(log_path), str(target_log))
+    shutil.move(str(complete_log_path), str(target_complete_log))
+
+    # Keep folder timestamp aligned with log timestamp.
+    log_mtime = target_log.stat().st_mtime
+    os.utime(out_dir, (log_mtime, log_mtime))
+
+    print(f"Packaged outputs: {out_dir}")
 
 
 if __name__ == "__main__":

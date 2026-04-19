@@ -10,6 +10,9 @@ _LOG_INITIALIZED = False
 _COMPLETE_LOG_STREAM = None
 _ORIGINAL_STDOUT = None
 _ORIGINAL_STDERR = None
+_LOG_FILE_PATH = None
+_COMPLETE_LOG_FILE_PATH = None
+_FILE_HANDLER = None
 
 
 class _TeeStream:
@@ -31,6 +34,7 @@ class _TeeStream:
 
 def _ensure_logging_initialized():
     global _LOG_INITIALIZED, _COMPLETE_LOG_STREAM, _ORIGINAL_STDOUT, _ORIGINAL_STDERR
+    global _LOG_FILE_PATH, _COMPLETE_LOG_FILE_PATH, _FILE_HANDLER
     if _LOG_INITIALIZED:
         return
 
@@ -40,6 +44,8 @@ def _ensure_logging_initialized():
 
     log_file = log_dir / f"{datetime.now().strftime('%Y%m%d_%H%M')}.log"
     complete_log_file = log_file.with_name(f"{log_file.stem}_complete.log")
+    _LOG_FILE_PATH = log_file
+    _COMPLETE_LOG_FILE_PATH = complete_log_file
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
 
@@ -57,6 +63,7 @@ def _ensure_logging_initialized():
             )
         )
         root_logger.addHandler(file_handler)
+        _FILE_HANDLER = file_handler
 
     _COMPLETE_LOG_STREAM = open(complete_log_file, "a", encoding="utf-8")
     if _ORIGINAL_STDOUT is None:
@@ -128,3 +135,52 @@ def print_and_save(*args, sep=" ", end="\n", flush=False):
     print(*args, sep=sep, end=end, flush=flush)
     message = sep.join(str(arg) for arg in args)
     logging.info("%s", message)
+
+
+def flush_logs():
+    _ensure_logging_initialized()
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers:
+        try:
+            handler.flush()
+        except Exception:
+            pass
+    if _COMPLETE_LOG_STREAM is not None:
+        _COMPLETE_LOG_STREAM.flush()
+
+
+def get_current_log_paths():
+    _ensure_logging_initialized()
+    return _LOG_FILE_PATH, _COMPLETE_LOG_FILE_PATH
+
+
+def close_logs():
+    global _LOG_INITIALIZED, _COMPLETE_LOG_STREAM, _FILE_HANDLER
+    _ensure_logging_initialized()
+    flush_logs()
+
+    root_logger = logging.getLogger()
+    if _FILE_HANDLER is not None:
+        try:
+            root_logger.removeHandler(_FILE_HANDLER)
+        except Exception:
+            pass
+        try:
+            _FILE_HANDLER.close()
+        except Exception:
+            pass
+        _FILE_HANDLER = None
+
+    if _COMPLETE_LOG_STREAM is not None:
+        try:
+            _COMPLETE_LOG_STREAM.close()
+        except Exception:
+            pass
+        _COMPLETE_LOG_STREAM = None
+
+    if _ORIGINAL_STDOUT is not None:
+        sys.stdout = _ORIGINAL_STDOUT
+    if _ORIGINAL_STDERR is not None:
+        sys.stderr = _ORIGINAL_STDERR
+
+    _LOG_INITIALIZED = False
