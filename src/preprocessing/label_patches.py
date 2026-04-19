@@ -1,5 +1,7 @@
 import csv
 from pathlib import Path
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import os
 
 import cv2
 import numpy as np
@@ -117,68 +119,85 @@ def write_scores_csv(csv_path: Path, rows: list):
 
 
 # Label patches in each sample folder using percentile thresholding.
-def process_dataset(input_dir: Path, output_dir: Path, top_percent=85, low_percent=10):
+def process_single_folder(sample_folder: Path, output_dir: Path, top_percent: float, low_percent: float):
+    print(f"Processing: {sample_folder.name}")
+
+    sample_output_dir = output_dir / f"{sample_folder.name}_labels"
+    sample_output_dir.mkdir(parents=True, exist_ok=True)
+
+    csv_path = sample_output_dir / f"{sample_folder.name}.csv"
+
+    images = []
+    filenames = []
+
+    for file_path in sample_folder.iterdir():
+        if not file_path.is_file():
+            continue
+
+        img = cv2.imread(str(file_path), cv2.IMREAD_GRAYSCALE)
+        if img is None:
+            continue
+
+        images.append(img)
+        filenames.append(file_path.name)
+
+    if len(images) == 0:
+        return f"Skipped (no images): {sample_folder.name}"
+
+    lap_scores, fft_scores, total_scores = score_cal(images)
+
+    top_threshold = np.percentile(total_scores, top_percent)
+    low_threshold = np.percentile(total_scores, low_percent)
+
+    rows = []
+    for i in range(len(images)):
+        if total_scores[i] >= top_threshold:
+            patch_label = 1
+        elif total_scores[i] <= low_threshold:
+            patch_label = -1
+        else:
+            patch_label = 0
+
+        rows.append([
+            filenames[i],
+            float(lap_scores[i]),
+            float(fft_scores[i]),
+            float(total_scores[i]),
+            patch_label
+        ])
+
+    write_scores_csv(csv_path, rows)
+    return f"Saved: {csv_path}"
+
+
+def process_dataset(input_dir: Path, output_dir: Path, top_percent=85, low_percent=10, max_workers: int | None = None):
     if not (0 <= low_percent <= 100 and 0 <= top_percent <= 100):
         raise ValueError("low_percent and top_percent must be in [0, 100].")
     if low_percent >= top_percent:
         raise ValueError("low_percent must be smaller than top_percent.")
 
-    for sample_folder in input_dir.iterdir():
-        if not sample_folder.is_dir():
-            continue
+    sample_folders = [folder for folder in input_dir.iterdir() if folder.is_dir()]
+    if not sample_folders:
+        return
 
-        print(f"Processing: {sample_folder.name}")
+    worker_count = max_workers if max_workers is not None else max(1, (os.cpu_count() or 1) // 2)
+    if worker_count is None or worker_count <= 1:
+        for folder in sample_folders:
+            message = process_single_folder(folder, output_dir, top_percent, low_percent)
+            print(message)
+        return
 
-        sample_output_dir = output_dir / f"{sample_folder.name}_labels"
-        sample_output_dir.mkdir(parents=True, exist_ok=True)
-
-        csv_path = sample_output_dir / f"{sample_folder.name}.csv"
-
-        images = []
-        filenames = []
-
-        for file_path in sample_folder.iterdir():
-            if not file_path.is_file():
-                continue
-
-            img = cv2.imread(str(file_path), cv2.IMREAD_GRAYSCALE)
-            if img is None:
-                continue
-
-            images.append(img)
-            filenames.append(file_path.name)
-
-        if len(images) == 0:
-            continue
-
-        lap_scores, fft_scores, total_scores = score_cal(images)
-
-        top_threshold = np.percentile(total_scores, top_percent)
-        low_threshold = np.percentile(total_scores, low_percent)
-
-        rows = []
-        for i in range(len(images)):
-            if total_scores[i] >= top_threshold:
-                patch_label = 1
-            elif total_scores[i] <= low_threshold:
-                patch_label = -1
-            else:
-                patch_label = 0
-
-            rows.append([
-                filenames[i],
-                float(lap_scores[i]),
-                float(fft_scores[i]),
-                float(total_scores[i]),
-                patch_label
-            ])
-
-        write_scores_csv(csv_path, rows)
-        print(f"Saved: {csv_path}")
+    with ProcessPoolExecutor(max_workers=worker_count) as executor:
+        futures = [
+            executor.submit(process_single_folder, folder, output_dir, top_percent, low_percent)
+            for folder in sample_folders
+        ]
+        for future in as_completed(futures):
+            print(future.result())
 
 
 # Run automatic labeling for train and validation sample sets.
-def label(top_percent=85, low_percent=10):
+def label(top_percent=85, low_percent=10, max_workers=None):
     root_dir = util.get_root_dir()
 
     train_input_dir = root_dir / "data/samples"
@@ -187,8 +206,8 @@ def label(top_percent=85, low_percent=10):
     valid_input_dir = root_dir / "data/valid_samples"
     valid_output_dir = root_dir / "data/valid_samples_labels"
 
-    process_dataset(train_input_dir, train_output_dir, top_percent, low_percent)
-    process_dataset(valid_input_dir, valid_output_dir, top_percent, low_percent)
+    process_dataset(train_input_dir, train_output_dir, top_percent, low_percent, max_workers=max_workers)
+    process_dataset(valid_input_dir, valid_output_dir, top_percent, low_percent, max_workers=max_workers)
 
 
 if __name__ == "__main__":

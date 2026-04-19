@@ -1,4 +1,6 @@
 from pathlib import Path
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import os
 
 import cv2
 import matplotlib
@@ -72,74 +74,85 @@ def overlay_score_map_on_image(image: np.ndarray, score_map: np.ndarray,
 
 
 # Generate visual overlays for every labeled sample folder.
-def process_dataset(input_dir: Path, raw_dir: Path, samples_dir: Path, sample_map: dict, patch_size: int = 32):
-    for folder in input_dir.iterdir():
-        if not folder.is_dir() or not folder.name.endswith("_labels"):
-            continue
+def process_single_label_folder(folder: Path, raw_dir: Path, samples_dir: Path, sample_map: dict, patch_size: int = 32):
+    sample_name = folder.name.replace("_labels", "")
+    csv_path = folder / f"{sample_name}.csv"
 
-        sample_name = folder.name.replace("_labels", "")
-        csv_path = folder / f"{sample_name}.csv"
+    if not csv_path.exists():
+        return f"Skipped (csv missing): {sample_name}"
 
-        if not csv_path.exists():
-            continue
+    df = pd.read_csv(csv_path)
+    if len(df) == 0:
+        return f"Skipped (empty csv): {sample_name}"
 
-        print(f"\nProcessing {sample_name}")
-        df = pd.read_csv(csv_path)
-        if len(df) == 0:
-            continue
+    key = f"{sample_name}.png"
+    if key not in sample_map:
+        return f"Skipped (original mapping missing): {sample_name}"
 
-        key = f"{sample_name}.png"
-        if key not in sample_map:
-            print("Original mapping missing")
-            continue
+    original_path = raw_dir / sample_map[key]
+    if not original_path.exists():
+        return f"Skipped (original image missing): {sample_name}"
 
-        original_path = raw_dir / sample_map[key]
-        if not original_path.exists():
-            print("Original image missing")
-            continue
+    original_img = cv2.imread(str(original_path))
+    if original_img is None:
+        return f"Skipped (cannot read original): {sample_name}"
+    h, w = original_img.shape[:2]
 
-        original_img = cv2.imread(str(original_path))
-        if original_img is None:
-            raise ValueError(f"Cannot read: {original_path}")
-        h, w = original_img.shape[:2]
+    parsed = [parse_row_col(name) for name in df["filename"]]
+    rows, cols = zip(*parsed)
+    rows = [int(r) for r in rows]
+    cols = [int(c) for c in cols]
+    grid_rows, grid_cols = max(rows) + 1, max(cols) + 1
 
-        parsed = [parse_row_col(name) for name in df["filename"]]
-        rows, cols = zip(*parsed)
-        rows = [int(r) for r in rows]
-        cols = [int(c) for c in cols]
+    label_heatmap = generate_label_heatmap(df, grid_rows, grid_cols)
+    label_heatmap_resized = cv2.resize(label_heatmap, (w, h), interpolation=cv2.INTER_NEAREST)
+    label_overlay = overlay_heatmap_on_image(original_img, label_heatmap_resized)
+    output_path = folder / f"{sample_name}_label_overlay.png"
+    cv2.imwrite(str(output_path), label_overlay)
 
-        grid_rows, grid_cols = max(rows) + 1, max(cols) + 1
-        print("Patch grid:", grid_rows, grid_cols)
+    score_map = generate_score_heatmap(df, grid_rows, grid_cols)
+    score_map_resized = cv2.resize(score_map, (w, h), interpolation=cv2.INTER_NEAREST)
+    score_overlay = overlay_score_map_on_image(original_img, score_map_resized)
+    output_path = folder / f"{sample_name}_score_overlay.png"
+    cv2.imwrite(str(output_path), score_overlay)
 
-        label_heatmap = generate_label_heatmap(df, grid_rows, grid_cols)
-        label_heatmap_resized = cv2.resize(label_heatmap, (w, h), interpolation=cv2.INTER_NEAREST)
-        label_overlay = overlay_heatmap_on_image(original_img, label_heatmap_resized)
-        output_path = folder / f"{sample_name}_label_overlay.png"
-        cv2.imwrite(str(output_path), label_overlay)
+    sample_folder = samples_dir / sample_name
+    X, y = collect_sample_features_for_pca(df, sample_folder, patch_size)
+    if X is not None:
+        save_pca_2d_plot(
+            X=X,
+            y=y,
+            output_path=folder / f"{sample_name}_pca_2d_distribution.png",
+            title=f"{sample_name} Patch Distribution (PCA 2D)"
+        )
+        save_pca_3d_plot(
+            X=X,
+            y=y,
+            output_path=folder / f"{sample_name}_pca_3d_distribution.png",
+            title=f"{sample_name} Patch Distribution (PCA 3D)"
+        )
 
-        score_map = generate_score_heatmap(df, grid_rows, grid_cols)
-        score_map_resized = cv2.resize(score_map, (w, h), interpolation=cv2.INTER_NEAREST)
-        score_overlay = overlay_score_map_on_image(original_img, score_map_resized)
-        output_path = folder / f"{sample_name}_score_overlay.png"
-        cv2.imwrite(str(output_path), score_overlay)
+    return f"Finished: {sample_name} (grid={grid_rows}x{grid_cols})"
 
-        sample_folder = samples_dir / sample_name
-        X, y = collect_sample_features_for_pca(df, sample_folder, patch_size)
-        if X is not None:
-            save_pca_2d_plot(
-                X=X,
-                y=y,
-                output_path=folder / f"{sample_name}_pca_2d_distribution.png",
-                title=f"{sample_name} Patch Distribution (PCA 2D)"
-            )
-            save_pca_3d_plot(
-                X=X,
-                y=y,
-                output_path=folder / f"{sample_name}_pca_3d_distribution.png",
-                title=f"{sample_name} Patch Distribution (PCA 3D)"
-            )
 
-        print("Finished")
+def process_dataset(input_dir: Path, raw_dir: Path, samples_dir: Path, sample_map: dict, patch_size: int = 32, max_workers: int | None = None):
+    folders = [folder for folder in input_dir.iterdir() if folder.is_dir() and folder.name.endswith("_labels")]
+    if not folders:
+        return
+
+    worker_count = max_workers if max_workers is not None else max(1, (os.cpu_count() or 1) // 2)
+    if worker_count is None or worker_count <= 1:
+        for folder in folders:
+            print(process_single_label_folder(folder, raw_dir, samples_dir, sample_map, patch_size))
+        return
+
+    with ProcessPoolExecutor(max_workers=worker_count) as executor:
+        futures = [
+            executor.submit(process_single_label_folder, folder, raw_dir, samples_dir, sample_map, patch_size)
+            for folder in folders
+        ]
+        for future in as_completed(futures):
+            print(future.result())
 
 
 def collect_sample_features_for_pca(df: pd.DataFrame, sample_folder: Path, patch_size: int = 32):
@@ -256,7 +269,7 @@ def save_pca_2d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str
 
 
 # Run visualization for both train and validation labeling outputs.
-def visualize():
+def visualize(max_workers=None):
     root_dir = util.get_root_dir()
 
     train_raw_dir = root_dir / "data/raw/train_img"
@@ -264,14 +277,14 @@ def visualize():
     train_samples_dir = root_dir / "data/samples"
     train_info_path = root_dir / "data/normalized/samples_info.csv"
     train_map = load_mapping(train_info_path)
-    process_dataset(train_labels_dir, train_raw_dir, train_samples_dir, train_map)
+    process_dataset(train_labels_dir, train_raw_dir, train_samples_dir, train_map, max_workers=max_workers)
 
     valid_raw_dir = root_dir / "data/raw/valid_img"
     valid_labels_dir = root_dir / "data/valid_samples_labels"
     valid_samples_dir = root_dir / "data/valid_samples"
     valid_info_path = root_dir / "data/valid_normalized/valid_samples_info.csv"
     valid_map = load_mapping(valid_info_path)
-    process_dataset(valid_labels_dir, valid_raw_dir, valid_samples_dir, valid_map)
+    process_dataset(valid_labels_dir, valid_raw_dir, valid_samples_dir, valid_map, max_workers=max_workers)
 
 
 if __name__ == "__main__":

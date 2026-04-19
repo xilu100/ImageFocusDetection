@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 from pathlib import Path
 from typing import Any, TypedDict
 
@@ -145,7 +146,7 @@ def main():
     # Preprocessing switch. Options: {0, 1}, default: 1
     process = 1
     # Train + Evaluation switch. Options: {0, 1}, default: 1
-    train_and_evaluate = 1
+    train_and_evaluate = 0
 
     experiment_cfg = get_experiment_config()
     plot_cfg = get_plot_config()
@@ -235,6 +236,7 @@ def run_pipeline_once(
 
     if process:
         print_and_save("=== Step 1: Preprocessing ===")
+        process_start = time.perf_counter()
         delete_folder()
 
         normalize_raw.normalize_images(patch_size)
@@ -242,6 +244,8 @@ def run_pipeline_once(
         label_patches.label(training_cfg["top_percent"], training_cfg["low_percent"])
         from preprocessing import visualize_labels
         visualize_labels.visualize()
+        process_elapsed = time.perf_counter() - process_start
+        print_and_save(f"Preprocessing total time: {process_elapsed:.2f}s")
 
     if train_and_evaluate:
         print_and_save("=== Step 2: Training ===")
