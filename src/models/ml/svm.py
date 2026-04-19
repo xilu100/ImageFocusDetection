@@ -12,7 +12,14 @@ from tools import util, pca
 from tools.log import print_and_save, save
 
 
-def train_svm(img_paths, y, patch_size, n_components=100, n_jobs=None):
+def train_svm(
+        img_paths,
+        y,
+        patch_size,
+        n_components=100,
+        n_jobs=None,
+        model_params=None
+):
     # Prepare labels and worker count.
     y = np.array(y)
 
@@ -41,35 +48,33 @@ def train_svm(img_paths, y, patch_size, n_components=100, n_jobs=None):
     print_and_save(f"[SVM] X shape after PCA: {X_reduced.shape}")
 
     # Define model hyperparameters and train.
-    nystroem_components = 300  # Nystroem映射后的特征维度，越大越能近似核方法但开销更高。
-    nystroem_kernel = 'rbf'  # 核近似所用核函数类型。
-    nystroem_gamma = None  # RBF核系数；None表示按sklearn默认策略自动设置。
-    random_state = 42  # 固定随机种子，保证特征映射可复现。
-    svc_c = 2.0  # 线性SVM正则化系数，越大越强调训练集拟合。
-    class_weight = 'balanced'  # 按类别频率自动加权，缓解类别不平衡。
-    max_iter = 5000  # 求解器最大迭代次数，防止未收敛时无限迭代。
+    default_model_params = {
+        "nystroem_components": 300,
+        "nystroem_kernel": "rbf",
+        "nystroem_gamma": None,
+        "random_state": 42,
+        "svc_c": 2.0,
+        "class_weight": "balanced",
+        "max_iter": 5000,
+    }
+    model_params = model_params or {}
+    final_model_params = {**default_model_params, **model_params}
 
     save("---- SVM ----")
-    save(nystroem_components)
-    save(nystroem_kernel)
-    save(nystroem_gamma)
-    save(random_state)
-    save(svc_c)
-    save(class_weight)
-    save(max_iter)
+    save(final_model_params)
 
     model = make_pipeline(
         StandardScaler(),
         Nystroem(
-            kernel=nystroem_kernel,
-            gamma=nystroem_gamma,
-            n_components=nystroem_components,
-            random_state=random_state
+            kernel=final_model_params["nystroem_kernel"],
+            gamma=final_model_params["nystroem_gamma"],
+            n_components=final_model_params["nystroem_components"],
+            random_state=final_model_params["random_state"]
         ),
         LinearSVC(
-            C=svc_c,
-            class_weight=class_weight,
-            max_iter=max_iter
+            C=final_model_params["svc_c"],
+            class_weight=final_model_params["class_weight"],
+            max_iter=final_model_params["max_iter"]
         ),
     )
     print("[SVM] Start training ...")

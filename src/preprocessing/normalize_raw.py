@@ -127,4 +127,3 @@ def normalize_images(patch_size=32):
 
 if __name__ == "__main__":
     normalize_images(patch_size=32)
-

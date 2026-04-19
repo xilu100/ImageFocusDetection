@@ -6,7 +6,6 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-
 _LOG_INITIALIZED = False
 _COMPLETE_LOG_STREAM = None
 _ORIGINAL_STDOUT = None
@@ -45,9 +44,9 @@ def _ensure_logging_initialized():
     root_logger.setLevel(logging.INFO)
 
     if not any(
-        isinstance(handler, logging.FileHandler)
-        and Path(handler.baseFilename) == log_file
-        for handler in root_logger.handlers
+            isinstance(handler, logging.FileHandler)
+            and Path(handler.baseFilename) == log_file
+            for handler in root_logger.handlers
     ):
         file_handler = logging.FileHandler(log_file, encoding="utf-8")
         file_handler.setLevel(logging.INFO)

@@ -120,10 +120,10 @@ def evaluate(name, y, y_pred):
     print_and_save(f"Accuracy: {acc:.4f}")
 
     print_and_save("Classification Report:")
-    print_and_save("\n",classification_report(y, y_pred))
+    print_and_save("\n", classification_report(y, y_pred))
 
     print_and_save("Confusion Matrix:")
-    print_and_save("\n",confusion_matrix(y, y_pred))
+    print_and_save("\n", confusion_matrix(y, y_pred))
 
 
 def evaluate_valid_set(patch_size: int = 32):
@@ -194,4 +194,3 @@ def evaluate_valid_set(patch_size: int = 32):
 
 if __name__ == "__main__":
     evaluate_valid_set(patch_size=32)
-

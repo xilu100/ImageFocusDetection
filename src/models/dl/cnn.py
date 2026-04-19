@@ -13,7 +13,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
-from tools.log import print_and_save,save
+from tools.log import print_and_save, save
 
 
 class SimpleCNN(nn.Module):
@@ -230,9 +230,15 @@ def train_cnn(
         batch_base: int = 64,
         lmdb_path: Optional[str] = None,
         build_lmdb_if_missing: bool = True,
-        assume_fixed_size: bool = True
+        assume_fixed_size: bool = True,
+        model_params: Optional[dict] = None
 ):
-    seed = 42
+    model_params = model_params or {}
+    epochs = model_params.get("epochs", epochs)
+    batch_base = model_params.get("batch_base", batch_base)
+    seed = model_params.get("seed", 42)
+    learning_rate = model_params.get("learning_rate", 1e-3)
+
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -278,7 +284,7 @@ def train_cnn(
     weights = torch.tensor([w0, w1], dtype=torch.float32).to(device)
     criterion = nn.CrossEntropyLoss(weight=weights)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     scaler = torch.amp.GradScaler('cuda') if use_amp else None
 

@@ -2,6 +2,7 @@ from pathlib import Path
 
 import cv2
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -275,4 +276,3 @@ def visualize():
 
 if __name__ == "__main__":
     visualize()
-

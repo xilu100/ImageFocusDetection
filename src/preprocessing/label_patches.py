@@ -193,4 +193,3 @@ def label(top_percent=85, low_percent=10):
 
 if __name__ == "__main__":
     label(top_percent=85, low_percent=10)
-

@@ -94,4 +94,3 @@ def segment_images(patch_size=32):
 
 if __name__ == "__main__":
     segment_images(patch_size=32)
-

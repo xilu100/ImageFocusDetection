@@ -9,7 +9,14 @@ from tools import util, pca
 from tools.log import print_and_save, save
 
 
-def train_random_forest(img_paths, y, patch_size, n_components=100, n_jobs=None):
+def train_random_forest(
+        img_paths,
+        y,
+        patch_size,
+        n_components=100,
+        n_jobs=None,
+        model_params=None
+):
     # Prepare labels and worker count.
     y = np.array(y)
 
@@ -38,25 +45,20 @@ def train_random_forest(img_paths, y, patch_size, n_components=100, n_jobs=None)
     print_and_save(f"[Random Forest] X shape after PCA: {X_reduced.shape}")
 
     # Define model hyperparameters and train.
-    n_estimators = 50  # 森林中树的数量，更多树通常更稳健但训练更慢。
-    max_depth = 10  # 单棵树最大深度，控制模型复杂度与过拟合。
-    random_state = 42  # 固定随机种子，保证训练结果可复现。
-    class_weight = 'balanced_subsample'  # 每棵树按其子采样类别频率加权，缓解类别不平衡。
-    train_n_jobs = -1  # 训练阶段使用全部CPU核心并行建树。
-    save("---- Random Forest ----")
-    save(n_estimators)
-    save(max_depth)
-    save(random_state)
-    save(class_weight)
-    save(train_n_jobs)
+    default_model_params = {
+        "n_estimators": 50,
+        "max_depth": 10,
+        "random_state": 42,
+        "class_weight": "balanced_subsample",
+        "n_jobs": -1,
+    }
+    model_params = model_params or {}
+    final_model_params = {**default_model_params, **model_params}
 
-    model = RandomForestClassifier(
-        n_estimators=n_estimators,
-        max_depth=max_depth,
-        random_state=random_state,
-        class_weight=class_weight,
-        n_jobs=train_n_jobs
-    )
+    save("---- Random Forest ----")
+    save(final_model_params)
+
+    model = RandomForestClassifier(**final_model_params)
     print("[Random Forest] Start training ...")
     start_train = time.time()
     model.fit(X_reduced, y)

@@ -9,7 +9,14 @@ from tools import util, pca
 from tools.log import print_and_save, save
 
 
-def train_decision_tree(img_paths, y, patch_size, n_components=100, n_jobs=None):
+def train_decision_tree(
+        img_paths,
+        y,
+        patch_size,
+        n_components=100,
+        n_jobs=None,
+        model_params=None
+):
     # Prepare labels and worker count.
     y = np.array(y)
 
@@ -38,25 +45,20 @@ def train_decision_tree(img_paths, y, patch_size, n_components=100, n_jobs=None)
     print_and_save(f"[Decision Tree] X shape after PCA: {X_reduced.shape}")
 
     # Define model hyperparameters and train.
-    max_depth = 16  # 树的最大深度，限制模型复杂度，降低过拟合风险。
-    min_samples_split = 50  # 一个节点继续分裂所需的最小样本数。
-    min_samples_leaf = 20  # 叶子节点最少样本数，避免叶子过小导致不稳定。
-    class_weight = 'balanced'  # 按类别频率自动加权，缓解类别不平衡。
-    random_state = 42  # 固定随机种子，保证训练结果可复现。
-    save("---- Decision Tree ----")
-    save(max_depth)
-    save(min_samples_split)
-    save(min_samples_leaf)
-    save(class_weight)
-    save(random_state)
+    default_model_params = {
+        "max_depth": 16,
+        "min_samples_split": 50,
+        "min_samples_leaf": 20,
+        "class_weight": "balanced",
+        "random_state": 42,
+    }
+    model_params = model_params or {}
+    final_model_params = {**default_model_params, **model_params}
 
-    model = DecisionTreeClassifier(
-        max_depth=max_depth,
-        min_samples_split=min_samples_split,
-        min_samples_leaf=min_samples_leaf,
-        class_weight=class_weight,
-        random_state=random_state
-    )
+    save("---- Decision Tree ----")
+    save(final_model_params)
+
+    model = DecisionTreeClassifier(**final_model_params)
     print("[Decision Tree] Start training ...")
     start_train = time.time()
     model.fit(X_reduced, y)

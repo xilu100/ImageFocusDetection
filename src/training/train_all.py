@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import joblib
@@ -7,6 +8,13 @@ import torch
 from models.dl import cnn
 from models.ml import decision_tree, random_forest, svm
 from tools import util
+
+
+def clear_model_dir(model_dir: Path):
+    if model_dir.exists():
+        shutil.rmtree(model_dir)
+        print(f"Deleted existing model folder: {model_dir}")
+    model_dir.mkdir(exist_ok=True)
 
 
 def merge_samples_labels(
@@ -84,36 +92,67 @@ def load_csv_data():
 def train_models(
         patch_size: int = 32,
         PCA_components=100,
-        sample_percentage: float = 100.0
+        sample_percentage: float = 100.0,
+        config: dict | None = None
 ):
+    config = config or {}
+    training_config = config.get("training", {})
+    models_config = config.get("models", {})
+
+    if "sample_percentage" in training_config:
+        sample_percentage = training_config["sample_percentage"]
+
+    if "PCA_components" in training_config:
+        PCA_components = training_config["PCA_components"]
+
     merge_samples_labels(sample_percentage=sample_percentage)
     img_paths, y = load_csv_data()
     root_dir = util.get_root_dir()
 
     current_file = Path(__file__).resolve()
     model_dir = current_file.parent / 'model_save'
-    model_dir.mkdir(exist_ok=True)
+    clear_model_dir(model_dir)
 
-    decision_tree_model, decision_tree_pca = decision_tree.train_decision_tree(img_paths, y, patch_size,PCA_components)
+    decision_tree_model, decision_tree_pca = decision_tree.train_decision_tree(
+        img_paths,
+        y,
+        patch_size,
+        PCA_components,
+        model_params=models_config.get("decision_tree", {})
+    )
     joblib.dump(decision_tree_model, model_dir / 'decision_tree_model.joblib')
     joblib.dump(decision_tree_pca, model_dir / 'decision_tree_pca.joblib')
 
-    random_forest_model, random_forest_pca = random_forest.train_random_forest(img_paths, y, patch_size,PCA_components)
+    random_forest_model, random_forest_pca = random_forest.train_random_forest(
+        img_paths,
+        y,
+        patch_size,
+        PCA_components,
+        model_params=models_config.get("random_forest", {})
+    )
     joblib.dump(random_forest_model, model_dir / 'random_forest_model.joblib')
     joblib.dump(random_forest_pca, model_dir / 'random_forest_pca.joblib')
 
-    svm_model, svm_pca = svm.train_svm(img_paths, y, patch_size,PCA_components)
+    svm_model, svm_pca = svm.train_svm(
+        img_paths,
+        y,
+        patch_size,
+        PCA_components,
+        model_params=models_config.get("svm", {})
+    )
     joblib.dump(svm_model, model_dir / 'svm_model.joblib')
     joblib.dump(svm_pca, model_dir / 'svm_pca.joblib')
 
     lmdb_path = root_dir / f"data/samples_labels/patches_ps{patch_size}.lmdb"
+    cnn_config = models_config.get("cnn", {})
     cnn_model = cnn.train_cnn(
         img_paths,
         y,
         patch_size,
         lmdb_path=str(lmdb_path),
-        build_lmdb_if_missing=True,
-        assume_fixed_size=True
+        build_lmdb_if_missing=cnn_config.get("build_lmdb_if_missing", True),
+        assume_fixed_size=cnn_config.get("assume_fixed_size", True),
+        model_params=cnn_config
     )
     torch.save({
         'model_state_dict': cnn_model.state_dict(),
@@ -126,4 +165,3 @@ def train_models(
 
 if __name__ == "__main__":
     train_models(patch_size=32, PCA_components=100, sample_percentage=100.0)
-
