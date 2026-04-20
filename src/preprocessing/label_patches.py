@@ -8,6 +8,9 @@ import numpy as np
 
 from tools import util
 
+LAP_ANCHOR_DEFAULT = 300.0
+SOBEL_ANCHOR_DEFAULT = 12.0
+
 
 # Measure sharpness using Laplacian response variance.
 def compute_laplacian(img: np.ndarray) -> float:
@@ -47,10 +50,10 @@ def compute_fft(img: np.ndarray) -> float:
     return float(magnitude[mask].sum() / (magnitude.sum() + 1e-8))
 
 
-# Scale score arrays to [0, 1] for fair fusion.
-def normalize(arr):
-    arr = np.array(arr, dtype=np.float32)
-    return (arr - arr.min()) / (arr.max() - arr.min() + 1e-8)
+def squash_score(value: float, anchor: float) -> float:
+    value = max(0.0, float(value))
+    anchor = max(1e-8, float(anchor))
+    return float(value / (value + anchor))
 
 
 # Fuse multiple focus cues with size-aware weighting rules.
@@ -65,8 +68,22 @@ def fuse_score(size, lap, sobel, fft):
         return 0.7 * fft + 0.3 * lap
 
 
+def compute_absolute_focus_score(
+        size: int,
+        lap_score: float,
+        sobel_score: float,
+        fft_score: float,
+        lap_anchor: float,
+        sobel_anchor: float,
+) -> float:
+    lap_norm = squash_score(lap_score, lap_anchor)
+    sobel_norm = squash_score(sobel_score, sobel_anchor)
+    fft_norm = float(np.clip(fft_score, 0.0, 1.0))
+    return float(fuse_score(size, lap_norm, sobel_norm, fft_norm))
+
+
 # Generate per-patch focus metrics and fused scores.
-def score_cal(images):
+def score_cal(images, lap_anchor: float = LAP_ANCHOR_DEFAULT, sobel_anchor: float = SOBEL_ANCHOR_DEFAULT):
     lap_scores = []
     sobel_scores = []
     fft_scores = []
@@ -85,17 +102,15 @@ def score_cal(images):
         else:
             fft_scores.append(0.0)
 
-    lap_n = normalize(lap_scores)
-    sobel_n = normalize(sobel_scores)
-    fft_n = normalize(fft_scores)
-
     total_scores = []
     for i in range(len(images)):
-        score = fuse_score(
+        score = compute_absolute_focus_score(
             sizes[i],
-            lap_n[i],
-            sobel_n[i],
-            fft_n[i]
+            lap_scores[i],
+            sobel_scores[i],
+            fft_scores[i],
+            lap_anchor,
+            sobel_anchor,
         )
         total_scores.append(score)
 
@@ -118,8 +133,15 @@ def write_scores_csv(csv_path: Path, rows: list):
         writer.writerows(rows)
 
 
-# Label patches in each sample folder using percentile thresholding.
-def process_single_folder(sample_folder: Path, output_dir: Path, top_percent: float, low_percent: float):
+# Label patches in each sample folder using absolute thresholding.
+def process_single_folder(
+        sample_folder: Path,
+        output_dir: Path,
+        sharp_threshold: float,
+        discard_threshold: float,
+        lap_anchor: float,
+        sobel_anchor: float,
+):
     print(f"Processing: {sample_folder.name}")
 
     sample_output_dir = output_dir / f"{sample_folder.name}_labels"
@@ -144,16 +166,15 @@ def process_single_folder(sample_folder: Path, output_dir: Path, top_percent: fl
     if len(images) == 0:
         return f"Skipped (no images): {sample_folder.name}"
 
-    lap_scores, fft_scores, total_scores = score_cal(images)
-
-    top_threshold = np.percentile(total_scores, top_percent)
-    low_threshold = np.percentile(total_scores, low_percent)
+    lap_scores, fft_scores, total_scores = score_cal(
+        images, lap_anchor=lap_anchor, sobel_anchor=sobel_anchor
+    )
 
     rows = []
     for i in range(len(images)):
-        if total_scores[i] >= top_threshold:
+        if total_scores[i] >= sharp_threshold:
             patch_label = 1
-        elif total_scores[i] <= low_threshold:
+        elif total_scores[i] <= discard_threshold:
             patch_label = -1
         else:
             patch_label = 0
@@ -170,11 +191,19 @@ def process_single_folder(sample_folder: Path, output_dir: Path, top_percent: fl
     return f"Saved: {csv_path}"
 
 
-def process_dataset(input_dir: Path, output_dir: Path, top_percent=85, low_percent=10, max_workers: int | None = None):
-    if not (0 <= low_percent <= 100 and 0 <= top_percent <= 100):
-        raise ValueError("low_percent and top_percent must be in [0, 100].")
-    if low_percent >= top_percent:
-        raise ValueError("low_percent must be smaller than top_percent.")
+def process_dataset(
+        input_dir: Path,
+        output_dir: Path,
+        sharp_threshold=0.75,
+        discard_threshold=0.10,
+        lap_anchor: float = LAP_ANCHOR_DEFAULT,
+        sobel_anchor: float = SOBEL_ANCHOR_DEFAULT,
+        max_workers: int | None = None,
+):
+    if not (0.0 <= discard_threshold <= 1.0 and 0.0 <= sharp_threshold <= 1.0):
+        raise ValueError("discard_threshold and sharp_threshold must be in [0, 1].")
+    if discard_threshold >= sharp_threshold:
+        raise ValueError("discard_threshold must be smaller than sharp_threshold.")
 
     sample_folders = [folder for folder in input_dir.iterdir() if folder.is_dir()]
     if not sample_folders:
@@ -183,13 +212,28 @@ def process_dataset(input_dir: Path, output_dir: Path, top_percent=85, low_perce
     worker_count = max_workers if max_workers is not None else max(1, (os.cpu_count() or 1) // 2)
     if worker_count is None or worker_count <= 1:
         for folder in sample_folders:
-            message = process_single_folder(folder, output_dir, top_percent, low_percent)
+            message = process_single_folder(
+                folder,
+                output_dir,
+                sharp_threshold,
+                discard_threshold,
+                lap_anchor,
+                sobel_anchor,
+            )
             print(message)
         return
 
     with ProcessPoolExecutor(max_workers=worker_count) as executor:
         futures = [
-            executor.submit(process_single_folder, folder, output_dir, top_percent, low_percent)
+            executor.submit(
+                process_single_folder,
+                folder,
+                output_dir,
+                sharp_threshold,
+                discard_threshold,
+                lap_anchor,
+                sobel_anchor,
+            )
             for folder in sample_folders
         ]
         for future in as_completed(futures):
@@ -197,7 +241,22 @@ def process_dataset(input_dir: Path, output_dir: Path, top_percent=85, low_perce
 
 
 # Run automatic labeling for train and validation sample sets.
-def label(top_percent=85, low_percent=10, max_workers=None):
+def label(
+        sharp_threshold=0.75,
+        discard_threshold=0.10,
+        lap_anchor: float = LAP_ANCHOR_DEFAULT,
+        sobel_anchor: float = SOBEL_ANCHOR_DEFAULT,
+        max_workers=None,
+):
+    # Backward compatibility: older pipeline may still pass 75/10 style percentage values.
+    if sharp_threshold > 1.0 or discard_threshold > 1.0:
+        sharp_threshold = float(sharp_threshold) / 100.0
+        discard_threshold = float(discard_threshold) / 100.0
+        print(
+            "Deprecated percentage thresholds detected. Converted to score thresholds: "
+            f"sharp_threshold={sharp_threshold:.3f}, discard_threshold={discard_threshold:.3f}"
+        )
+
     root_dir = util.get_root_dir()
 
     train_input_dir = root_dir / "data/samples"
@@ -206,9 +265,25 @@ def label(top_percent=85, low_percent=10, max_workers=None):
     valid_input_dir = root_dir / "data/valid_samples"
     valid_output_dir = root_dir / "data/valid_samples_labels"
 
-    process_dataset(train_input_dir, train_output_dir, top_percent, low_percent, max_workers=max_workers)
-    process_dataset(valid_input_dir, valid_output_dir, top_percent, low_percent, max_workers=max_workers)
+    process_dataset(
+        train_input_dir,
+        train_output_dir,
+        sharp_threshold,
+        discard_threshold,
+        lap_anchor=lap_anchor,
+        sobel_anchor=sobel_anchor,
+        max_workers=max_workers,
+    )
+    process_dataset(
+        valid_input_dir,
+        valid_output_dir,
+        sharp_threshold,
+        discard_threshold,
+        lap_anchor=lap_anchor,
+        sobel_anchor=sobel_anchor,
+        max_workers=max_workers,
+    )
 
 
 if __name__ == "__main__":
-    label(top_percent=85, low_percent=10)
+    label(sharp_threshold=0.75, discard_threshold=0.10)

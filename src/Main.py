@@ -17,10 +17,10 @@ def get_experiment_config():
         "training": {
             # Patch size (px). Options: [16, 32, 64, 128], default: 32
             "patch_size": 32,
-            # Sharp threshold (%). Range: [0, 100], default: 75
-            "top_percent": 75,
-            # Discard threshold (%): unidentifiable or extremely blurred. Range: [0, 100], default: 10
-            "low_percent": 10,
+            # Sharp score threshold. Range: [0.0, 1.0], default: 0.75
+            "sharp_threshold": 0.75,
+            # Discard score threshold. Range: [0.0, 1.0], default: 0.10
+            "discard_threshold": 0.10,
             # PCA components. Options: [-1 (off), 0.9, 0.95, 0.99], default: 0.95
             "PCA_components": 0.95,
             # Train sample ratio (%). Range: (0, 100], default: 100
@@ -241,7 +241,7 @@ def run_pipeline_once(
 
         normalize_raw.normalize_images(patch_size)
         segment_nor_img.segment_images(patch_size)
-        label_patches.label(training_cfg["top_percent"], training_cfg["low_percent"])
+        label_patches.label(training_cfg["sharp_threshold"], training_cfg["discard_threshold"])
         from preprocessing import visualize_labels
         visualize_labels.visualize()
         process_elapsed = time.perf_counter() - process_start
