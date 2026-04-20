@@ -19,12 +19,12 @@ def get_experiment_config():
             "patch_size": 32,
             # Sharp threshold (%). Range: [0, 100], default: 75
             "top_percent": 75,
-            # Blur threshold (%). Range: [0, 100], default: 10
+            # Discard threshold (%): unidentifiable or extremely blurred. Range: [0, 100], default: 10
             "low_percent": 10,
-            # PCA components (-1 disables PCA). Options: [-1, 64, 100, 256], default: 100
-            "PCA_components": 100,
-            # Train sample ratio (%). Range: (0, 100], default: 80
-            "sample_percentage": 80,
+            # PCA components. Options: [-1 (off), 0.9, 0.95, 0.99], default: 0.95
+            "PCA_components": 0.95,
+            # Train sample ratio (%). Range: (0, 100], default: 100
+            "sample_percentage": 100,
         },
         "models": {
             # Decision Tree params
@@ -42,10 +42,10 @@ def get_experiment_config():
             },
             # Random Forest params
             "random_forest": {
-                # Trees count. Options: [50, 100, 200, 300], default: 50
-                "n_estimators": 50,
-                # Max depth. Options: [8, 10, 16, None], default: 10
-                "max_depth": 10,
+                # Trees count. Options: [50, 100, 200, 300], default: 100
+                "n_estimators": 100,
+                # Max depth. Options: [8, 10, 16, None], default: 16
+                "max_depth": 16,
                 # Random seed. Options: [42, 123, 2024, 3407], default: 42
                 "random_state": 42,
                 # Class weight. Options: {"balanced_subsample", "balanced", None}, default: "balanced_subsample"
@@ -63,8 +63,8 @@ def get_experiment_config():
                 "nystroem_gamma": None,
                 # Random seed. Options: [42, 123, 2024, 3407], default: 42
                 "random_state": 42,
-                # C. Range: float > 0, default: 2.0
-                "svc_c": 2.0,
+                # C. Range: float > 0, default: 1.0
+                "svc_c": 1.0,
                 # Class weight. Options: {"balanced", None}, default: "balanced"
                 "class_weight": "balanced",
                 # Max iterations. Options: [2000, 5000, 10000, 20000], default: 5000
@@ -72,10 +72,10 @@ def get_experiment_config():
             },
             # CNN params
             "cnn": {
-                # Epochs. Options: [5, 10, 15, 20], default: 5
-                "epochs": 5,
-                # Base batch size. Options: [32, 64, 128, 256], default: 64
-                "batch_base": 64,
+                # Epochs. Options: [5, 10, 15, 20], default: 10
+                "epochs": 10,
+                # Base batch size. Options: [32, 64, 128, 256], default: 128
+                "batch_base": 128,
                 # Random seed. Options: [42, 123, 2024, 3407], default: 42
                 "seed": 42,
                 # Learning rate. Range: float > 0, default: 1e-3
@@ -146,7 +146,7 @@ def main():
     # Preprocessing switch. Options: {0, 1}, default: 1
     process = 1
     # Train + Evaluation switch. Options: {0, 1}, default: 1
-    train_and_evaluate = 0
+    train_and_evaluate = 1
 
     experiment_cfg = get_experiment_config()
     plot_cfg = get_plot_config()

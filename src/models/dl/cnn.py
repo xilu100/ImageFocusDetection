@@ -155,7 +155,7 @@ class LmdbPatchDataset(Dataset):
                 self.length = int(bytes(len_raw).decode("ascii"))
                 self.patch_size = int(bytes(patch_raw).decode("ascii"))
 
-    def _lazy_init(self):
+    def lazy_init(self):
         if self.env is None:
             self.env = lmdb.open(
                 self.lmdb_path,
@@ -172,7 +172,7 @@ class LmdbPatchDataset(Dataset):
         return self.length
 
     def __getitem__(self, idx):
-        self._lazy_init()
+        self.lazy_init()
         key_img = f"img-{idx:09d}".encode("ascii")
         key_lbl = f"lbl-{idx:09d}".encode("ascii")
         img_raw = self.txn.get(key_img)

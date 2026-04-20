@@ -16,7 +16,7 @@ def train_svm(
         img_paths,
         y,
         patch_size,
-        n_components=100,
+        n_components=0.95,
         n_jobs=None,
         model_params=None
 ):

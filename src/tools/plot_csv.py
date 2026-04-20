@@ -116,8 +116,8 @@ def enabled_columns(metric_switches: dict[str, int]) -> list[str]:
 def sorted_by_control(df: pd.DataFrame, control_col: str) -> pd.DataFrame:
     ctrl = pd.to_numeric(df[control_col], errors="coerce")
     if ctrl.notna().all():
-        return df.assign(_ctrl_num=ctrl).sort_values("_ctrl_num").drop(columns=["_ctrl_num"])
-    return df.assign(_ctrl_str=df[control_col].astype(str)).sort_values("_ctrl_str").drop(columns=["_ctrl_str"])
+        return df.assign(ctrl_num=ctrl).sort_values("ctrl_num").drop(columns=["ctrl_num"])
+    return df.assign(ctrl_str=df[control_col].astype(str)).sort_values("ctrl_str").drop(columns=["ctrl_str"])
 
 
 def split_columns_by_value_range(

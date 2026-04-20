@@ -91,7 +91,7 @@ def load_csv_data():
 
 def train_models(
         patch_size: int = 32,
-        PCA_components=100,
+        PCA_components=0.95,
         sample_percentage: float = 100.0,
         config: dict | None = None
 ):
@@ -164,4 +164,4 @@ def train_models(
 
 
 if __name__ == "__main__":
-    train_models(patch_size=32, PCA_components=100, sample_percentage=100.0)
+    train_models(patch_size=32, PCA_components=0.95, sample_percentage=100.0)

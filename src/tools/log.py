@@ -3,16 +3,17 @@ import inspect
 import logging
 import re
 import sys
+from threading import Lock
 from datetime import datetime
 from pathlib import Path
 
-_LOG_INITIALIZED = False
-_COMPLETE_LOG_STREAM = None
-_ORIGINAL_STDOUT = None
-_ORIGINAL_STDERR = None
-_LOG_FILE_PATH = None
-_COMPLETE_LOG_FILE_PATH = None
-_FILE_HANDLER = None
+LOG_INITIALIZED = False
+COMPLETE_LOG_STREAM = None
+ORIGINAL_STDOUT = None
+ORIGINAL_STDERR = None
+LOG_FILE_PATH = None
+COMPLETE_LOG_FILE_PATH = None
+FILE_HANDLER = None
 
 
 class TeeStream:
@@ -32,10 +33,47 @@ class TeeStream:
         return any(getattr(stream, "isatty", lambda: False)() for stream in self.streams)
 
 
+class TimestampedLevelLineStream:
+    def __init__(self, stream, level):
+        self.stream = stream
+        self.level = level
+        self.line_start = True
+        self.lock = Lock()
+
+    def write(self, data):
+        if not isinstance(data, str):
+            data = str(data)
+        if not data:
+            return 0
+
+        with self.lock:
+            for ch in data:
+                if self.line_start and ch not in ("\n", "\r"):
+                    prefix = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    prefix = f"{prefix} [{self.level}] "
+                    self.stream.write(prefix)
+                    self.line_start = False
+                self.stream.write(ch)
+                if ch in ("\n", "\r"):
+                    self.line_start = True
+        return len(data)
+
+    def flush(self):
+        with self.lock:
+            self.stream.flush()
+
+    def close(self):
+        with self.lock:
+            self.stream.close()
+
+    def isatty(self):
+        return getattr(self.stream, "isatty", lambda: False)()
+
+
 def ensure_logging_initialized():
-    global _LOG_INITIALIZED, _COMPLETE_LOG_STREAM, _ORIGINAL_STDOUT, _ORIGINAL_STDERR
-    global _LOG_FILE_PATH, _COMPLETE_LOG_FILE_PATH, _FILE_HANDLER
-    if _LOG_INITIALIZED:
+    global LOG_INITIALIZED, COMPLETE_LOG_STREAM, ORIGINAL_STDOUT, ORIGINAL_STDERR
+    global LOG_FILE_PATH, COMPLETE_LOG_FILE_PATH, FILE_HANDLER
+    if LOG_INITIALIZED:
         return
 
     project_root = Path(__file__).resolve().parent.parent.parent
@@ -44,8 +82,8 @@ def ensure_logging_initialized():
 
     log_file = log_dir / f"{datetime.now().strftime('%Y%m%d_%H%M')}.log"
     complete_log_file = log_file.with_name(f"{log_file.stem}_complete.log")
-    _LOG_FILE_PATH = log_file
-    _COMPLETE_LOG_FILE_PATH = complete_log_file
+    LOG_FILE_PATH = log_file
+    COMPLETE_LOG_FILE_PATH = complete_log_file
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
 
@@ -63,18 +101,21 @@ def ensure_logging_initialized():
             )
         )
         root_logger.addHandler(file_handler)
-        _FILE_HANDLER = file_handler
+        FILE_HANDLER = file_handler
 
-    _COMPLETE_LOG_STREAM = open(complete_log_file, "a", encoding="utf-8")
-    if _ORIGINAL_STDOUT is None:
-        _ORIGINAL_STDOUT = sys.stdout
-    if _ORIGINAL_STDERR is None:
-        _ORIGINAL_STDERR = sys.stderr
+    raw_complete_stream = open(complete_log_file, "a", encoding="utf-8")
+    complete_info_stream = TimestampedLevelLineStream(raw_complete_stream, "INFO")
+    complete_error_stream = TimestampedLevelLineStream(raw_complete_stream, "ERROR")
+    COMPLETE_LOG_STREAM = complete_info_stream
+    if ORIGINAL_STDOUT is None:
+        ORIGINAL_STDOUT = sys.stdout
+    if ORIGINAL_STDERR is None:
+        ORIGINAL_STDERR = sys.stderr
 
-    sys.stdout = TeeStream(_ORIGINAL_STDOUT, _COMPLETE_LOG_STREAM)
-    sys.stderr = TeeStream(_ORIGINAL_STDERR, _COMPLETE_LOG_STREAM)
+    sys.stdout = TeeStream(ORIGINAL_STDOUT, complete_info_stream)
+    sys.stderr = TeeStream(ORIGINAL_STDERR, complete_error_stream)
 
-    _LOG_INITIALIZED = True
+    LOG_INITIALIZED = True
 
 
 def infer_save_argument_name():
@@ -145,62 +186,42 @@ def flush_logs():
             handler.flush()
         except Exception:
             pass
-    if _COMPLETE_LOG_STREAM is not None:
-        _COMPLETE_LOG_STREAM.flush()
+    if COMPLETE_LOG_STREAM is not None:
+        COMPLETE_LOG_STREAM.flush()
 
 
 def get_current_log_paths():
     ensure_logging_initialized()
-    return _LOG_FILE_PATH, _COMPLETE_LOG_FILE_PATH
+    return LOG_FILE_PATH, COMPLETE_LOG_FILE_PATH
 
 
 def close_logs():
-    global _LOG_INITIALIZED, _COMPLETE_LOG_STREAM, _FILE_HANDLER
+    global LOG_INITIALIZED, COMPLETE_LOG_STREAM, FILE_HANDLER
     ensure_logging_initialized()
     flush_logs()
 
     root_logger = logging.getLogger()
-    if _FILE_HANDLER is not None:
+    if FILE_HANDLER is not None:
         try:
-            root_logger.removeHandler(_FILE_HANDLER)
+            root_logger.removeHandler(FILE_HANDLER)
         except Exception:
             pass
         try:
-            _FILE_HANDLER.close()
+            FILE_HANDLER.close()
         except Exception:
             pass
-        _FILE_HANDLER = None
+        FILE_HANDLER = None
 
-    if _COMPLETE_LOG_STREAM is not None:
+    if COMPLETE_LOG_STREAM is not None:
         try:
-            _COMPLETE_LOG_STREAM.close()
+            COMPLETE_LOG_STREAM.close()
         except Exception:
             pass
-        _COMPLETE_LOG_STREAM = None
+        COMPLETE_LOG_STREAM = None
 
-    if _ORIGINAL_STDOUT is not None:
-        sys.stdout = _ORIGINAL_STDOUT
-    if _ORIGINAL_STDERR is not None:
-        sys.stderr = _ORIGINAL_STDERR
+    if ORIGINAL_STDOUT is not None:
+        sys.stdout = ORIGINAL_STDOUT
+    if ORIGINAL_STDERR is not None:
+        sys.stderr = ORIGINAL_STDERR
 
-    _LOG_INITIALIZED = False
-
-
-class LogApi:
-    def save(self, value):
-        save(value)
-
-    def print_and_save(self, *args, sep=" ", end="\n", flush=False):
-        print_and_save(*args, sep=sep, end=end, flush=flush)
-
-    def flush_logs(self):
-        flush_logs()
-
-    def get_current_log_paths(self):
-        return get_current_log_paths()
-
-    def close_logs(self):
-        close_logs()
-
-
-log_api = LogApi()
+    LOG_INITIALIZED = False
