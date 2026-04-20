@@ -15,6 +15,8 @@ from torch.utils.data import Dataset, DataLoader
 
 from tools.log import print_and_save, save
 
+DEFAULT_NOISE_STD = 0.03
+
 
 class SimpleCNN(nn.Module):
     def __init__(self, patch_size: int, num_classes: int = 2):
@@ -69,17 +71,20 @@ def convert(img_path: str, patch_size: int, assume_fixed_size: bool = True) -> t
 
 
 class PatchDataset(Dataset):
-    def __init__(self, img_paths, labels, patch_size, assume_fixed_size: bool = True):
+    def __init__(self, img_paths, labels, patch_size, assume_fixed_size: bool = True, noise_std: float = 0.0):
         self.img_paths = img_paths
         self.labels = labels
         self.patch_size = patch_size
         self.assume_fixed_size = assume_fixed_size
+        self.noise_std = noise_std
 
     def __len__(self):
         return len(self.img_paths)
 
     def __getitem__(self, idx):
         img = convert(self.img_paths[idx], self.patch_size, assume_fixed_size=self.assume_fixed_size)
+        if self.noise_std > 0:
+            img = torch.clamp(img + torch.randn_like(img) * self.noise_std, 0.0, 1.0)
         label = self.labels[idx]
         return img, label
 
@@ -142,10 +147,11 @@ def build_lmdb_from_paths(
 
 
 class LmdbPatchDataset(Dataset):
-    def __init__(self, lmdb_path: Path):
+    def __init__(self, lmdb_path: Path, noise_std: float = 0.0):
         self.lmdb_path = str(lmdb_path)
         self.env = None
         self.txn = None
+        self.noise_std = noise_std
         with lmdb.open(self.lmdb_path, subdir=False, readonly=True, lock=False, readahead=False, meminit=False) as env:
             with env.begin(write=False) as txn:
                 len_raw = txn.get(b"__len__")
@@ -183,6 +189,8 @@ class LmdbPatchDataset(Dataset):
 
         img = np.frombuffer(img_raw, dtype=np.uint8).reshape(self.patch_size, self.patch_size).copy()
         img = torch.from_numpy(img).unsqueeze(0).to(torch.float32).div_(255.0)
+        if self.noise_std > 0:
+            img = torch.clamp(img + torch.randn_like(img) * self.noise_std, 0.0, 1.0)
         label = int.from_bytes(lbl_raw, byteorder="little", signed=True)
         return img, label
 
@@ -238,6 +246,7 @@ def train_cnn(
     batch_base = model_params.get("batch_base", batch_base)
     seed = model_params.get("seed", 42)
     learning_rate = model_params.get("learning_rate", 1e-3)
+    noise_std = model_params.get("noise_std", DEFAULT_NOISE_STD)
 
     random.seed(seed)
     np.random.seed(seed)
@@ -257,11 +266,11 @@ def train_cnn(
                 assume_fixed_size=assume_fixed_size
             )
         if lmdb_file.exists():
-            dataset = LmdbPatchDataset(lmdb_file)
+            dataset = LmdbPatchDataset(lmdb_file, noise_std=noise_std)
             print_and_save(f"[CNN] Using LMDB dataset: {lmdb_file}")
 
     if dataset is None:
-        dataset = PatchDataset(img_paths, y, patch_size, assume_fixed_size=assume_fixed_size)
+        dataset = PatchDataset(img_paths, y, patch_size, assume_fixed_size=assume_fixed_size, noise_std=noise_std)
         print("[CNN] Using file-path dataset")
 
     loader_kwargs = dict(
