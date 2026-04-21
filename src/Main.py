@@ -244,9 +244,9 @@ def main():
         created_predict_dirs.update(run_predict_dirs)
 
     out_dir = package_run_outputs()
-    plot_paths = run_plot_cli(sweep_dir=out_dir, plot_config=plot_cfg)
     collect_predict_outputs(out_dir, created_predict_dirs)
-    print(f"Generated plots: {len(plot_paths)}")
+    plot_paths = run_plot_cli(sweep_dir=out_dir, plot_config=plot_cfg)
+    print_and_save(f"Generated plots: {len(plot_paths)}")
 
 
 def adapt_plot_config_for_label_mode(training_cfg: dict, plot_cfg: dict):
@@ -340,12 +340,12 @@ def collect_predict_outputs(out_dir: Path, created_predict_dirs: set[Path]):
     copied = 0
     for src_dir in sorted(created_predict_dirs):
         if not src_dir.exists() or not src_dir.is_dir():
-            print(f"Skip missing prediction folder: {src_dir}")
+            print_and_save(f"Skip missing prediction folder: {src_dir}")
             continue
         dst_dir = predict_out_dir / src_dir.name
         shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
         copied += 1
-    print(f"Collected {copied} prediction folder(s) to: {predict_out_dir}")
+    print_and_save(f"Collected {copied} prediction folder(s) to: {predict_out_dir}")
 
 
 def find_sweep_targets(
@@ -397,9 +397,9 @@ def delete_folder():
     for folder in folders_to_remove:
         if folder.exists():
             shutil.rmtree(folder)
-            print(f"Deleted folder: {folder}")
+            print_and_save(f"Deleted folder: {folder}")
         else:
-            print(f"Folder does not exist: {folder}")
+            print_and_save(f"Folder does not exist: {folder}")
 
 
 def package_run_outputs():
@@ -424,7 +424,7 @@ def package_run_outputs():
     log_mtime = target_log.stat().st_mtime
     os.utime(out_dir, (log_mtime, log_mtime))
 
-    print(f"Packaged outputs: {out_dir}")
+    print_and_save(f"Packaged outputs: {out_dir}")
     return out_dir
 
 
