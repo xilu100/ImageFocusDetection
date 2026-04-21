@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 import cv2
 import joblib
@@ -133,17 +134,22 @@ def safe_model_name(name: str) -> str:
 
 def model_name_suffix(name: str) -> str:
     return {
-        "Decision Tree": "RT",
+        "Decision Tree": "DT",
         "Random Forest": "RF",
         "SVM": "SVM",
         "CNN": "CNN",
     }.get(name, safe_model_name(name).upper())
 
 
+def sanitize_run_tag(run_tag: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_]+", "_", str(run_tag)).strip("_")
+
+
 def save_prediction_outputs(
         model_name: str,
         valid_df: pd.DataFrame,
         y_pred,
+        run_tag: str | None = None,
 ):
     root_dir = util.get_root_dir()
     model_suffix = model_name_suffix(model_name)
@@ -153,6 +159,8 @@ def save_prediction_outputs(
 
     pred_df = valid_df.copy()
     pred_df["predicted_label"] = np.asarray(y_pred, dtype=np.int16)
+
+    created_dirs: set[Path] = set()
 
     for source_folder, group in pred_df.groupby("source_folder", sort=True):
         sample_name = Path(source_folder).name
@@ -164,14 +172,20 @@ def save_prediction_outputs(
             output_df["original_label"] = output_df["label"]
             pred_map = dict(zip(group["filename"], group["predicted_label"]))
             output_df["predicted_label"] = output_df["filename"].map(pred_map).astype("Int64")
-            output_df["label"] = output_df["predicted_label"].fillna(output_df["original_label"]).astype(np.int16)
+            output_df["label"] = output_df["original_label"].astype(np.int16)
+            predicted_mask = output_df["predicted_label"].notna() & (output_df["original_label"] != -1)
+            output_df.loc[predicted_mask, "label"] = output_df.loc[predicted_mask, "predicted_label"].astype(np.int16)
         else:
             output_df = group.copy()
             output_df["original_label"] = output_df["label"]
             output_df["label"] = output_df["predicted_label"].astype(np.int16)
 
-        sample_output_dir = label_folder / f"{sample_name}_labels_predict"
+        if run_tag:
+            sample_output_dir = label_folder / f"{sample_name}_labels_predict_{sanitize_run_tag(run_tag)}"
+        else:
+            sample_output_dir = label_folder / f"{sample_name}_labels_predict"
         sample_output_dir.mkdir(parents=True, exist_ok=True)
+        created_dirs.add(sample_output_dir)
 
         key = f"{sample_name}.png"
         if key not in sample_map:
@@ -200,9 +214,10 @@ def save_prediction_outputs(
         cv2.imwrite(str(label_overlay_path), label_overlay)
 
     print_and_save(f"[{model_name}] Prediction overlays saved under: {labels_dir}")
+    return created_dirs
 
 
-def evaluate_valid_set(patch_size: int = 32):
+def evaluate_valid_set(patch_size: int = 32, run_tag: str | None = None):
     merge_valid_samples_labels()
 
     img_paths, y, valid_df = load_valid_data()
@@ -231,17 +246,19 @@ def evaluate_valid_set(patch_size: int = 32):
     X_rf = X if random_forest_pca is None else random_forest_pca.transform(X)
     X_svm = X if svm_pca is None else svm_pca.transform(X)
 
+    all_created_dirs: set[Path] = set()
+
     y_pred_dt = decision_tree_model.predict(X_dt)
     evaluate("Decision Tree", y, y_pred_dt)
-    save_prediction_outputs("Decision Tree", valid_df, y_pred_dt)
+    all_created_dirs.update(save_prediction_outputs("Decision Tree", valid_df, y_pred_dt, run_tag=run_tag))
 
     y_pred_rf = random_forest_model.predict(X_rf)
     evaluate("Random Forest", y, y_pred_rf)
-    save_prediction_outputs("Random Forest", valid_df, y_pred_rf)
+    all_created_dirs.update(save_prediction_outputs("Random Forest", valid_df, y_pred_rf, run_tag=run_tag))
 
     y_pred_svm = svm_model.predict(X_svm)
     evaluate("SVM", y, y_pred_svm)
-    save_prediction_outputs("SVM", valid_df, y_pred_svm)
+    all_created_dirs.update(save_prediction_outputs("SVM", valid_df, y_pred_svm, run_tag=run_tag))
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -269,7 +286,8 @@ def evaluate_valid_set(patch_size: int = 32):
     )
 
     evaluate("CNN", y, y_pred_cnn)
-    save_prediction_outputs("CNN", valid_df, y_pred_cnn)
+    all_created_dirs.update(save_prediction_outputs("CNN", valid_df, y_pred_cnn, run_tag=run_tag))
+    return sorted(all_created_dirs)
 
 
 if __name__ == "__main__":

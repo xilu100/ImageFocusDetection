@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import time
 from pathlib import Path
@@ -22,7 +23,7 @@ def get_experiment_config():
             # Blur score threshold. Range: [0.0, 1.0], default: 0.40
             "blur_threshold": 0.40,
             # PCA components. Options: [-1 (off), 0.9, 0.95, 0.99], default: 0.95
-            "PCA_components": 0.95,
+            "PCA_components": [0.95,0.99],
             # Train sample ratio (%). Range: (0, 100], default: 100
             "sample_percentage": 100,
         },
@@ -199,6 +200,7 @@ def main():
             experiment_cfg=experiment_cfg,
             process=1,
             train_and_evaluate=0,
+            run_tag=None,
         )
         return
 
@@ -211,10 +213,13 @@ def main():
             experiment_cfg=experiment_cfg,
             process=1,
             train_and_evaluate=0,
+            run_tag=None,
         )
     else:
         print_and_save("Both process and train_and_evaluate are disabled. Nothing to run.")
         return
+
+    created_predict_dirs: set[Path] = set()
 
     for run_idx, run_value in enumerate(run_values, start=1):
         if target is not None:
@@ -225,15 +230,22 @@ def main():
         else:
             print_and_save("=== Run 1/1 ===")
 
-        run_pipeline_once(
+        run_tag = build_run_tag(target, run_value)
+        if run_tag:
+            print_and_save(f"Prediction output tag: {run_tag}")
+
+        run_predict_dirs = run_pipeline_once(
             training_cfg=training_cfg,
             experiment_cfg=experiment_cfg,
             process=0,
             train_and_evaluate=1,
+            run_tag=run_tag,
         )
+        created_predict_dirs.update(run_predict_dirs)
 
     out_dir = package_run_outputs()
     plot_paths = run_plot_cli(sweep_dir=out_dir, plot_config=plot_cfg)
+    collect_predict_outputs(out_dir, created_predict_dirs)
     print(f"Generated plots: {len(plot_paths)}")
 
 
@@ -266,6 +278,7 @@ def run_pipeline_once(
         experiment_cfg,
         process,
         train_and_evaluate,
+        run_tag: str | None = None,
 ):
     patch_size = training_cfg["patch_size"]
 
@@ -292,7 +305,47 @@ def run_pipeline_once(
         )
 
         print_and_save("=== Step 3: Evaluation ===")
-        evaluate_all.evaluate_valid_set(patch_size)
+        return evaluate_all.evaluate_valid_set(patch_size, run_tag=run_tag)
+    return []
+
+
+def sanitize_tag_part(value: object) -> str:
+    text = str(value)
+    sanitized = re.sub(r"[^A-Za-z0-9_]+", "_", text).strip("_")
+    return sanitized if sanitized else "value"
+
+
+def build_run_tag(target: "SweepTarget | None", run_value: object) -> str | None:
+    if target is None:
+        return None
+    path_str = target["path_str"]
+    if path_str.startswith("models.decision_tree."):
+        prefix = "DT"
+    elif path_str.startswith("models.random_forest."):
+        prefix = "RF"
+    elif path_str.startswith("models.svm."):
+        prefix = "SVM"
+    elif path_str.startswith("models.cnn."):
+        prefix = "CNN"
+    elif path_str.startswith("training."):
+        prefix = "TR"
+    else:
+        prefix = "CTRL"
+    control_name = target["path"][-1] if target["path"] else target["path_str"]
+    return f"{prefix}_{sanitize_tag_part(control_name)}_{sanitize_tag_part(run_value)}"
+
+
+def collect_predict_outputs(out_dir: Path, created_predict_dirs: set[Path]):
+    predict_out_dir = out_dir / "predict"
+    copied = 0
+    for src_dir in sorted(created_predict_dirs):
+        if not src_dir.exists() or not src_dir.is_dir():
+            print(f"Skip missing prediction folder: {src_dir}")
+            continue
+        dst_dir = predict_out_dir / src_dir.name
+        shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
+        copied += 1
+    print(f"Collected {copied} prediction folder(s) to: {predict_out_dir}")
 
 
 def find_sweep_targets(
