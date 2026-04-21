@@ -8,6 +8,7 @@ import torch
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 from models.dl import cnn
+from preprocessing import visualize_labels
 from tools import util
 from tools.log import print_and_save
 
@@ -69,7 +70,7 @@ def load_valid_data():
     img_paths = [str(Path(row['source_folder']) / row['filename']) for _, row in df.iterrows()]
     y = df['label'].tolist()
 
-    return img_paths, y
+    return img_paths, y, df
 
 
 def build_X(img_paths, patch_size: int = 32):
@@ -126,10 +127,85 @@ def evaluate(name, y, y_pred):
     print_and_save("\n", confusion_matrix(y, y_pred))
 
 
+def safe_model_name(name: str) -> str:
+    return name.lower().replace(" ", "_")
+
+
+def model_name_suffix(name: str) -> str:
+    return {
+        "Decision Tree": "RT",
+        "Random Forest": "RF",
+        "SVM": "SVM",
+        "CNN": "CNN",
+    }.get(name, safe_model_name(name).upper())
+
+
+def save_prediction_outputs(
+        model_name: str,
+        valid_df: pd.DataFrame,
+        y_pred,
+):
+    root_dir = util.get_root_dir()
+    model_suffix = model_name_suffix(model_name)
+    labels_dir = root_dir / "data/valid_samples_labels"
+    raw_dir = root_dir / "data/raw/valid_img"
+    sample_map = visualize_labels.load_mapping(root_dir / "data/valid_normalized/valid_samples_info.csv")
+
+    pred_df = valid_df.copy()
+    pred_df["predicted_label"] = np.asarray(y_pred, dtype=np.int16)
+
+    for source_folder, group in pred_df.groupby("source_folder", sort=True):
+        sample_name = Path(source_folder).name
+        label_folder = labels_dir / f"{sample_name}_labels"
+        original_csv = label_folder / f"{sample_name}.csv"
+
+        if original_csv.exists():
+            output_df = pd.read_csv(original_csv)
+            output_df["original_label"] = output_df["label"]
+            pred_map = dict(zip(group["filename"], group["predicted_label"]))
+            output_df["predicted_label"] = output_df["filename"].map(pred_map).astype("Int64")
+            output_df["label"] = output_df["predicted_label"].fillna(output_df["original_label"]).astype(np.int16)
+        else:
+            output_df = group.copy()
+            output_df["original_label"] = output_df["label"]
+            output_df["label"] = output_df["predicted_label"].astype(np.int16)
+
+        sample_output_dir = label_folder / f"{sample_name}_labels_predict"
+        sample_output_dir.mkdir(parents=True, exist_ok=True)
+
+        key = f"{sample_name}.png"
+        if key not in sample_map:
+            print_and_save(f"[{model_name}] Prediction overlay skipped, mapping missing: {sample_name}")
+            continue
+
+        original_path = raw_dir / sample_map[key]
+        original_img = cv2.imread(str(original_path))
+        if original_img is None:
+            print_and_save(f"[{model_name}] Prediction overlay skipped, cannot read original: {original_path}")
+            continue
+
+        if output_df.empty:
+            print_and_save(f"[{model_name}] Prediction overlay skipped, empty output: {sample_name}")
+            continue
+
+        parsed = [visualize_labels.parse_row_col(name) for name in output_df["filename"]]
+        rows, cols = zip(*parsed)
+        grid_rows, grid_cols = max(rows) + 1, max(cols) + 1
+
+        label_heatmap = visualize_labels.generate_label_heatmap(output_df, grid_rows, grid_cols)
+        h, w = original_img.shape[:2]
+        label_heatmap_resized = cv2.resize(label_heatmap, (w, h), interpolation=cv2.INTER_NEAREST)
+        label_overlay = visualize_labels.overlay_heatmap_on_image(original_img, label_heatmap_resized)
+        label_overlay_path = sample_output_dir / f"{sample_name}_label_overlay_{model_suffix}.png"
+        cv2.imwrite(str(label_overlay_path), label_overlay)
+
+    print_and_save(f"[{model_name}] Prediction overlays saved under: {labels_dir}")
+
+
 def evaluate_valid_set(patch_size: int = 32):
     merge_valid_samples_labels()
 
-    img_paths, y = load_valid_data()
+    img_paths, y, valid_df = load_valid_data()
     X = build_X(img_paths, patch_size)
 
     current_file = Path(__file__).resolve()
@@ -157,12 +233,15 @@ def evaluate_valid_set(patch_size: int = 32):
 
     y_pred_dt = decision_tree_model.predict(X_dt)
     evaluate("Decision Tree", y, y_pred_dt)
+    save_prediction_outputs("Decision Tree", valid_df, y_pred_dt)
 
     y_pred_rf = random_forest_model.predict(X_rf)
     evaluate("Random Forest", y, y_pred_rf)
+    save_prediction_outputs("Random Forest", valid_df, y_pred_rf)
 
     y_pred_svm = svm_model.predict(X_svm)
     evaluate("SVM", y, y_pred_svm)
+    save_prediction_outputs("SVM", valid_df, y_pred_svm)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -190,6 +269,7 @@ def evaluate_valid_set(patch_size: int = 32):
     )
 
     evaluate("CNN", y, y_pred_cnn)
+    save_prediction_outputs("CNN", valid_df, y_pred_cnn)
 
 
 if __name__ == "__main__":
