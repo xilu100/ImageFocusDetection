@@ -243,10 +243,13 @@ def main():
         )
         created_predict_dirs.update(run_predict_dirs)
 
-    out_dir = package_run_outputs()
-    collect_predict_outputs(out_dir, created_predict_dirs)
-    plot_paths = run_plot_cli(sweep_dir=out_dir, plot_config=plot_cfg)
-    print_and_save(f"Generated plots: {len(plot_paths)}")
+    out_dir, log_path, complete_log_path = prepare_run_outputs()
+    try:
+        collect_predict_outputs(out_dir, created_predict_dirs)
+        plot_paths = run_plot_cli(sweep_dir=out_dir, plot_config=plot_cfg)
+        print_and_save(f"Generated plots: {len(plot_paths)}")
+    finally:
+        finalize_packaged_logs(out_dir, log_path, complete_log_path)
 
 
 def adapt_plot_config_for_label_mode(training_cfg: dict, plot_cfg: dict):
@@ -338,13 +341,30 @@ def build_run_tag(target: "SweepTarget | None", run_value: object) -> str | None
 def collect_predict_outputs(out_dir: Path, created_predict_dirs: set[Path]):
     predict_out_dir = out_dir / "predict"
     copied = 0
+    parent_dirs: set[Path] = set()
     for src_dir in sorted(created_predict_dirs):
         if not src_dir.exists() or not src_dir.is_dir():
             print_and_save(f"Skip missing prediction folder: {src_dir}")
             continue
         dst_dir = predict_out_dir / src_dir.name
         shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
+        parent_dirs.add(src_dir.parent)
         copied += 1
+
+    # Cleanup temporary prediction cache folders after packaging outputs.
+    for src_dir in sorted(created_predict_dirs, reverse=True):
+        if src_dir.exists() and src_dir.is_dir():
+            shutil.rmtree(src_dir, ignore_errors=True)
+
+    # Remove empty cache root(s), e.g. logs/_predict_cache
+    for parent_dir in sorted(parent_dirs, reverse=True):
+        if parent_dir.exists() and parent_dir.is_dir():
+            try:
+                parent_dir.rmdir()
+            except OSError:
+                # Directory not empty (or in use); keep it.
+                pass
+
     print_and_save(f"Collected {copied} prediction folder(s) to: {predict_out_dir}")
 
 
@@ -402,13 +422,19 @@ def delete_folder():
             print_and_save(f"Folder does not exist: {folder}")
 
 
-def package_run_outputs():
+def prepare_run_outputs() -> tuple[Path, Path, Path]:
     flush_logs()
     log_path, complete_log_path = get_current_log_paths()
     if log_path is None or complete_log_path is None:
         raise RuntimeError("Current log paths are unavailable.")
 
     out_dir = run_log_tools(log_path)
+    print_and_save(f"Packaged outputs: {out_dir}")
+    return out_dir, log_path, complete_log_path
+
+
+def finalize_packaged_logs(out_dir: Path, log_path: Path, complete_log_path: Path):
+    flush_logs()
     close_logs()
 
     target_log = out_dir / log_path.name
@@ -423,9 +449,6 @@ def package_run_outputs():
     # Keep folder timestamp aligned with log timestamp.
     log_mtime = target_log.stat().st_mtime
     os.utime(out_dir, (log_mtime, log_mtime))
-
-    print_and_save(f"Packaged outputs: {out_dir}")
-    return out_dir
 
 
 if __name__ == "__main__":
