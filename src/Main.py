@@ -23,7 +23,7 @@ def get_experiment_config():
             # Blur score threshold. Range: [0.0, 1.0], default: 0.40
             "blur_threshold": 0.40,
             # PCA components. Options: [-1 (off), 0.9, 0.95, 0.99], default: 0.95
-            "PCA_components": [0.95,0.99],
+            "PCA_components": 0.95,
             # Train sample ratio (%). Range: (0, 100], default: 100
             "sample_percentage": 100,
         },
