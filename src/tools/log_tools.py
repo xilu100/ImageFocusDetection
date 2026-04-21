@@ -40,7 +40,7 @@ BATCH_WORKER_RE = re.compile(r"^Batch size: (\d+), num_workers: (\d+)$")
 EVAL_MODEL_RE = re.compile(r"^={7,}\s*(.+?)\s*={7,}$")
 ACCURACY_RE = re.compile(r"^Accuracy:\s*([0-9.]+)$")
 CLASS_REPORT_ROW_RE = re.compile(
-    r"^\s*(0|1|macro avg|weighted avg)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9]+)\s*$"
+    r"^\s*(\d+|macro avg|weighted avg)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9]+)\s*$"
 )
 ACCURACY_ROW_RE = re.compile(r"^\s*accuracy\s+([0-9.]+)\s+([0-9]+)\s*$")
 MODEL_KEY_TO_DISPLAY = {
@@ -73,6 +73,10 @@ EVAL_COLUMNS = [
     "class1_recall",
     "class1_f1",
     "class1_support",
+    "class2_precision",
+    "class2_recall",
+    "class2_f1",
+    "class2_support",
     "macro_p",
     "macro_r",
     "macro_f1",
@@ -85,6 +89,7 @@ EVAL_COLUMNS = [
     "cm_fp",
     "cm_fn",
     "cm_tp",
+    "cm_size",
 ]
 
 
@@ -141,6 +146,28 @@ def flatten_plain(data: dict[str, object]) -> dict[str, object]:
     for key, value in data.items():
         flat[str(key)] = value
     return flat
+
+
+def parse_control_value(raw: str) -> object:
+    try:
+        return ast.literal_eval(raw)
+    except (ValueError, SyntaxError):
+        return raw
+
+
+def _to_float_or_none(value: object) -> float | None:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def is_binary_labeling_mode(training_params: dict[str, object]) -> bool:
+    sharp = _to_float_or_none(training_params.get("sharp_threshold"))
+    blur = _to_float_or_none(training_params.get("blur_threshold"))
+    if sharp is None or blur is None:
+        return False
+    return abs(sharp - blur) <= 1e-8
 
 
 def pick_mode(lines: list[str]) -> str:
@@ -290,16 +317,11 @@ def extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
                     r = float(class_row_match.group(3))
                     f1 = float(class_row_match.group(4))
                     s = int(class_row_match.group(5))
-                    if label == "0":
-                        eval_metrics["class0_precision"] = p
-                        eval_metrics["class0_recall"] = r
-                        eval_metrics["class0_f1"] = f1
-                        eval_metrics["class0_support"] = s
-                    elif label == "1":
-                        eval_metrics["class1_precision"] = p
-                        eval_metrics["class1_recall"] = r
-                        eval_metrics["class1_f1"] = f1
-                        eval_metrics["class1_support"] = s
+                    if label.isdigit():
+                        eval_metrics[f"class{label}_precision"] = p
+                        eval_metrics[f"class{label}_recall"] = r
+                        eval_metrics[f"class{label}_f1"] = f1
+                        eval_metrics[f"class{label}_support"] = s
                     elif label == "macro avg":
                         eval_metrics["macro_p"] = p
                         eval_metrics["macro_r"] = r
@@ -321,12 +343,22 @@ def extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
             if parsing_confusion_matrix:
                 numbers = [int(x) for x in re.findall(r"\d+", payload)]
                 if len(numbers) >= 2:
-                    confusion_rows.append(numbers[:2])
-                    if len(confusion_rows) == 2:
-                        eval_metrics["cm_tn"] = confusion_rows[0][0]
-                        eval_metrics["cm_fp"] = confusion_rows[0][1]
-                        eval_metrics["cm_fn"] = confusion_rows[1][0]
-                        eval_metrics["cm_tp"] = confusion_rows[1][1]
+                    confusion_rows.append(numbers)
+                    row_len = len(confusion_rows[0])
+                    if all(len(row) == row_len for row in confusion_rows) and len(confusion_rows) == row_len:
+                        cm_size = row_len
+                        eval_metrics["cm_size"] = cm_size
+                        for r_idx, row in enumerate(confusion_rows):
+                            for c_idx, value in enumerate(row):
+                                eval_metrics[f"cm_r{r_idx}_c{c_idx}"] = value
+
+                        # Backward compatibility for binary confusion-matrix keys.
+                        if cm_size == 2:
+                            eval_metrics["cm_tn"] = confusion_rows[0][0]
+                            eval_metrics["cm_fp"] = confusion_rows[0][1]
+                            eval_metrics["cm_fn"] = confusion_rows[1][0]
+                            eval_metrics["cm_tp"] = confusion_rows[1][1]
+
                         parsing_confusion_matrix = False
                         confusion_rows = []
                     continue
@@ -482,6 +514,7 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
         stats_columns_present: list[str] = []
         eval_columns_present: list[str] = []
         dynamic_stats_columns_present: list[str] = []
+        dynamic_eval_columns_present: list[str] = []
 
         for run in runs:
             model_params = run.model_params.get(model_name)
@@ -492,11 +525,28 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
 
             # Per-run training params: replace sweep target with current run value.
             run_training = dict(training_params)
+            parsed_control_value = parse_control_value(run.control_value)
             if run.control_path != "__normal__":
-                run_training[control_name] = run.control_value
+                run_training[control_name] = parsed_control_value
 
             flat_training = flatten_plain(run_training)
             flat_model = flatten_plain(model_params)
+            if run.control_path != "__normal__":
+                target_model = ""
+                if run.control_path.startswith("models."):
+                    target_model = run.control_path.split(".")[1]
+                target_display = MODEL_KEY_TO_DISPLAY.get(target_model, target_model)
+
+                # Keep sweep axis column stable across all model CSVs.
+                if run.control_name in flat_model and model_name != target_display:
+                    flat_model[f"model_{run.control_name}"] = flat_model[run.control_name]
+                    flat_model.pop(run.control_name, None)
+
+            if run.control_path.startswith("models.") and run.control_name in flat_model:
+                target_model = run.control_path.split(".")[1]
+                target_display = MODEL_KEY_TO_DISPLAY.get(target_model, target_model)
+                if model_name == target_display:
+                    flat_model[run.control_name] = parsed_control_value
             if model_name == "CNN":
                 # Keep LMDB timing metric, drop config flag about whether to build LMDB.
                 flat_model.pop("build_lmdb_if_missing", None)
@@ -519,7 +569,11 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
                         model_stats[f"loss_e{idx}"] = float(f"{loss:.4f}")
                 model_stats.pop("epoch_total", None)
             row.update(model_stats)
-            row.update(run.model_eval.get(model_name, {}))
+            model_eval = dict(run.model_eval.get(model_name, {}))
+            if is_binary_labeling_mode(run_training):
+                for col in ("class2_precision", "class2_recall", "class2_f1", "class2_support"):
+                    model_eval.pop(col, None)
+            row.update(model_eval)
             rows.append(row)
             for stat_col in MODEL_STATS_COLUMNS:
                 value = row.get(stat_col)
@@ -535,6 +589,12 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
                 value = row.get(stat_col)
                 if value not in (None, "", []) and stat_col not in dynamic_stats_columns_present:
                     dynamic_stats_columns_present.append(stat_col)
+            for eval_col in model_eval.keys():
+                if eval_col in EVAL_COLUMNS:
+                    continue
+                value = row.get(eval_col)
+                if value not in (None, "", []) and eval_col not in dynamic_eval_columns_present:
+                    dynamic_eval_columns_present.append(eval_col)
 
         # Keep epoch loss columns ordered by epoch index (loss_e1, loss_e2, ...).
         epoch_loss_columns = sorted(
@@ -558,6 +618,7 @@ def log_to_model_csv(log_path: str | Path, output_root: str | Path | None = None
                 + other_dynamic_stats_columns
                 + train_time_columns
                 + eval_columns_present
+                + dynamic_eval_columns_present
         ):
             if col not in ordered_columns:
                 ordered_columns.append(col)

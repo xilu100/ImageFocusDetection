@@ -1,6 +1,6 @@
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
 import os
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 
 import cv2
 import matplotlib
@@ -27,7 +27,7 @@ def load_mapping(csv_path: Path) -> dict:
     return {row["filename"]: row["original_filename"] for _, row in df.iterrows()}
 
 
-# Create a tri-state map: -1 (uncertain / very blurry), 0 (blurry), 1 (sharp).
+# Create a label map: -1 (textureless), 0 (blurry), 2 (mid-band), 1 (sharp).
 def generate_label_heatmap(df: pd.DataFrame, grid_rows: int, grid_cols: int) -> np.ndarray:
     heatmap = np.full((grid_rows, grid_cols), fill_value=99, dtype=np.int16)
     for _, row in df.iterrows():
@@ -45,21 +45,44 @@ def generate_score_heatmap(df: pd.DataFrame, grid_rows: int, grid_cols: int) -> 
     return score_map
 
 
-# Blend a tri-state label mask onto the original image for inspection.
+# Blend label masks onto the original image for inspection.
 def overlay_heatmap_on_image(image: np.ndarray, heatmap: np.ndarray,
-                             sharp_color=(0, 0, 255), uncertain_color=(255, 0, 0),
-                             alpha=0.3) -> np.ndarray:
+                             sharp_color=(0, 0, 255), sharp_border_color=(0, 255, 0),
+                             mid_color=(255, 0, 0), textureless_color=(0, 180, 0),
+                             alpha=0.35) -> np.ndarray:
     overlay = image.copy()
 
-    for label, color in ((1, sharp_color), (-1, uncertain_color)):
-        region = heatmap == label
-        if not np.any(region):
-            continue
+    # Sharp (1): red tint + green borders.
+    sharp_region = heatmap == 1
+    if np.any(sharp_region):
+        sharp_patch = np.zeros_like(image, dtype=np.uint8)
+        sharp_patch[:] = sharp_color
+        sharp_blended = cv2.addWeighted(image, 1 - alpha, sharp_patch, alpha, 0)
+        overlay[sharp_region] = sharp_blended[sharp_region]
 
-        color_patch = np.zeros_like(image, dtype=np.uint8)
-        color_patch[:] = color
-        blended = cv2.addWeighted(image, 1 - alpha, color_patch, alpha, 0)
-        overlay[region] = blended[region]
+    # Mid-band (2): pink tint
+    mid_region = heatmap == 2
+    if np.any(mid_region):
+        mid_patch = np.zeros_like(image, dtype=np.uint8)
+        mid_patch[:] = mid_color
+        mid_blended = cv2.addWeighted(image, 1 - alpha, mid_patch, alpha, 0)
+        overlay[mid_region] = mid_blended[mid_region]
+
+    # Undefined / textureless (-1): brown tint
+    textureless_region = heatmap == -1
+    if np.any(textureless_region):
+        textureless_patch = np.zeros_like(image, dtype=np.uint8)
+        textureless_patch[:] = textureless_color
+        textureless_blended = cv2.addWeighted(image, 1 - alpha, textureless_patch, alpha, 0)
+        overlay[textureless_region] = textureless_blended[textureless_region]
+
+    # Blur (0): no color tint by design.
+
+    # Sharp borders.
+    sharp_mask = (heatmap == 1).astype(np.uint8) * 255
+    if np.any(sharp_mask):
+        contours, _ = cv2.findContours(sharp_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cv2.drawContours(overlay, contours, -1, sharp_border_color, 1)
 
     return overlay
 
@@ -135,7 +158,8 @@ def process_single_label_folder(folder: Path, raw_dir: Path, samples_dir: Path, 
     return f"Finished: {sample_name} (grid={grid_rows}x{grid_cols})"
 
 
-def process_dataset(input_dir: Path, raw_dir: Path, samples_dir: Path, sample_map: dict, patch_size: int = 32, max_workers: int | None = None):
+def process_dataset(input_dir: Path, raw_dir: Path, samples_dir: Path, sample_map: dict, patch_size: int = 32,
+                    max_workers: int | None = None):
     folders = [folder for folder in input_dir.iterdir() if folder.is_dir() and folder.name.endswith("_labels")]
     if not folders:
         return
@@ -203,9 +227,10 @@ def save_pca_3d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str
     fig = plt.figure(figsize=(9, 7))
     ax = fig.add_subplot(111, projection="3d")
     label_style = {
-        -1: ("Uncertain / Very Blurry (-1)", "tab:blue"),
-        0: ("Blurry (0)", "tab:gray"),
-        1: ("Sharp (1)", "tab:red"),
+        -1: ("Textureless (-1)", "#00B400"),
+        0: ("Blurry (0)", "#1E88E5"),
+        2: ("Mid-band (2)", "#FDD835"),
+        1: ("Sharp (1)", "#D81B60"),
     }
 
     unique_labels = sorted(int(lbl) for lbl in np.unique(y).tolist())
@@ -216,9 +241,11 @@ def save_pca_3d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str
             X_3d[idx, 0],
             X_3d[idx, 1],
             X_3d[idx, 2],
-            s=8,
-            alpha=0.7,
+            s=14,
+            alpha=0.9,
             c=color,
+            edgecolors="black",
+            linewidths=0.25,
             label=label_name
         )
 
@@ -241,9 +268,10 @@ def save_pca_2d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str
 
     plt.figure(figsize=(8, 6))
     label_style = {
-        -1: ("Uncertain / Very Blurry (-1)", "tab:blue"),
-        0: ("Blurry (0)", "tab:gray"),
-        1: ("Sharp (1)", "tab:red"),
+        -1: ("Textureless (-1)", "#00B400"),
+        0: ("Blurry (0)", "#1E88E5"),
+        2: ("Mid-band (2)", "#FDD835"),
+        1: ("Sharp (1)", "#D81B60"),
     }
 
     unique_labels = sorted(int(lbl) for lbl in np.unique(y).tolist())
@@ -253,9 +281,11 @@ def save_pca_2d_plot(X: np.ndarray, y: np.ndarray, output_path: Path, title: str
         plt.scatter(
             X_2d[idx, 0],
             X_2d[idx, 1],
-            s=8,
-            alpha=0.7,
+            s=14,
+            alpha=0.9,
             c=color,
+            edgecolors="black",
+            linewidths=0.25,
             label=label_name
         )
 

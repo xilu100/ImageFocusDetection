@@ -19,6 +19,8 @@ def train_random_forest(
 ):
     # Prepare labels and worker count.
     y = np.array(y)
+    unique_labels = np.unique(y).tolist()
+    print_and_save(f"[Random Forest] Detected classes: {unique_labels}")
 
     if n_jobs is None:
         cpu_count = os.cpu_count() or 2

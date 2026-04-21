@@ -19,8 +19,8 @@ def get_experiment_config():
             "patch_size": 32,
             # Sharp score threshold. Range: [0.0, 1.0], default: 0.75
             "sharp_threshold": 0.75,
-            # Discard score threshold. Range: [0.0, 1.0], default: 0.10
-            "discard_threshold": 0.10,
+            # Blur score threshold. Range: [0.0, 1.0], default: 0.40
+            "blur_threshold": 0.40,
             # PCA components. Options: [-1 (off), 0.9, 0.95, 0.99], default: 0.95
             "PCA_components": 0.95,
             # Train sample ratio (%). Range: (0, 100], default: 100
@@ -106,9 +106,9 @@ def get_plot_config():
         },
         "evaluate_metrics": {
             # class 0 row
-            "class0_precision": 0,
-            "class0_recall": 0,
-            "class0_f1": 0,
+            "class0_precision": 1,
+            "class0_recall": 1,
+            "class0_f1": 1,
             "class0_support": 0,
 
             # class 1 row
@@ -116,6 +116,12 @@ def get_plot_config():
             "class1_recall": 1,
             "class1_f1": 1,
             "class1_support": 0,
+
+            # class 2 row
+            "class2_precision": 1,
+            "class2_recall": 1,
+            "class2_f1": 1,
+            "class2_support": 0,
 
             # accuracy row
             "accuracy": 0,
@@ -138,6 +144,16 @@ def get_plot_config():
             "cm_fp": 0,
             "cm_fn": 0,
             "cm_tp": 0,
+            "cm_size": 0,
+            "cm_r0_c0": 0,
+            "cm_r0_c1": 0,
+            "cm_r0_c2": 0,
+            "cm_r1_c0": 0,
+            "cm_r1_c1": 0,
+            "cm_r1_c2": 0,
+            "cm_r2_c0": 0,
+            "cm_r2_c1": 0,
+            "cm_r2_c2": 0,
         },
     }
 
@@ -155,6 +171,7 @@ def main():
     save("\n")
 
     training_cfg = experiment_cfg["training"]
+    adapt_plot_config_for_label_mode(training_cfg, plot_cfg)
     sweep_targets = find_sweep_targets(experiment_cfg)
 
     if len(sweep_targets) > 1:
@@ -220,6 +237,24 @@ def main():
     print(f"Generated plots: {len(plot_paths)}")
 
 
+def adapt_plot_config_for_label_mode(training_cfg: dict, plot_cfg: dict):
+    sharp = training_cfg.get("sharp_threshold")
+    blur = training_cfg.get("blur_threshold")
+    try:
+        sharp_f = float(sharp)
+        blur_f = float(blur)
+    except (TypeError, ValueError):
+        return
+
+    if abs(sharp_f - blur_f) > 1e-8:
+        return
+
+    eval_metrics = plot_cfg.get("evaluate_metrics", {})
+    for col in ("class2_precision", "class2_recall", "class2_f1", "class2_support"):
+        if col in eval_metrics:
+            eval_metrics[col] = 0
+
+
 class SweepTarget(TypedDict):
     path: tuple[str, ...]
     path_str: str
@@ -241,7 +276,7 @@ def run_pipeline_once(
 
         normalize_raw.normalize_images(patch_size)
         segment_nor_img.segment_images(patch_size)
-        label_patches.label(training_cfg["sharp_threshold"], training_cfg["discard_threshold"])
+        label_patches.label(training_cfg["sharp_threshold"], training_cfg["blur_threshold"])
         from preprocessing import visualize_labels
         visualize_labels.visualize()
         process_elapsed = time.perf_counter() - process_start

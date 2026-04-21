@@ -1,6 +1,6 @@
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
 import os
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 
 import cv2
 import pandas as pd
@@ -106,14 +106,16 @@ def segment_images(patch_size=32, max_workers=None):
     train_output_dir = root_dir / "data/samples"
     train_prefix = "sample"
     train_csv_name = "samples_info.csv"
-    process_dataset(train_input_dir, train_output_dir, train_prefix, train_csv_name, patch_size, max_workers=max_workers)
+    process_dataset(train_input_dir, train_output_dir, train_prefix, train_csv_name, patch_size,
+                    max_workers=max_workers)
 
     # Valid set
     valid_input_dir = root_dir / "data/valid_normalized"
     valid_output_dir = root_dir / "data/valid_samples"
     valid_prefix = "valid_sample"
     valid_csv_name = "valid_samples_info.csv"
-    process_dataset(valid_input_dir, valid_output_dir, valid_prefix, valid_csv_name, patch_size, max_workers=max_workers)
+    process_dataset(valid_input_dir, valid_output_dir, valid_prefix, valid_csv_name, patch_size,
+                    max_workers=max_workers)
 
 
 if __name__ == "__main__":

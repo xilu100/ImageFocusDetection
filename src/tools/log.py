@@ -3,9 +3,9 @@ import inspect
 import logging
 import re
 import sys
-from threading import Lock
 from datetime import datetime
 from pathlib import Path
+from threading import Lock
 
 LOG_INITIALIZED = False
 COMPLETE_LOG_STREAM = None

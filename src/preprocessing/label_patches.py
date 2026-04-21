@@ -1,7 +1,7 @@
 import csv
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
 import os
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -10,6 +10,8 @@ from tools import util
 
 LAP_ANCHOR_DEFAULT = 300.0
 SOBEL_ANCHOR_DEFAULT = 12.0
+TEXTURE_STD_THRESHOLD = 3.0
+TEXTURE_SOBEL_THRESHOLD = 2.0
 
 
 # Measure sharpness using Laplacian response variance.
@@ -56,6 +58,16 @@ def squash_score(value: float, anchor: float) -> float:
     return float(value / (value + anchor))
 
 
+def is_textureless_patch(
+        img: np.ndarray,
+        sobel_score: float,
+        std_threshold: float = TEXTURE_STD_THRESHOLD,
+        sobel_threshold: float = TEXTURE_SOBEL_THRESHOLD,
+) -> bool:
+    intensity_std = float(np.std(img.astype(np.float32)))
+    return intensity_std < std_threshold and sobel_score < sobel_threshold
+
+
 # Fuse multiple focus cues with size-aware weighting rules.
 def fuse_score(size, lap, sobel, fft):
     if size <= 32:
@@ -88,6 +100,7 @@ def score_cal(images, lap_anchor: float = LAP_ANCHOR_DEFAULT, sobel_anchor: floa
     sobel_scores = []
     fft_scores = []
     sizes = []
+    textureless_flags = []
 
     for img in images:
         h, w = img.shape
@@ -95,7 +108,9 @@ def score_cal(images, lap_anchor: float = LAP_ANCHOR_DEFAULT, sobel_anchor: floa
         sizes.append(size)
 
         lap_scores.append(compute_laplacian(img))
-        sobel_scores.append(compute_sobel(img))
+        sobel_score = compute_sobel(img)
+        sobel_scores.append(sobel_score)
+        textureless_flags.append(is_textureless_patch(img, sobel_score))
 
         if size >= 32:
             fft_scores.append(compute_fft(img))
@@ -114,7 +129,7 @@ def score_cal(images, lap_anchor: float = LAP_ANCHOR_DEFAULT, sobel_anchor: floa
         )
         total_scores.append(score)
 
-    return lap_scores, fft_scores, total_scores
+    return lap_scores, fft_scores, total_scores, textureless_flags
 
 
 # Write patch scores and labels into a structured CSV file.
@@ -134,11 +149,13 @@ def write_scores_csv(csv_path: Path, rows: list):
 
 
 # Label patches in each sample folder using absolute thresholding.
+# - If sharp_threshold > blur_threshold: tri-class labels {0, 1, 2} (+ -1 textureless).
+# - If sharp_threshold == blur_threshold: binary labels {0, 1} (+ -1 textureless).
 def process_single_folder(
         sample_folder: Path,
         output_dir: Path,
         sharp_threshold: float,
-        discard_threshold: float,
+        blur_threshold: float,
         lap_anchor: float,
         sobel_anchor: float,
 ):
@@ -166,18 +183,24 @@ def process_single_folder(
     if len(images) == 0:
         return f"Skipped (no images): {sample_folder.name}"
 
-    lap_scores, fft_scores, total_scores = score_cal(
+    lap_scores, fft_scores, total_scores, textureless_flags = score_cal(
         images, lap_anchor=lap_anchor, sobel_anchor=sobel_anchor
     )
 
     rows = []
+    binary_mode = np.isclose(sharp_threshold, blur_threshold, atol=1e-8)
     for i in range(len(images)):
-        if total_scores[i] >= sharp_threshold:
-            patch_label = 1
-        elif total_scores[i] <= discard_threshold:
+        if textureless_flags[i]:
             patch_label = -1
         else:
-            patch_label = 0
+            if binary_mode:
+                patch_label = 1 if total_scores[i] >= sharp_threshold else 0
+            elif total_scores[i] >= sharp_threshold:
+                patch_label = 1
+            elif total_scores[i] < blur_threshold:
+                patch_label = 0
+            else:
+                patch_label = 2
 
         rows.append([
             filenames[i],
@@ -195,15 +218,19 @@ def process_dataset(
         input_dir: Path,
         output_dir: Path,
         sharp_threshold=0.75,
-        discard_threshold=0.10,
+        blur_threshold=0.4,
         lap_anchor: float = LAP_ANCHOR_DEFAULT,
         sobel_anchor: float = SOBEL_ANCHOR_DEFAULT,
         max_workers: int | None = None,
 ):
-    if not (0.0 <= discard_threshold <= 1.0 and 0.0 <= sharp_threshold <= 1.0):
-        raise ValueError("discard_threshold and sharp_threshold must be in [0, 1].")
-    if discard_threshold >= sharp_threshold:
-        raise ValueError("discard_threshold must be smaller than sharp_threshold.")
+    if not (0.0 <= blur_threshold <= 1.0 and 0.0 <= sharp_threshold <= 1.0):
+        raise ValueError("blur_threshold and sharp_threshold must be in [0, 1].")
+    if blur_threshold > sharp_threshold:
+        raise ValueError("blur_threshold must be smaller than or equal to sharp_threshold.")
+    if np.isclose(blur_threshold, sharp_threshold, atol=1e-8):
+        print(
+            f"Binary labeling mode enabled: blur_threshold == sharp_threshold == {sharp_threshold:.3f}"
+        )
 
     sample_folders = [folder for folder in input_dir.iterdir() if folder.is_dir()]
     if not sample_folders:
@@ -216,7 +243,7 @@ def process_dataset(
                 folder,
                 output_dir,
                 sharp_threshold,
-                discard_threshold,
+                blur_threshold,
                 lap_anchor,
                 sobel_anchor,
             )
@@ -230,7 +257,7 @@ def process_dataset(
                 folder,
                 output_dir,
                 sharp_threshold,
-                discard_threshold,
+                blur_threshold,
                 lap_anchor,
                 sobel_anchor,
             )
@@ -243,18 +270,18 @@ def process_dataset(
 # Run automatic labeling for train and validation sample sets.
 def label(
         sharp_threshold=0.75,
-        discard_threshold=0.10,
+        blur_threshold=0.4,
         lap_anchor: float = LAP_ANCHOR_DEFAULT,
         sobel_anchor: float = SOBEL_ANCHOR_DEFAULT,
         max_workers=None,
 ):
     # Backward compatibility: older pipeline may still pass 75/10 style percentage values.
-    if sharp_threshold > 1.0 or discard_threshold > 1.0:
+    if sharp_threshold > 1.0 or blur_threshold > 1.0:
         sharp_threshold = float(sharp_threshold) / 100.0
-        discard_threshold = float(discard_threshold) / 100.0
+        blur_threshold = float(blur_threshold) / 100.0
         print(
             "Deprecated percentage thresholds detected. Converted to score thresholds: "
-            f"sharp_threshold={sharp_threshold:.3f}, discard_threshold={discard_threshold:.3f}"
+            f"sharp_threshold={sharp_threshold:.3f}, blur_threshold={blur_threshold:.3f}"
         )
 
     root_dir = util.get_root_dir()
@@ -269,7 +296,7 @@ def label(
         train_input_dir,
         train_output_dir,
         sharp_threshold,
-        discard_threshold,
+        blur_threshold,
         lap_anchor=lap_anchor,
         sobel_anchor=sobel_anchor,
         max_workers=max_workers,
@@ -278,7 +305,7 @@ def label(
         valid_input_dir,
         valid_output_dir,
         sharp_threshold,
-        discard_threshold,
+        blur_threshold,
         lap_anchor=lap_anchor,
         sobel_anchor=sobel_anchor,
         max_workers=max_workers,
@@ -286,4 +313,4 @@ def label(
 
 
 if __name__ == "__main__":
-    label(sharp_threshold=0.75, discard_threshold=0.10)
+    label(sharp_threshold=0.75, blur_threshold=0.4)

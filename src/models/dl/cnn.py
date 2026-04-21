@@ -252,6 +252,15 @@ def train_cnn(
     np.random.seed(seed)
     torch.manual_seed(seed)
 
+    y_np = np.asarray(y, dtype=np.int64)
+    if y_np.size == 0:
+        raise ValueError("[CNN] Empty training labels.")
+    if np.any(y_np < 0):
+        raise ValueError("[CNN] Labels must be non-negative for CrossEntropyLoss.")
+    num_classes = int(np.max(y_np)) + 1
+    present_classes = np.unique(y_np).tolist()
+    print_and_save(f"[CNN] Detected classes: {present_classes}, num_classes={num_classes}")
+
     device, use_amp, batch_size, num_workers = auto_device_and_params(batch_base)
 
     dataset = None
@@ -260,7 +269,7 @@ def train_cnn(
         if build_lmdb_if_missing:
             build_lmdb_from_paths(
                 img_paths=img_paths,
-                labels=y,
+                labels=y_np.tolist(),
                 patch_size=patch_size,
                 lmdb_path=lmdb_file,
                 assume_fixed_size=assume_fixed_size
@@ -270,7 +279,9 @@ def train_cnn(
             print_and_save(f"[CNN] Using LMDB dataset: {lmdb_file}")
 
     if dataset is None:
-        dataset = PatchDataset(img_paths, y, patch_size, assume_fixed_size=assume_fixed_size, noise_std=noise_std)
+        dataset = PatchDataset(
+            img_paths, y_np.tolist(), patch_size, assume_fixed_size=assume_fixed_size, noise_std=noise_std
+        )
         print("[CNN] Using file-path dataset")
 
     loader_kwargs = dict(
@@ -285,12 +296,17 @@ def train_cnn(
         loader_kwargs["prefetch_factor"] = 4
     loader = DataLoader(**loader_kwargs)
 
-    model = SimpleCNN(patch_size).to(device)
+    model = SimpleCNN(patch_size, num_classes=num_classes).to(device)
 
-    counter = Counter(y)
-    w0 = 1.0
-    w1 = counter[0] / counter[1] if counter[1] > 0 else 1.0
-    weights = torch.tensor([w0, w1], dtype=torch.float32).to(device)
+    counter = Counter(y_np.tolist())
+    counts = np.array([counter.get(cls, 0) for cls in range(num_classes)], dtype=np.float32)
+    weights_np = np.zeros(num_classes, dtype=np.float32)
+    present_mask = counts > 0
+    present_count = int(np.sum(present_mask))
+    if present_count <= 0:
+        raise ValueError("[CNN] No valid classes found in labels.")
+    weights_np[present_mask] = float(np.sum(counts)) / (float(present_count) * counts[present_mask])
+    weights = torch.tensor(weights_np, dtype=torch.float32).to(device)
     criterion = nn.CrossEntropyLoss(weight=weights)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)

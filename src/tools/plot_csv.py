@@ -36,6 +36,11 @@ DEFAULT_PLOT_CONFIG = {
         "class1_recall": 1,
         "class1_f1": 1,
         "class1_support": 0,
+        # class 2 row
+        "class2_precision": 1,
+        "class2_recall": 1,
+        "class2_f1": 1,
+        "class2_support": 0,
         # accuracy row
         "accuracy": 0,
         "accuracy_support": 0,
@@ -54,6 +59,16 @@ DEFAULT_PLOT_CONFIG = {
         "cm_fp": 0,
         "cm_fn": 0,
         "cm_tp": 0,
+        "cm_size": 0,
+        "cm_r0_c0": 0,
+        "cm_r0_c1": 0,
+        "cm_r0_c2": 0,
+        "cm_r1_c0": 0,
+        "cm_r1_c1": 0,
+        "cm_r1_c2": 0,
+        "cm_r2_c0": 0,
+        "cm_r2_c1": 0,
+        "cm_r2_c2": 0,
     },
 }
 
@@ -92,7 +107,8 @@ def find_latest_sweep_dir(logs_root: Path) -> Path:
 
 def infer_control_var(csv_path: Path, df: pd.DataFrame) -> str:
     stem = csv_path.stem
-    model_prefix = sanitize_filename_part(str(df["model_name"].iloc[0])) if "model_name" in df.columns and not df.empty else ""
+    model_prefix = sanitize_filename_part(
+        str(df["model_name"].iloc[0])) if "model_name" in df.columns and not df.empty else ""
     if model_prefix and stem.startswith(model_prefix + "_"):
         return stem[len(model_prefix) + 1:]
     parts = stem.split("_")
@@ -149,6 +165,7 @@ def plot_grouped_bars(
         ylabel: str,
         out_file: Path,
         y_lim: tuple[float, float] | None = None,
+        y_ref_lines: list[float] | None = None,
 ) -> Path | None:
     if plot_df.empty:
         return None
@@ -176,6 +193,15 @@ def plot_grouped_bars(
     plt.xticks(x_pos, x_labels)
     if y_lim is not None:
         plt.ylim(*y_lim)
+    if y_ref_lines:
+        for y_ref in y_ref_lines:
+            plt.axhline(
+                y=y_ref,
+                color="black",
+                linestyle="--",
+                linewidth=0.8,
+                alpha=0.45,
+            )
     plt.grid(axis="y", alpha=0.25)
     plt.legend()
     plt.tight_layout()
@@ -244,6 +270,20 @@ def plot_evaluate(
     if plot_modules.get("evaluate", 0) != 1:
         return []
 
+    evaluate_metrics = dict(evaluate_metrics)
+    class2_cols = ["class2_precision", "class2_recall", "class2_f1", "class2_support"]
+    has_class2_data = False
+    for col in class2_cols:
+        if col not in df.columns:
+            continue
+        series = pd.to_numeric(df[col], errors="coerce")
+        if series.notna().any():
+            has_class2_data = True
+            break
+    if not has_class2_data:
+        for col in class2_cols:
+            evaluate_metrics[col] = 0
+
     eval_cols = [c for c in enabled_columns(evaluate_metrics) if c in df.columns]
     eval_df = to_numeric_frame(df, eval_cols).dropna(axis=1, how="all")
     if eval_df.empty:
@@ -265,6 +305,7 @@ def plot_evaluate(
             ylabel="Score",
             out_file=score_out,
             y_lim=(0.0, 1.0),
+            y_ref_lines=[0.6, 0.7, 0.8],
         )
         if generated:
             outputs.append(generated)
@@ -310,8 +351,8 @@ def plot_model_csv(
             c
             for c in df.columns
             if c not in {"model_name"}
-            and c not in excluded_metric_cols
-            and c not in {"accuracy", "accuracy_support", "weighted_f1", "weighted_precision", "weighted_recall"}
+               and c not in excluded_metric_cols
+               and c not in {"accuracy", "accuracy_support", "weighted_f1", "weighted_precision", "weighted_recall"}
         ]
         if numeric_candidates:
             control_col = numeric_candidates[0]
