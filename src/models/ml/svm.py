@@ -62,7 +62,6 @@ def train_svm(
     model_params = model_params or {}
     final_model_params = {**default_model_params, **model_params}
 
-    save("---- SVM ----")
     save(final_model_params)
 
     model = make_pipeline(
@@ -84,5 +83,5 @@ def train_svm(
     model.fit(X_reduced, y)
     end_train = time.time()
     print_and_save(f"[SVM] Training done, time: {end_train - start_train:.2f}s")
-    save("---- SVM ----\n")
+    save("\n")
     return model, pca_model

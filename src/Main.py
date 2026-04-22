@@ -299,7 +299,7 @@ def run_pipeline_once(
     patch_size = training_cfg["patch_size"]
 
     if preprocess:
-        print_and_save("=== Step 1: Preprocessing ===")
+        print("=== Step 1: Preprocessing ===")
         process_start = time.perf_counter()
         delete_folder()
 
@@ -351,19 +351,19 @@ def get_enabled_models(control_cfg: dict) -> dict[str, bool]:
 
 def log_model_artifacts_snapshot():
     model_dir = Path(__file__).resolve().parent / "training" / "model_save"
-    print_and_save(f"Model artifacts directory: {model_dir}")
+    print(f"Model artifacts directory: {model_dir}")
     if not model_dir.exists():
-        print_and_save("Model artifacts directory does not exist yet.")
+        print("Model artifacts directory does not exist yet.")
         return
 
     model_files = sorted(p for p in model_dir.iterdir() if p.is_file())
     if not model_files:
-        print_and_save("No model artifact files found.")
+        print("No model artifact files found.")
         return
 
     for file_path in model_files:
         modified_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(file_path.stat().st_mtime))
-        print_and_save(f"Artifact: {file_path.name} | modified_at={modified_at}")
+        print(f"Artifact: {file_path.name} | modified_at={modified_at}")
 
 
 def sanitize_tag_part(value: object) -> str:
@@ -471,9 +471,9 @@ def delete_folder():
     for folder in folders_to_remove:
         if folder.exists():
             shutil.rmtree(folder)
-            print_and_save(f"Deleted folder: {folder}")
+            print(f"Deleted folder: {folder}")
         else:
-            print_and_save(f"Folder does not exist: {folder}")
+            print(f"Folder does not exist: {folder}")
 
 
 def prepare_run_outputs() -> tuple[Path, Path, Path]:

@@ -57,7 +57,6 @@ def train_random_forest(
     model_params = model_params or {}
     final_model_params = {**default_model_params, **model_params}
 
-    save("---- Random Forest ----")
     save(final_model_params)
 
     model = RandomForestClassifier(**final_model_params)
@@ -66,5 +65,5 @@ def train_random_forest(
     model.fit(X_reduced, y)
     end_train = time.time()
     print_and_save(f"[Random Forest] Training done, time: {end_train - start_train:.2f}s")
-    save("---- Random Forest ----\n")
+    save("\n")
     return model, pca_model
