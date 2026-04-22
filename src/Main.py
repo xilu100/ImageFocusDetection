@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 from typing import Any, TypedDict
 
-from evaluate import evaluate_all
+from evaluate import evaluate_all as evaluate_runner
 from preprocessing import normalize_raw, segment_nor_img, label_patches
 from tools.log import print_and_save, save, flush_logs, get_current_log_paths, close_logs
 from tools.log_tools import run_log_tools
@@ -90,14 +90,26 @@ def get_experiment_config():
     }
 
 
+def get_control_config():
+    return {
+        "pipeline": {
+            # Preprocessing switch. Options: {0, 1}, default: 1
+            "preprocess": 1,
+            # Bound train+evaluate switch. Options: {0, 1}, default: 1
+            "train_evaluate": 1,
+        },
+        "models": {
+            # Per-model switches. Options: {0, 1}, default: 1
+            "decision_tree": 1,
+            "random_forest": 1,
+            "svm": 1,
+            "cnn": 1,
+        },
+    }
+
+
 def get_plot_config():
     return {
-        "modules": {
-            # Plot time chart. Options: {0, 1}, default: 1
-            "time": 1,
-            # Plot evaluation chart. Options: {0, 1}, default: 1
-            "evaluate": 1,
-        },
         "time_metrics": {
             # Time metrics switches. Options: {0, 1}
             "img_load_time": 1,
@@ -160,18 +172,19 @@ def get_plot_config():
 
 
 def main():
-    # Preprocessing switch. Options: {0, 1}, default: 1
-    process = 1
-    # Train + Evaluation switch. Options: {0, 1}, default: 1
-    train_and_evaluate = 1
-
     experiment_cfg = get_experiment_config()
+    control_cfg = get_control_config()
     plot_cfg = get_plot_config()
 
     save(experiment_cfg)
+    save(control_cfg)
     save("\n")
 
     training_cfg = experiment_cfg["training"]
+    pipeline_cfg = control_cfg.get("pipeline", {})
+    preprocess_enabled = bool(pipeline_cfg.get("preprocess", 1))
+    train_evaluate_enabled = bool(pipeline_cfg.get("train_evaluate", 1))
+    enabled_models = get_enabled_models(control_cfg)
     adapt_plot_config_for_label_mode(training_cfg, plot_cfg)
     sweep_targets = find_sweep_targets(experiment_cfg)
 
@@ -193,33 +206,29 @@ def main():
         run_values = [None]
         print_and_save("No sweep target found. Running once with current config.")
 
-    if process and not train_and_evaluate:
-        print_and_save("=== Mode: Process Only ===")
+    if not (preprocess_enabled or train_evaluate_enabled):
+        print_and_save("All pipeline switches are disabled. Nothing to run.")
+        return
+
+    if preprocess_enabled:
+        print_and_save("=== Step 1: Preprocessing (Run Once) ===")
         run_pipeline_once(
             training_cfg=training_cfg,
             experiment_cfg=experiment_cfg,
-            process=1,
-            train_and_evaluate=0,
+            preprocess=1,
+            train_models=0,
+            evaluate=0,
+            enabled_models=enabled_models,
             run_tag=None,
         )
+
+    if not train_evaluate_enabled:
+        print_and_save("Train + Evaluate is disabled. Pipeline finished.")
         return
 
-    if train_and_evaluate and not process:
-        print_and_save("=== Mode: Train + Evaluate Only ===")
-    elif process and train_and_evaluate:
-        print_and_save("=== Mode: Process Once + Train + Evaluate Sweep ===")
-        run_pipeline_once(
-            training_cfg=training_cfg,
-            experiment_cfg=experiment_cfg,
-            process=1,
-            train_and_evaluate=0,
-            run_tag=None,
-        )
-    else:
-        print_and_save("Both process and train_and_evaluate are disabled. Nothing to run.")
-        return
+    print_and_save("=== Mode: Train + Evaluate ===")
 
-    created_predict_dirs: set[Path] = set()
+    created_evaluate_dirs: set[Path] = set()
 
     for run_idx, run_value in enumerate(run_values, start=1):
         if target is not None:
@@ -232,20 +241,22 @@ def main():
 
         run_tag = build_run_tag(target, run_value)
         if run_tag:
-            print_and_save(f"Prediction output tag: {run_tag}")
+            print_and_save(f"Evaluate output tag: {run_tag}")
 
-        run_predict_dirs = run_pipeline_once(
+        run_evaluate_dirs = run_pipeline_once(
             training_cfg=training_cfg,
             experiment_cfg=experiment_cfg,
-            process=0,
-            train_and_evaluate=1,
+            preprocess=0,
+            train_models=train_evaluate_enabled,
+            evaluate=train_evaluate_enabled,
+            enabled_models=enabled_models,
             run_tag=run_tag,
         )
-        created_predict_dirs.update(run_predict_dirs)
+        created_evaluate_dirs.update(run_evaluate_dirs)
 
     out_dir, log_path, complete_log_path = prepare_run_outputs()
     try:
-        collect_predict_outputs(out_dir, created_predict_dirs)
+        collect_evaluate_outputs(out_dir, created_evaluate_dirs)
         plot_paths = run_plot_cli(sweep_dir=out_dir, plot_config=plot_cfg)
         print_and_save(f"Generated plots: {len(plot_paths)}")
     finally:
@@ -279,13 +290,15 @@ class SweepTarget(TypedDict):
 def run_pipeline_once(
         training_cfg,
         experiment_cfg,
-        process,
-        train_and_evaluate,
+        preprocess,
+        train_models,
+        evaluate,
+        enabled_models: dict[str, bool],
         run_tag: str | None = None,
 ):
     patch_size = training_cfg["patch_size"]
 
-    if process:
+    if preprocess:
         print_and_save("=== Step 1: Preprocessing ===")
         process_start = time.perf_counter()
         delete_folder()
@@ -298,18 +311,59 @@ def run_pipeline_once(
         process_elapsed = time.perf_counter() - process_start
         print_and_save(f"Preprocessing total time: {process_elapsed:.2f}s")
 
-    if train_and_evaluate:
-        print_and_save("=== Step 2: Training ===")
-        train_all.train_models(
-            patch_size=patch_size,
-            PCA_components=training_cfg["PCA_components"],
-            sample_percentage=training_cfg["sample_percentage"],
-            config=experiment_cfg
-        )
+    if train_models or evaluate:
+        enabled_model_names = [name for name, enabled in enabled_models.items() if enabled]
+        if not enabled_model_names:
+            print_and_save("No model is enabled. Skip training and evaluate.")
+            return []
 
-        print_and_save("=== Step 3: Evaluation ===")
-        return evaluate_all.evaluate_valid_set(patch_size, run_tag=run_tag)
+        print_and_save(f"Enabled models: {', '.join(enabled_model_names)}")
+        if train_models:
+            print_and_save("=== Step 2: Training ===")
+            train_all.train_models(
+                patch_size=patch_size,
+                PCA_components=training_cfg["PCA_components"],
+                sample_percentage=training_cfg["sample_percentage"],
+                config=experiment_cfg,
+                enabled_models=enabled_models,
+            )
+            log_model_artifacts_snapshot()
+
+        if evaluate:
+            print_and_save("=== Step 3: Evaluate ===")
+            return evaluate_runner.evaluate_valid_set(
+                patch_size,
+                run_tag=run_tag,
+                enabled_models=enabled_models,
+            )
     return []
+
+
+def get_enabled_models(control_cfg: dict) -> dict[str, bool]:
+    models_cfg = control_cfg.get("models", {})
+    return {
+        "decision_tree": bool(models_cfg.get("decision_tree", 1)),
+        "random_forest": bool(models_cfg.get("random_forest", 1)),
+        "svm": bool(models_cfg.get("svm", 1)),
+        "cnn": bool(models_cfg.get("cnn", 1)),
+    }
+
+
+def log_model_artifacts_snapshot():
+    model_dir = Path(__file__).resolve().parent / "training" / "model_save"
+    print_and_save(f"Model artifacts directory: {model_dir}")
+    if not model_dir.exists():
+        print_and_save("Model artifacts directory does not exist yet.")
+        return
+
+    model_files = sorted(p for p in model_dir.iterdir() if p.is_file())
+    if not model_files:
+        print_and_save("No model artifact files found.")
+        return
+
+    for file_path in model_files:
+        modified_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(file_path.stat().st_mtime))
+        print_and_save(f"Artifact: {file_path.name} | modified_at={modified_at}")
 
 
 def sanitize_tag_part(value: object) -> str:
@@ -338,25 +392,25 @@ def build_run_tag(target: "SweepTarget | None", run_value: object) -> str | None
     return f"{prefix}_{sanitize_tag_part(control_name)}_{sanitize_tag_part(run_value)}"
 
 
-def collect_predict_outputs(out_dir: Path, created_predict_dirs: set[Path]):
-    predict_out_dir = out_dir / "predict"
+def collect_evaluate_outputs(out_dir: Path, created_evaluate_dirs: set[Path]):
+    evaluate_out_dir = out_dir / "predict_images"
     copied = 0
     parent_dirs: set[Path] = set()
-    for src_dir in sorted(created_predict_dirs):
+    for src_dir in sorted(created_evaluate_dirs):
         if not src_dir.exists() or not src_dir.is_dir():
-            print_and_save(f"Skip missing prediction folder: {src_dir}")
+            print_and_save(f"Skip missing evaluate folder: {src_dir}")
             continue
-        dst_dir = predict_out_dir / src_dir.name
+        dst_dir = evaluate_out_dir / src_dir.name
         shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
         parent_dirs.add(src_dir.parent)
         copied += 1
 
-    # Cleanup temporary prediction cache folders after packaging outputs.
-    for src_dir in sorted(created_predict_dirs, reverse=True):
+    # Cleanup temporary evaluate cache folders after packaging outputs.
+    for src_dir in sorted(created_evaluate_dirs, reverse=True):
         if src_dir.exists() and src_dir.is_dir():
             shutil.rmtree(src_dir, ignore_errors=True)
 
-    # Remove empty cache root(s), e.g. logs/_predict_cache
+    # Remove empty cache root(s), e.g. logs/_evaluate_cache
     for parent_dir in sorted(parent_dirs, reverse=True):
         if parent_dir.exists() and parent_dir.is_dir():
             try:
@@ -365,7 +419,7 @@ def collect_predict_outputs(out_dir: Path, created_predict_dirs: set[Path]):
                 # Directory not empty (or in use); keep it.
                 pass
 
-    print_and_save(f"Collected {copied} prediction folder(s) to: {predict_out_dir}")
+    print_and_save(f"Collected {copied} predict image folder(s) to: {evaluate_out_dir}")
 
 
 def find_sweep_targets(

@@ -12,8 +12,7 @@ except ModuleNotFoundError:
     from util import get_root_dir
 
 ALLOWED_MODES = {
-    "=== Mode: Process Once + Train + Evaluate Sweep ===",
-    "=== Mode: Train + Evaluate Only ===",
+    "=== Mode: Train + Evaluate ===",
 }
 
 MODE_LINE_RE = re.compile(r"(=== Mode: .+ ===)")
@@ -180,8 +179,7 @@ def pick_mode(lines: list[str]) -> str:
         if mode_text in ALLOWED_MODES:
             return mode_text
     raise ValueError(
-        "Unsupported mode in log. Only these modes are parsed: "
-        f"{sorted(ALLOWED_MODES)}"
+        f"Unsupported mode in log. Only these modes are parsed: {sorted(ALLOWED_MODES)}"
     )
 
 

@@ -12,10 +12,6 @@ except ModuleNotFoundError:
     from util import get_root_dir
 
 DEFAULT_PLOT_CONFIG = {
-    "modules": {
-        "time": 1,
-        "evaluate": 1,
-    },
     "time_metrics": {
         # Data loading / preprocessing time
         "img_load_time": 1,
@@ -75,16 +71,12 @@ DEFAULT_PLOT_CONFIG = {
 
 def resolve_plot_config(plot_config: dict[str, dict[str, int]] | None = None) -> dict[str, dict[str, int]]:
     config = {
-        "modules": dict(DEFAULT_PLOT_CONFIG["modules"]),
         "time_metrics": dict(DEFAULT_PLOT_CONFIG["time_metrics"]),
         "evaluate_metrics": dict(DEFAULT_PLOT_CONFIG["evaluate_metrics"]),
     }
     if not plot_config:
         return config
 
-    modules = plot_config.get("modules")
-    if isinstance(modules, dict):
-        config["modules"].update({str(k): int(v) for k, v in modules.items()})
     time_metrics = plot_config.get("time_metrics")
     if isinstance(time_metrics, dict):
         config["time_metrics"].update({str(k): int(v) for k, v in time_metrics.items()})
@@ -215,12 +207,8 @@ def plot_time(
         model_name: str,
         control_col: str,
         out_file: Path,
-        plot_modules: dict[str, int],
         time_metrics: dict[str, int],
 ) -> None:
-    if plot_modules.get("time", 0) != 1:
-        return
-
     time_cols = [c for c in enabled_columns(time_metrics) if c in df.columns]
     if not time_cols:
         return
@@ -264,12 +252,8 @@ def plot_evaluate(
         model_name: str,
         control_col: str,
         out_file: Path,
-        plot_modules: dict[str, int],
         evaluate_metrics: dict[str, int],
 ) -> list[Path]:
-    if plot_modules.get("evaluate", 0) != 1:
-        return []
-
     evaluate_metrics = dict(evaluate_metrics)
     class2_cols = ["class2_precision", "class2_recall", "class2_f1", "class2_support"]
     has_class2_data = False
@@ -339,7 +323,6 @@ def plot_model_csv(
         return []
 
     config = resolve_plot_config(plot_config)
-    plot_modules = config["modules"]
     time_metrics = config["time_metrics"]
     evaluate_metrics = config["evaluate_metrics"]
 
@@ -366,8 +349,8 @@ def plot_model_csv(
     time_out = output_dir / f"{base_name}_Time.png"
     eval_out = output_dir / f"{base_name}_Evaluate.png"
 
-    plot_time(df, model_name, control_col, time_out, plot_modules, time_metrics)
-    eval_outputs = plot_evaluate(df, model_name, control_col, eval_out, plot_modules, evaluate_metrics)
+    plot_time(df, model_name, control_col, time_out, time_metrics)
+    eval_outputs = plot_evaluate(df, model_name, control_col, eval_out, evaluate_metrics)
 
     outputs = []
     if time_out.exists():
