@@ -154,7 +154,7 @@ def parse_control_value(raw: str) -> object:
         return raw
 
 
-def _to_float_or_none(value: object) -> float | None:
+def to_float_or_none(value: object) -> float | None:
     try:
         return float(value)
     except (TypeError, ValueError):
@@ -162,8 +162,8 @@ def _to_float_or_none(value: object) -> float | None:
 
 
 def is_binary_labeling_mode(training_params: dict[str, object]) -> bool:
-    sharp = _to_float_or_none(training_params.get("sharp_threshold"))
-    blur = _to_float_or_none(training_params.get("blur_threshold"))
+    sharp = to_float_or_none(training_params.get("sharp_threshold"))
+    blur = to_float_or_none(training_params.get("blur_threshold"))
     if sharp is None or blur is None:
         return False
     return abs(sharp - blur) <= 1e-8
