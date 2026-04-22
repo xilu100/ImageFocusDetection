@@ -12,6 +12,8 @@ from preprocessing import visualize_labels
 from tools import util
 from tools.log import print_and_save
 
+DEFAULT_BINARY_CLASS1_THRESHOLD = 0.5
+
 
 def merge_valid_samples_labels(source_subfolder: str = None):
     root_dir = util.get_root_dir()
@@ -93,7 +95,14 @@ def load_img_for_cnn(path, patch_size: int = 32):
     return img
 
 
-def cnn_predict_batch(model, img_paths, patch_size: int, device, batch_size: int = 64):
+def cnn_predict_batch(
+        model,
+        img_paths,
+        patch_size: int,
+        device,
+        batch_size: int = 64,
+        class1_threshold: float | None = None,
+):
     model.eval()
     preds = []
 
@@ -107,7 +116,13 @@ def cnn_predict_batch(model, img_paths, patch_size: int, device, batch_size: int
 
         with torch.no_grad():
             out = model(batch_tensor)
-            batch_preds = out.argmax(dim=1).cpu().numpy()
+            if class1_threshold is not None and out.shape[1] == 2:
+                # Binary only: tune class-1 recall by threshold.
+                probs = torch.softmax(out, dim=1)
+                batch_preds = (probs[:, 1] >= float(class1_threshold)).to(torch.int64).cpu().numpy()
+            else:
+                # Multi-class always uses argmax.
+                batch_preds = out.argmax(dim=1).cpu().numpy()
 
         preds.extend(batch_preds)
 
@@ -289,12 +304,19 @@ def evaluate_valid_set(
             cnn_model.load_state_dict(checkpoint['model_state_dict'])
             cnn_model.to(device)
             cnn_model.eval()
+            num_classes = int(checkpoint['num_classes'])
+            class1_threshold = DEFAULT_BINARY_CLASS1_THRESHOLD if num_classes == 2 else None
+            if num_classes == 2:
+                print_and_save(f"[CNN] Using class1_threshold={class1_threshold:.4f} for binary prediction.")
+            else:
+                print_and_save("[CNN] Multi-class prediction uses argmax.")
 
             y_pred_cnn = cnn_predict_batch(
                 cnn_model,
                 img_paths,
                 checkpoint['patch_size'],
-                device
+                device,
+                class1_threshold=class1_threshold
             )
 
             log_eval_metrics("CNN", y, y_pred_cnn)

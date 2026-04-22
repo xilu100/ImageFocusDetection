@@ -11,11 +11,35 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 
 from tools.log import print_and_save, save
 
 DEFAULT_NOISE_STD = 0.03
+
+
+def resolve_weighted_sampler_flag(
+        flag_value: object,
+        class_counts: np.ndarray,
+        imbalance_ratio_threshold: float = 1.5,
+) -> bool:
+    if isinstance(flag_value, bool):
+        return flag_value
+
+    if isinstance(flag_value, str):
+        text = flag_value.strip().lower()
+        if text in {"on", "true", "1", "yes"}:
+            return True
+        if text in {"off", "false", "0", "no"}:
+            return False
+        # "auto" or unknown string -> auto mode
+
+    valid_counts = class_counts[class_counts > 0]
+    if valid_counts.size <= 1:
+        return False
+
+    imbalance_ratio = float(valid_counts.max() / valid_counts.min())
+    return imbalance_ratio >= imbalance_ratio_threshold
 
 
 class SimpleCNN(nn.Module):
@@ -247,6 +271,9 @@ def train_cnn(
     seed = model_params.get("seed", 42)
     learning_rate = model_params.get("learning_rate", 1e-3)
     noise_std = model_params.get("noise_std", DEFAULT_NOISE_STD)
+    use_weighted_sampler_cfg = model_params.get("use_weighted_sampler", "auto")
+    sampler_weight_power = float(model_params.get("sampler_weight_power", 1.0))
+    loss_weight_power = float(model_params.get("loss_weight_power", 1.0))
 
     random.seed(seed)
     np.random.seed(seed)
@@ -260,6 +287,9 @@ def train_cnn(
     num_classes = int(np.max(y_np)) + 1
     present_classes = np.unique(y_np).tolist()
     print_and_save(f"[CNN] Detected classes: {present_classes}, num_classes={num_classes}")
+    counter = Counter(y_np.tolist())
+    counts = np.array([counter.get(cls, 0) for cls in range(num_classes)], dtype=np.float32)
+    use_weighted_sampler = resolve_weighted_sampler_flag(use_weighted_sampler_cfg, counts)
 
     device, use_amp, batch_size, num_workers = auto_device_and_params(batch_base)
 
@@ -287,26 +317,48 @@ def train_cnn(
     loader_kwargs = dict(
         dataset=dataset,
         batch_size=batch_size,
-        shuffle=True,
+        shuffle=(not use_weighted_sampler),
         num_workers=num_workers,
         pin_memory=(device.type == "cuda")
     )
     if num_workers > 0:
         loader_kwargs["persistent_workers"] = True
         loader_kwargs["prefetch_factor"] = 4
+    if use_weighted_sampler:
+        sample_weights = np.zeros_like(y_np, dtype=np.float32)
+        for cls in range(num_classes):
+            cls_count = float(counter.get(cls, 0))
+            if cls_count > 0:
+                sample_weights[y_np == cls] = (1.0 / cls_count) ** sampler_weight_power
+        sampler = WeightedRandomSampler(
+            weights=torch.from_numpy(sample_weights).to(torch.double),
+            num_samples=len(sample_weights),
+            replacement=True
+        )
+        loader_kwargs["sampler"] = sampler
+        loader_kwargs["shuffle"] = False
+        print_and_save(
+            f"[CNN] Weighted sampler enabled (power={sampler_weight_power:.2f}) for minority recall."
+        )
+    else:
+        print_and_save("[CNN] Weighted sampler disabled.")
+
     loader = DataLoader(**loader_kwargs)
 
     model = SimpleCNN(patch_size, num_classes=num_classes).to(device)
 
-    counter = Counter(y_np.tolist())
-    counts = np.array([counter.get(cls, 0) for cls in range(num_classes)], dtype=np.float32)
     weights_np = np.zeros(num_classes, dtype=np.float32)
     present_mask = counts > 0
     present_count = int(np.sum(present_mask))
     if present_count <= 0:
         raise ValueError("[CNN] No valid classes found in labels.")
     weights_np[present_mask] = float(np.sum(counts)) / (float(present_count) * counts[present_mask])
+    if abs(loss_weight_power - 1.0) > 1e-8:
+        weights_np[present_mask] = np.power(weights_np[present_mask], loss_weight_power)
+        print_and_save(f"[CNN] Loss class weights power applied: {loss_weight_power:.2f}")
     weights = torch.tensor(weights_np, dtype=torch.float32).to(device)
+    print_and_save(f"[CNN] Class counts: {counts.astype(np.int64).tolist()}")
+    print_and_save(f"[CNN] Class weights: {weights_np.round(4).tolist()}")
     criterion = nn.CrossEntropyLoss(weight=weights)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)

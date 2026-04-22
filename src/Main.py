@@ -81,6 +81,12 @@ def get_experiment_config():
                 "seed": 42,
                 # Learning rate. Range: float > 0, default: 1e-3
                 "learning_rate": 1e-3,
+                # Weighted sampler for imbalanced labels. Options: {"auto", True, False}, default: "auto"
+                "use_weighted_sampler": "auto",
+                # Sampler class-weight exponent. Range: float > 0, default: 1.0
+                "sampler_weight_power": 1.0,
+                # Loss class-weight exponent. Range: float > 0, default: 1.0
+                "loss_weight_power": 1.0,
                 # Build LMDB if missing. Options: {True, False}, default: True
                 "build_lmdb_if_missing": True,
                 # Enforce fixed patch size. Options: {True, False}, default: True
