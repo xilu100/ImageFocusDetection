@@ -149,6 +149,18 @@ def split_columns_by_value_range(
     return in_range_cols, out_range_cols
 
 
+def extract_loss_columns(df: pd.DataFrame) -> list[str]:
+    pattern = re.compile(r"^loss_e(\d+)$")
+    pairs: list[tuple[int, str]] = []
+    for col in df.columns:
+        match = pattern.match(col)
+        if not match:
+            continue
+        pairs.append((int(match.group(1)), col))
+    pairs.sort(key=lambda x: x[0])
+    return [col for _, col in pairs]
+
+
 def plot_grouped_bars(
         plot_df: pd.DataFrame,
         x_labels: list[str],
@@ -200,6 +212,69 @@ def plot_grouped_bars(
     plt.savefig(out_file, dpi=180)
     plt.close()
     return out_file
+
+
+def plot_loss_curves(
+        df: pd.DataFrame,
+        model_name: str,
+        control_col: str,
+        output_dir: Path,
+        base_name: str,
+) -> list[Path]:
+    loss_cols = extract_loss_columns(df)
+    if not loss_cols:
+        return []
+
+    loss_df = to_numeric_frame(df, loss_cols).dropna(axis=1, how="all")
+    if loss_df.empty:
+        return []
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outputs: list[Path] = []
+    epochs = [int(col.split("loss_e", 1)[1]) for col in loss_df.columns]
+
+    out_all = output_dir / f"{base_name}_Loss_AllRuns.png"
+    plt.figure(figsize=(9, 5))
+    for _, row in loss_df.iterrows():
+        run_label = str(df.loc[row.name, control_col])
+        y_values = row.values.astype(float)
+        valid_mask = ~np.isnan(y_values)
+        if not valid_mask.any():
+            continue
+        x_vals = np.array(epochs)[valid_mask]
+        plt.plot(x_vals, y_values[valid_mask], marker="o", linewidth=1.8, label=run_label)
+    if plt.gca().has_data():
+        plt.title(f"{model_name} - {control_col} - Loss (All Runs)")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.grid(axis="y", alpha=0.25)
+        plt.legend(title=control_col)
+        plt.tight_layout()
+        plt.savefig(out_all, dpi=180)
+        outputs.append(out_all)
+    plt.close()
+
+    for _, row in loss_df.iterrows():
+        run_value = str(df.loc[row.name, control_col])
+        out_one = output_dir / f"{base_name}_Loss_{sanitize_filename_part(run_value)}.png"
+        y_values = row.values.astype(float)
+        valid_mask = ~np.isnan(y_values)
+        if not valid_mask.any():
+            continue
+
+        plt.figure(figsize=(9, 5))
+        x_vals = np.array(epochs)[valid_mask]
+        plt.plot(x_vals, y_values[valid_mask], marker="o", linewidth=2.0, color="#1f77b4")
+        plt.title(f"{model_name} - {control_col}={run_value} - Loss")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.grid(axis="y", alpha=0.25)
+        plt.tight_layout()
+        plt.savefig(out_one, dpi=180)
+        plt.close()
+        outputs.append(out_one)
+
+    return outputs
 
 
 def plot_time(
@@ -351,11 +426,13 @@ def plot_model_csv(
 
     plot_time(df, model_name, control_col, time_out, time_metrics)
     eval_outputs = plot_evaluate(df, model_name, control_col, eval_out, evaluate_metrics)
+    loss_outputs = plot_loss_curves(df, model_name, control_col, output_dir, base_name)
 
     outputs = []
     if time_out.exists():
         outputs.append(time_out)
     outputs.extend([p for p in eval_outputs if p.exists()])
+    outputs.extend([p for p in loss_outputs if p.exists()])
     return outputs
 
 
