@@ -129,7 +129,7 @@ def score_cal(images, lap_anchor: float = LAP_ANCHOR_DEFAULT, sobel_anchor: floa
         )
         total_scores.append(score)
 
-    return lap_scores, fft_scores, total_scores, textureless_flags
+    return lap_scores, sobel_scores, fft_scores, total_scores, textureless_flags
 
 
 # Write patch scores and labels into a structured CSV file.
@@ -141,6 +141,7 @@ def write_scores_csv(csv_path: Path, rows: list):
         writer.writerow([
             "filename",
             "lap_score",
+            "sobel_score",
             "fft_score",
             "total_score",
             "label"
@@ -183,7 +184,7 @@ def process_single_folder(
     if len(images) == 0:
         return f"Skipped (no images): {sample_folder.name}"
 
-    lap_scores, fft_scores, total_scores, textureless_flags = score_cal(
+    lap_scores, sobel_scores, fft_scores, total_scores, textureless_flags = score_cal(
         images, lap_anchor=lap_anchor, sobel_anchor=sobel_anchor
     )
 
@@ -205,6 +206,7 @@ def process_single_folder(
         rows.append([
             filenames[i],
             float(lap_scores[i]),
+            float(sobel_scores[i]),
             float(fft_scores[i]),
             float(total_scores[i]),
             patch_label
