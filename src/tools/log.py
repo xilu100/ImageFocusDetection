@@ -6,14 +6,15 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from threading import Lock
+from typing import Optional
 
 LOG_INITIALIZED = False
-COMPLETE_LOG_STREAM = None
-ORIGINAL_STDOUT = None
-ORIGINAL_STDERR = None
-LOG_FILE_PATH = None
-COMPLETE_LOG_FILE_PATH = None
-FILE_HANDLER = None
+COMPLETE_LOG_STREAM: Optional["TimestampedLevelLineStream"] = None
+ORIGINAL_STDOUT: Optional[object] = None
+ORIGINAL_STDERR: Optional[object] = None
+LOG_FILE_PATH: Optional[Path] = None
+COMPLETE_LOG_FILE_PATH: Optional[Path] = None
+FILE_HANDLER: Optional[logging.FileHandler] = None
 
 
 class TeeStream:
@@ -120,10 +121,14 @@ def ensure_logging_initialized():
 
 def infer_save_argument_name():
     frame = inspect.currentframe()
-    if frame is None or frame.f_back is None:
+    if frame is None:
         return "value"
 
-    caller = frame.f_back.f_back
+    parent = frame.f_back
+    if parent is None:
+        return "value"
+
+    caller = parent.f_back
     if caller is None:
         return "value"
 
@@ -159,6 +164,8 @@ def is_string_literal_expression(expr):
         tree = ast.parse(expr, mode="eval")
     except (SyntaxError, ValueError, TypeError):
         return False
+    if not isinstance(tree, ast.Expression):
+        return False
     return isinstance(tree.body, ast.Constant) and isinstance(tree.body.value, str)
 
 
@@ -184,7 +191,7 @@ def flush_logs():
     for handler in root_logger.handlers:
         try:
             handler.flush()
-        except Exception:
+        except (OSError, ValueError):
             pass
     if COMPLETE_LOG_STREAM is not None:
         COMPLETE_LOG_STREAM.flush()
@@ -204,18 +211,18 @@ def close_logs():
     if FILE_HANDLER is not None:
         try:
             root_logger.removeHandler(FILE_HANDLER)
-        except Exception:
+        except (OSError, ValueError):
             pass
         try:
             FILE_HANDLER.close()
-        except Exception:
+        except (OSError, ValueError):
             pass
         FILE_HANDLER = None
 
     if COMPLETE_LOG_STREAM is not None:
         try:
             COMPLETE_LOG_STREAM.close()
-        except Exception:
+        except (OSError, ValueError):
             pass
         COMPLETE_LOG_STREAM = None
 

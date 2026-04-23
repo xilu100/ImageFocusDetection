@@ -270,8 +270,11 @@ def main():
 
 
 def adapt_plot_config_for_label_mode(training_cfg: dict, plot_cfg: dict):
-    sharp = training_cfg.get("sharp_threshold")
-    blur = training_cfg.get("blur_threshold")
+    sharp: str | float | int | bytes | bytearray | memoryview | None = training_cfg.get("sharp_threshold")
+    blur: str | float | int | bytes | bytearray | memoryview | None = training_cfg.get("blur_threshold")
+    if sharp is None or blur is None:
+        return
+
     try:
         sharp_f = float(sharp)
         blur_f = float(blur)

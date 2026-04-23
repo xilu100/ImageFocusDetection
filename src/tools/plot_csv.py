@@ -11,7 +11,7 @@ try:
 except ModuleNotFoundError:
     from util import get_root_dir
 
-DEFAULT_PLOT_CONFIG = {
+DEFAULT_PLOT_CONFIG: dict[str, dict[str, int]] = {
     "time_metrics": {
         # Data loading / preprocessing time
         "img_load_time": 1,
@@ -70,17 +70,18 @@ DEFAULT_PLOT_CONFIG = {
 
 
 def resolve_plot_config(plot_config: dict[str, dict[str, int]] | None = None) -> dict[str, dict[str, int]]:
-    config = {
+    config: dict[str, dict[str, int]] = {
         "time_metrics": dict(DEFAULT_PLOT_CONFIG["time_metrics"]),
         "evaluate_metrics": dict(DEFAULT_PLOT_CONFIG["evaluate_metrics"]),
     }
     if not plot_config:
         return config
+    provided_config = plot_config
 
-    time_metrics = plot_config.get("time_metrics")
+    time_metrics = provided_config.get("time_metrics")
     if isinstance(time_metrics, dict):
         config["time_metrics"].update({str(k): int(v) for k, v in time_metrics.items()})
-    evaluate_metrics = plot_config.get("evaluate_metrics")
+    evaluate_metrics = provided_config.get("evaluate_metrics")
     if isinstance(evaluate_metrics, dict):
         config["evaluate_metrics"].update({str(k): int(v) for k, v in evaluate_metrics.items()})
     return config
@@ -122,7 +123,7 @@ def enabled_columns(metric_switches: dict[str, int]) -> list[str]:
 
 
 def sorted_by_control(df: pd.DataFrame, control_col: str) -> pd.DataFrame:
-    ctrl = pd.to_numeric(df[control_col], errors="coerce")
+    ctrl = pd.Series(pd.to_numeric(df[control_col], errors="coerce"), index=df.index)
     if ctrl.notna().all():
         return df.assign(ctrl_num=ctrl).sort_values("ctrl_num").drop(columns=["ctrl_num"])
     return df.assign(ctrl_str=df[control_col].astype(str)).sort_values("ctrl_str").drop(columns=["ctrl_str"])
@@ -137,11 +138,12 @@ def split_columns_by_value_range(
     in_range_cols: list[str] = []
     out_range_cols: list[str] = []
     for col in metric_df.columns:
-        series = metric_df[col].dropna()
-        if series.empty:
+        values = np.asarray(pd.to_numeric(metric_df[col], errors="coerce"), dtype=float)
+        valid_values = values[~np.isnan(values)]
+        if valid_values.size == 0:
             continue
-        col_min = float(series.min())
-        col_max = float(series.max())
+        col_min = float(valid_values.min())
+        col_max = float(valid_values.max())
         if (lower - tol) <= col_min and col_max <= (upper + tol):
             in_range_cols.append(col)
         else:
@@ -165,8 +167,8 @@ def plot_grouped_bars(
         plot_df: pd.DataFrame,
         x_labels: list[str],
         title: str,
-        xlabel: str,
-        ylabel: str,
+        x_label: str,
+        y_label: str,
         out_file: Path,
         y_lim: tuple[float, float] | None = None,
         y_ref_lines: list[float] | None = None,
@@ -180,7 +182,7 @@ def plot_grouped_bars(
 
     group_width = 0.82
     bar_width = max(0.08, min(0.28, group_width / max(n_metrics, 1)))
-    offsets = (np.arange(n_metrics) - (n_metrics - 1) / 2.0) * bar_width
+    offsets = [(idx - (n_metrics - 1) / 2.0) * bar_width for idx in range(n_metrics)]
 
     plt.figure(figsize=(9, 5))
     for i, col in enumerate(metric_cols):
@@ -192,8 +194,8 @@ def plot_grouped_bars(
             alpha=0.9,
         )
     plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     plt.xticks(x_pos, x_labels)
     if y_lim is not None:
         plt.ylim(*y_lim)
@@ -236,7 +238,7 @@ def plot_loss_curves(
     out_all = output_dir / f"{base_name}_Loss_AllRuns.png"
     plt.figure(figsize=(9, 5))
     for _, row in loss_df.iterrows():
-        run_label = str(df.loc[row.name, control_col])
+        run_label = str(df.at[row.name, control_col])
         y_values = row.values.astype(float)
         valid_mask = ~np.isnan(y_values)
         if not valid_mask.any():
@@ -255,7 +257,7 @@ def plot_loss_curves(
     plt.close()
 
     for _, row in loss_df.iterrows():
-        run_value = str(df.loc[row.name, control_col])
+        run_value = str(df.at[row.name, control_col])
         out_one = output_dir / f"{base_name}_Loss_{sanitize_filename_part(run_value)}.png"
         y_values = row.values.astype(float)
         valid_mask = ~np.isnan(y_values)
@@ -292,34 +294,14 @@ def plot_time(
         return
 
     x_labels = df[control_col].astype(str).tolist()
-    x_pos = np.arange(len(x_labels), dtype=float)
-    metric_cols = list(time_df.columns)
-    n_metrics = len(metric_cols)
-
-    # Grouped bar width adapts to metric count.
-    group_width = 0.82
-    bar_width = max(0.08, min(0.28, group_width / max(n_metrics, 1)))
-    offsets = (np.arange(n_metrics) - (n_metrics - 1) / 2.0) * bar_width
-
-    plt.figure(figsize=(9, 5))
-    for i, col in enumerate(metric_cols):
-        plt.bar(
-            x_pos + offsets[i],
-            time_df[col].values,
-            width=bar_width * 0.95,
-            label=col,
-            alpha=0.9,
-        )
-
-    plt.title(f"{model_name} - {control_col} - Time")
-    plt.xlabel(control_col)
-    plt.ylabel("Seconds")
-    plt.xticks(x_pos, x_labels)
-    plt.grid(axis="y", alpha=0.25)
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(out_file, dpi=180)
-    plt.close()
+    plot_grouped_bars(
+        time_df,
+        x_labels=x_labels,
+        title=f"{model_name} - {control_col} - Time",
+        x_label=control_col,
+        y_label="Seconds",
+        out_file=out_file,
+    )
 
 
 def plot_evaluate(
@@ -335,7 +317,7 @@ def plot_evaluate(
     for col in class2_cols:
         if col not in df.columns:
             continue
-        series = pd.to_numeric(df[col], errors="coerce")
+        series = pd.Series(pd.to_numeric(df[col], errors="coerce"), index=df.index)
         if series.notna().any():
             has_class2_data = True
             break
@@ -360,8 +342,8 @@ def plot_evaluate(
             eval_df[in_range_cols],
             x_labels=x_labels,
             title=f"{model_name} - {control_col} - Evaluate [0,1]",
-            xlabel=control_col,
-            ylabel="Score",
+            x_label=control_col,
+            y_label="Score",
             out_file=score_out,
             y_lim=(0.0, 1.0),
             y_ref_lines=[0.6, 0.7, 0.8],
@@ -375,8 +357,8 @@ def plot_evaluate(
             eval_df[out_range_cols],
             x_labels=x_labels,
             title=f"{model_name} - {control_col} - Evaluate (Other Range)",
-            xlabel=control_col,
-            ylabel="Value",
+            x_label=control_col,
+            y_label="Value",
             out_file=other_out,
             y_lim=None,
         )
@@ -447,10 +429,9 @@ def plot_directory(
         if not p.name.startswith(".")
     )
     all_outputs: list[Path] = []
-    if output_dir is None:
-        output_dir = sweep_dir / "plots"
+    resolved_output_dir: Path = output_dir if output_dir is not None else (sweep_dir / "plots")
     for csv_path in csv_files:
-        all_outputs.extend(plot_model_csv(csv_path, output_dir, plot_config))
+        all_outputs.extend(plot_model_csv(csv_path, resolved_output_dir, plot_config))
     return all_outputs
 
 

@@ -174,7 +174,7 @@ def save_evaluate_outputs(
     run_part = f"_{run_tag}" if run_tag else ""
 
     for source_folder, group in pred_df.groupby("source_folder", sort=True):
-        sample_name = Path(source_folder).name
+        sample_name = Path(str(source_folder)).name
         sample_output_dir = output_root / f"{sample_name}_predict_images{run_part}"
         sample_output_dir.mkdir(parents=True, exist_ok=True)
         created_dirs.add(sample_output_dir)
@@ -196,7 +196,7 @@ def save_evaluate_outputs(
 
         parsed = [visualize_labels.parse_row_col(name) for name in group["filename"]]
         rows, cols = zip(*parsed)
-        grid_rows, grid_cols = max(rows) + 1, max(cols) + 1
+        grid_rows, grid_cols = int(max(rows)) + 1, int(max(cols)) + 1
 
         output_df = group.copy()
         output_df["label"] = output_df["predicted_label"].astype(np.int16)
@@ -235,7 +235,7 @@ def evaluate_valid_set(
 
     all_created_dirs: set[Path] = set()
 
-    if enabled_models.get("decision_tree", True):
+    if enabled_models.get("decision_tree", True) if enabled_models is not None else None:
         dt_model_path = model_dir / 'decision_tree_model.joblib'
         dt_pca_path = model_dir / 'decision_tree_pca.joblib'
         if dt_model_path.exists() and dt_pca_path.exists():
@@ -252,7 +252,7 @@ def evaluate_valid_set(
         else:
             print_and_save(f"[Decision Tree] Skip evaluation, missing model files under: {model_dir}")
 
-    if enabled_models.get("random_forest", True):
+    if enabled_models.get("random_forest", True) if enabled_models is not None else None:
         rf_model_path = model_dir / 'random_forest_model.joblib'
         rf_pca_path = model_dir / 'random_forest_pca.joblib'
         if rf_model_path.exists() and rf_pca_path.exists():
@@ -269,7 +269,7 @@ def evaluate_valid_set(
         else:
             print_and_save(f"[Random Forest] Skip evaluation, missing model files under: {model_dir}")
 
-    if enabled_models.get("svm", True):
+    if enabled_models.get("svm", True) if enabled_models is not None else None:
         svm_model_path = model_dir / 'svm_model.joblib'
         svm_pca_path = model_dir / 'svm_pca.joblib'
         if svm_model_path.exists() and svm_pca_path.exists():
@@ -286,7 +286,7 @@ def evaluate_valid_set(
         else:
             print_and_save(f"[SVM] Skip evaluation, missing model files under: {model_dir}")
 
-    if enabled_models.get("cnn", True):
+    if enabled_models.get("cnn", True) if enabled_models is not None else None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         checkpoint_path = model_dir / 'cnn_model.pth'
         if checkpoint_path.exists():

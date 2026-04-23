@@ -3,7 +3,7 @@ import random
 import time
 from collections import Counter
 from pathlib import Path
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 import cv2
 import lmdb
@@ -263,17 +263,17 @@ def train_cnn(
         lmdb_path: Optional[str] = None,
         build_lmdb_if_missing: bool = True,
         assume_fixed_size: bool = True,
-        model_params: Optional[dict] = None
+        model_params: Optional[dict[str, Any]] = None
 ):
-    model_params = model_params or {}
-    epochs = model_params.get("epochs", epochs)
-    batch_base = model_params.get("batch_base", batch_base)
-    seed = model_params.get("seed", 42)
-    learning_rate = model_params.get("learning_rate", 1e-3)
-    noise_std = model_params.get("noise_std", DEFAULT_NOISE_STD)
-    use_weighted_sampler_cfg = model_params.get("use_weighted_sampler", "auto")
-    sampler_weight_power = float(model_params.get("sampler_weight_power", 1.0))
-    loss_weight_power = float(model_params.get("loss_weight_power", 1.0))
+    params: dict[str, Any] = model_params if model_params is not None else {}
+    epochs = params.get("epochs", epochs)
+    batch_base = params.get("batch_base", batch_base)
+    seed = params.get("seed", 42)
+    learning_rate = params.get("learning_rate", 1e-3)
+    noise_std = params.get("noise_std", DEFAULT_NOISE_STD)
+    use_weighted_sampler_cfg = params.get("use_weighted_sampler", "auto")
+    sampler_weight_power = float(params.get("sampler_weight_power", 1.0))
+    loss_weight_power = float(params.get("loss_weight_power", 1.0))
 
     random.seed(seed)
     np.random.seed(seed)
@@ -314,7 +314,7 @@ def train_cnn(
         )
         print("[CNN] Using file-path dataset")
 
-    loader_kwargs = dict(
+    loader_kwargs: dict[str, Any] = dict(
         dataset=dataset,
         batch_size=batch_size,
         shuffle=(not use_weighted_sampler),

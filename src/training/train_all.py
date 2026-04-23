@@ -1,5 +1,6 @@
 import shutil
 from pathlib import Path
+from typing import Any
 
 import joblib
 import pandas as pd
@@ -96,16 +97,16 @@ def train_models(
         config: dict | None = None,
         enabled_models: dict[str, bool] | None = None,
 ):
-    config = config or {}
-    training_config = config.get("training", {})
-    models_config = config.get("models", {})
+    effective_config: dict[str, Any] = {} if config is None else config
+    training_config = effective_config.get("training", {})
+    models_config = effective_config.get("models", {})
 
     if "sample_percentage" in training_config:
         sample_percentage = training_config["sample_percentage"]
 
     if "PCA_components" in training_config:
         PCA_components = training_config["PCA_components"]
-    enabled_models = enabled_models or {
+    effective_enabled_models = enabled_models or {
         "decision_tree": True,
         "random_forest": True,
         "svm": True,
@@ -120,7 +121,7 @@ def train_models(
     model_dir = current_file.parent / 'model_save'
     clear_model_dir(model_dir)
 
-    if enabled_models.get("decision_tree", True):
+    if effective_enabled_models.get("decision_tree", True):
         decision_tree_model, decision_tree_pca = decision_tree.train_decision_tree(
             img_paths,
             y,
@@ -131,7 +132,7 @@ def train_models(
         joblib.dump(decision_tree_model, model_dir / 'decision_tree_model.joblib')
         joblib.dump(decision_tree_pca, model_dir / 'decision_tree_pca.joblib')
 
-    if enabled_models.get("random_forest", True):
+    if effective_enabled_models.get("random_forest", True):
         random_forest_model, random_forest_pca = random_forest.train_random_forest(
             img_paths,
             y,
@@ -142,7 +143,7 @@ def train_models(
         joblib.dump(random_forest_model, model_dir / 'random_forest_model.joblib')
         joblib.dump(random_forest_pca, model_dir / 'random_forest_pca.joblib')
 
-    if enabled_models.get("svm", True):
+    if effective_enabled_models.get("svm", True):
         svm_model, svm_pca = svm.train_svm(
             img_paths,
             y,
@@ -153,7 +154,7 @@ def train_models(
         joblib.dump(svm_model, model_dir / 'svm_model.joblib')
         joblib.dump(svm_pca, model_dir / 'svm_pca.joblib')
 
-    if enabled_models.get("cnn", True):
+    if effective_enabled_models.get("cnn", True):
         lmdb_path = root_dir / f"data/samples_labels/patches_ps{patch_size}.lmdb"
         cnn_config = models_config.get("cnn", {})
         cnn_model = cnn.train_cnn(

@@ -5,6 +5,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+from typing import SupportsFloat, SupportsIndex, cast
 
 try:
     from tools.util import get_root_dir
@@ -24,7 +25,7 @@ MODEL_BLOCK_RE = re.compile(r"---- (.+?) ----")
 FINAL_MODEL_PARAMS_RE = re.compile(r"final_model_params = (.+)$")
 TIMESTAMP_PREFIX_RE = re.compile(r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})")
 EXPERIMENT_CFG_RE = re.compile(r"experiment_cfg = (.+)$")
-MODEL_PREFIX_RE = re.compile(r"^\[(.+?)\]\s+(.+)$")
+MODEL_PREFIX_RE = re.compile(r"^\[(.+?)]\s+(.+)$")
 CPU_CORES_RE = re.compile(r"Using (\d+) CPU cores for image loading\.")
 IMAGE_LOADING_DONE_RE = re.compile(r"Image loading done, time: ([0-9.]+)s")
 X_SHAPE_BEFORE_RE = re.compile(r"X shape before PCA: (.+)$")
@@ -32,7 +33,7 @@ PCA_DONE_RE = re.compile(r"PCA preprocessing done, time: ([0-9.]+)s")
 X_SHAPE_AFTER_RE = re.compile(r"X shape after PCA: (.+)$")
 TRAINING_DONE_RE = re.compile(r"Training done, time: ([0-9.]+)s")
 CNN_TRAINING_TIME_RE = re.compile(r"Training time: ([0-9.]+) seconds")
-LMDB_BUILD_DONE_RE = re.compile(r"^\[LMDB\] Build done in ([0-9.]+)s$")
+LMDB_BUILD_DONE_RE = re.compile(r"^\[LMDB] Build done in ([0-9.]+)s$")
 EPOCH_LOSS_RE = re.compile(r"^Epoch (\d+)/(\d+), Loss: ([0-9.]+)$")
 DEVICE_AMP_RE = re.compile(r"^Using device: ([^,]+), AMP enabled: (True|False)$")
 BATCH_WORKER_RE = re.compile(r"^Batch size: (\d+), num_workers: (\d+)$")
@@ -156,7 +157,8 @@ def parse_control_value(raw: str) -> object:
 
 def to_float_or_none(value: object) -> float | None:
     try:
-        return float(value)
+        candidate = cast(str | bytes | bytearray | SupportsFloat | SupportsIndex, value)
+        return float(candidate)
     except (TypeError, ValueError):
         return None
 
@@ -215,14 +217,15 @@ def extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
             control_path = run_match.group(3).strip()
             control_name = control_path.split(".")[-1]
             control_value = run_match.group(4).strip()
-            current_run = RunRecord(
+            new_run = RunRecord(
                 run_idx=run_idx,
                 run_total=run_total,
                 control_path=control_path,
                 control_name=control_name,
                 control_value=control_value,
             )
-            runs.append(current_run)
+            current_run = new_run
+            runs.append(new_run)
             current_model_name = None
             current_eval_model = None
             parsing_class_report = False
@@ -241,14 +244,15 @@ def extract_runs(lines: list[str]) -> tuple[list[RunRecord], datetime | None]:
         if simple_run_match:
             run_idx = int(simple_run_match.group(1))
             run_total = int(simple_run_match.group(2))
-            current_run = RunRecord(
+            new_run = RunRecord(
                 run_idx=run_idx,
                 run_total=run_total,
                 control_path="__normal__",
                 control_name="normal",
                 control_value="normal",
             )
-            runs.append(current_run)
+            current_run = new_run
+            runs.append(new_run)
             current_model_name = None
             current_eval_model = None
             parsing_class_report = False
