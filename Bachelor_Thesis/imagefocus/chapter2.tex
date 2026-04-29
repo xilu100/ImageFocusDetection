@@ -1,0 +1,609 @@
+\chapter{Theoretical Background}
+\section{Image Focus and Blur Fundamentals}
+\subsection{Concept of Focus and Blur}
+\par The focus state of an image is usually reflected by the degree to which
+edges, textures, and high-frequency information are preserved in local regions.
+When the imaging system is accurately focused on the target plane, boundaries
+and details in the image can be presented clearly. In contrast, when the lens
+is out of focus or relative motion occurs between the camera and the object,
+the image shows different degrees of blur. Common types of blur include
+defocus blur and motion blur. Defocus blur usually results from the limitation
+of depth of field or the shift of the focal plane, while motion blur is mainly
+caused by relative displacement during exposure. Although their generation
+mechanisms are different, both may lead to local edge diffusion, texture
+weakening, and loss of high-frequency components.
+
+\par From the perspective of image features, clear regions usually have more
+obvious grayscale variation, stronger local gradients, and richer texture
+structures, while blurred regions often show smoother edge transitions,
+smoothed details, and a frequency distribution more concentrated in the
+low-frequency range. Therefore, the essence of focus detection can be
+understood as the analysis of the fidelity of structural information in local
+regions. For the patch-level classification task studied in this thesis, how to
+effectively describe the difference between clear and blurred regions is the
+theoretical basis for subsequent feature design and model learning.
+
+\subsection{Imaging Degradation Model}
+\par From the perspective of the imaging degradation model, a blurred image can
+usually be expressed as the convolution of a clear image and a point spread
+function, plus a noise term, namely
+\begin{equation}
+    g(x,y)=f(x,y)*h(x,y)+n(x,y)
+    \label{eq:blur-model}
+\end{equation}
+\par where $f(x,y)$ denotes the ideal clear image, $g(x,y)$ denotes the
+observed image, $h(x,y)$ denotes the blur kernel or point spread function,
+$n(x,y)$ denotes noise, and the symbol $*$ represents convolution. In the
+frequency domain, the above equation can be further written as
+\begin{equation}
+    G(u,v)=F(u,v)H(u,v)+N(u,v)
+    \label{eq:blur-model-frequency}
+\end{equation}
+\par This shows that the blur process essentially suppresses the high-frequency
+components of an image. As a result, details such as edges and textures are
+weakened by defocus or motion, which also provides the theoretical basis for
+the construction of subsequent sharpness features.
+
+\section{Patch-Based Image Representation}
+\subsection{Rationale for Patch-Based Modeling}
+\par In image analysis tasks, using the whole image directly as input can retain
+global context, but it is not suitable for describing spatial changes in local
+focus states. In contrast, dividing the image into multiple local patches of
+fixed size can transform a complex region detection problem into a group of
+local classification problems with consistent structure and easier modeling
+\cite{Hou_2016_CVPR}. Each patch corresponds to one grid cell in the original
+image, so the image can be represented as a regular two-dimensional patch set.
+
+\par This representation has two main advantages. First, patch-based
+representation can highlight local texture, gradient, and frequency
+information, allowing the model to focus more directly on local visual features
+related to focus state. Second, fixed-size patches make it convenient to
+extract statistical features in a unified way or to construct the input of
+neural networks, thus reducing the complexity of model design and training
+procedures. In this thesis, the image is divided into a non-overlapping grid,
+and each patch is not only the basic unit for feature extraction, but also the
+basic unit for label generation, model training, and result projection.
+Therefore, patch-based representation is not only a data organization strategy,
+but also the core modeling foundation of the research method in this thesis.
+
+\subsection{Mathematical Formulation of Patch Grids}
+\par Let the input image be denoted by $I\in\mathbb{R}^{H\times W}$, and let
+the patch side length be $p$. When the image size is divisible by $p$, it can
+be divided into
+\begin{equation}
+    M=\frac{H}{p},\qquad N=\frac{W}{p}
+    \label{eq:patch-grid}
+\end{equation}
+\par row and column grids, and the $(i,j)$-th patch can be expressed as
+\begin{equation}
+    P_{i,j}=I[ip:(i+1)p,\; jp:(j+1)p],\qquad
+    0\le i<M,\; 0\le j<N
+    \label{eq:patch-definition}
+\end{equation}
+\par Therefore, the whole image can be written as the patch set
+\begin{equation}
+    \mathcal{P}=\left\{P_{i,j}\mid 0\le i<M,\;0\le j<N\right\}
+    \label{eq:patch-set}
+\end{equation}
+\par This representation transforms the original image analysis task into a
+patch-by-patch modeling problem over the local patch set $\mathcal{P}$, thus
+providing a unified data form for patch-level feature extraction and
+classification. The above derivation assumes that the input size is compatible
+with the patch size. If the original image size is not divisible by $p$,
+corresponding adjustment is required in advance.
+
+\section{Patch Representations and Automatic Labeling}
+\subsection{Two Types of Patch Representation}
+\par In image focus analysis, the representation of local patches can be roughly
+divided into two categories. The first category is focus measures based on
+hand-crafted sharpness indicators \cite{5739529,1284395}, whose purpose is to
+directly describe the sharpness level of local regions by using edge, gradient,
+and frequency-domain statistics. The second category is raw representation
+based on pixel values, that is, unfolding the grayscale patch matrix into a
+vector and then letting the classifier or dimensionality reduction method model
+it automatically \cite{murphy2022pml}. The former has strong interpretability
+and is suitable for constructing automatic labels or explicit scoring rules,
+while the latter preserves more complete local intensity distribution
+information and is more suitable as a general input representation for
+supervised learning models.
+
+\par For the task in this thesis, Laplacian, Sobel, and frequency-domain
+high-frequency energy are mainly used to measure the absolute sharpness of a
+patch and generate supervisory labels, while traditional machine learning
+models and CNNs learn class boundaries on unified patch inputs. Therefore, the
+theoretical focus of this part is not to mix the two kinds of representation,
+but to explain that interpretable sharpness features can be used to establish
+the basis for label generation, and raw pixel representation can also be used
+for models to learn discriminative patterns automatically. These two
+representations correspond to the two stages of ``automatic labeling'' and
+``supervised classification'' in the method of this thesis.
+
+\subsection{Focus Measures in Spatial and Frequency Domains}
+\par Laplacian features reflect second-order grayscale variation and are
+sensitive to edge and detail changes, so they are often used to measure local
+sharpness. Sobel features describe the gradient strength in the horizontal and
+vertical directions through first-order derivative approximation and can
+represent local edge saliency well. FFT features analyze image signals from the
+frequency-domain perspective and use the proportion or energy of high-frequency
+components as an important indicator of sharpness \cite{5739529,1284395},
+because clear regions usually preserve more high-frequency details. Combining
+these features makes it possible to describe the focus state of a patch from
+both the spatial and frequency domains. Compared with a single feature, fused
+features usually have better stability and are also more suitable for
+subsequent automatic label generation.
+
+\par For a local grayscale patch $P(x,y)$, the Laplacian operator can be
+written as
+\begin{equation}
+    \nabla^2 P=\frac{\partial^2 P}{\partial x^2}+\frac{\partial^2 P}{\partial y^2}
+    \label{eq:laplacian-basic}
+\end{equation}
+\par A common local sharpness measure is the variance of the Laplacian response:
+\begin{equation}
+    s_{\mathrm{lap}}(P)=\operatorname{Var}\!\left(\nabla^2 P\right)
+    \label{eq:laplacian-var-basic}
+\end{equation}
+\par Sobel features approximate the local gradient by first-order differences in
+two directions:
+\begin{equation}
+    G_x=S_x*P,\qquad G_y=S_y*P
+    \label{eq:sobel-basic}
+\end{equation}
+\begin{equation}
+    G(x,y)=\sqrt{G_x(x,y)^2+G_y(x,y)^2}
+    \label{eq:sobel-magnitude-basic}
+\end{equation}
+\par Therefore, the average gradient strength of a patch can be written as
+\begin{equation}
+    s_{\mathrm{sob}}(P)=\frac{1}{|P|}\sum_{(x,y)\in P} G(x,y)
+    \label{eq:sobel-score-basic}
+\end{equation}
+\par In the frequency domain, the two-dimensional discrete Fourier transform can
+be expressed as
+\begin{equation}
+    \hat{P}(u,v)=\sum_{x=0}^{m-1}\sum_{y=0}^{n-1}
+    P(x,y)\exp\!\left[-j2\pi\left(\frac{ux}{m}+\frac{vy}{n}\right)\right]
+    \label{eq:dft-basic}
+\end{equation}
+\par If $\Omega_h$ denotes the high-frequency region, a high-frequency ratio can
+be further constructed. Taking the energy ratio as an example, it can be
+defined as
+\begin{equation}
+    s_{\mathrm{fft}}(P)=
+    \frac{\sum_{(u,v)\in\Omega_h}\left|\hat{P}(u,v)\right|^2}
+    {\sum_{u}\sum_{v}\left|\hat{P}(u,v)\right|^2}
+    \label{eq:fft-energy-basic}
+\end{equation}
+\par After combining the three types of features, the feature vector used for
+subsequent sharpness analysis can be obtained as
+\begin{equation}
+    \mathbf{x}(P)=
+    \left[s_{\mathrm{lap}}(P),\; s_{\mathrm{sob}}(P),\; s_{\mathrm{fft}}(P)\right]^\top
+    \label{eq:feature-vector-basic}
+\end{equation}
+\subsection{Pixel-Level Vector Representation}
+\par Complementary to the above statistical features is the direct use of raw
+patch pixels to construct the input for supervised learning. Let a grayscale
+patch be denoted by $P\in\mathbb{R}^{p\times p}$, then its vectorized
+representation can be written as
+\begin{equation}
+    \mathbf{z}(P)=\operatorname{vec}(P)\in\mathbb{R}^{p^2}
+    \label{eq:pixel-vector-basic}
+\end{equation}
+\par If the grayscale values are further normalized to the interval $[0,1]$,
+then we obtain
+\begin{equation}
+    \tilde{\mathbf{z}}(P)=\frac{1}{255}\,\mathbf{z}(P)
+    \label{eq:pixel-vector-normalized}
+\end{equation}
+\par This representation does not explicitly specify which edge or frequency
+statistics are most important. Instead, it preserves the complete local
+distribution of all pixels within the patch, and the subsequent classifier or
+convolutional network learns effective discriminative features by itself. When
+the patch size is large, the dimension of the raw pixel vector becomes $p^2$.
+Therefore, dimensionality reduction methods are often combined in practical
+modeling to control the complexity of the feature space.
+
+\subsection{From Focus Scores to Automatic Labels}
+\par A further distinction should be made here. The process of generating
+supervisory signals from the above sharpness indicators is more appropriately
+called ``automatic labeling'' rather than strict ``pseudo-labeling''.
+Pseudo-labeling usually refers to first using an existing model to predict
+unlabeled samples and then using the predictions as new training labels
+\cite{lee2013pseudo}. In contrast, automatic labeling directly generates labels
+from the original data according to manually designed and interpretable rules.
+For patch-level focus analysis, Laplacian, Sobel, and frequency-domain features
+can be used not only to describe local sharpness, but also as the basis for
+constructing supervisory labels. Therefore, the source of such labels is closer
+to rule-based automatic labeling \cite{5739529,1284395} than to model-bootstrapped
+pseudo-labeling.
+
+\par From a more general perspective, automatic labeling usually requires a
+mapping process from continuous scores to discrete labels. That is, a patch is
+first assigned some form of sharpness score according to local features, and
+then divided into several discrete categories according to pre-defined rules.
+When some local regions simultaneously lack sufficient texture, edge, or
+intensity variation, their sharpness is often difficult to determine stably
+from local observation alone. In such cases, they are usually regarded as
+low-confidence samples and are ignored or filtered out before subsequent
+training.
+
+\section{Classical Machine Learning Methods}
+\subsection{General Characteristics of Classical Models}
+\par Image classification tasks based on patch vector representation can often be
+implemented with classical machine learning methods \cite{murphy2022pml}.
+Compared with end-to-end deep learning, these methods do not automatically
+learn hierarchical representations in multi-layer networks, but rely on input
+feature vectors for discrimination. Their advantages lie in relatively simple
+model structure, lower training cost, and often better controllability in
+small-sample scenarios.
+
+\par The typical classical classifiers involved in this thesis include support
+vector machines, decision trees, and random forests. Support vector machines
+maximize the class margin by finding an optimal separating hyperplane
+\cite{cortes1995support}, and they have strong discriminative ability in
+small- and medium-scale datasets as well as high-dimensional feature spaces.
+Decision trees build tree-structured decision rules by recursively partitioning
+the feature space \cite{breiman2017classification}, and they are highly
+interpretable. Random forests improve model stability and generalization by
+ensembling multiple decision trees, and they usually resist overfitting better
+than a single tree. Since the dimension of vectorized patches grows with
+$p^2$, classical models often need to combine procedures such as feature
+standardization, kernel approximation, or principal component analysis, so as
+to reduce training complexity while preserving the main information.
+
+\subsection{Support Vector Machine, Tree Models and PCA}
+\par For a binary classification problem based on the feature vector
+$\mathbf{x}\in\mathbb{R}^d$, the linear decision function of a support vector
+machine \cite{cortes1995support} is usually written as
+\begin{equation}
+    f(\mathbf{x})=\mathbf{w}^\top\mathbf{x}+b
+    \label{eq:svm-decision-basic}
+\end{equation}
+\par Its core optimization objective is to maximize the classification margin,
+and the corresponding soft-margin form can be written as
+\begin{equation}
+    \min_{\mathbf{w},b,\boldsymbol{\xi}}
+    \frac{1}{2}\|\mathbf{w}\|_2^2+C\sum_{i=1}^{n}\xi_i
+    \label{eq:svm-objective-basic}
+\end{equation}
+\begin{equation}
+    \text{s.t.}\quad
+    y_i(\mathbf{w}^\top\mathbf{x}_i+b)\ge 1-\xi_i,\qquad
+    \xi_i\ge 0
+    \label{eq:svm-constraint-basic}
+\end{equation}
+\par Decision trees \cite{breiman2017classification} usually split data by
+selecting the feature that brings the largest improvement in purity. Taking
+information gain as an example, we have
+\begin{equation}
+    \operatorname{Gain}(D,a)=H(D)-\sum_{v=1}^{V}\frac{|D^{(v)}|}{|D|}H(D^{(v)})
+    \label{eq:info-gain-basic}
+\end{equation}
+\par where $H(D)$ denotes the information entropy of the sample set $D$, and
+$D^{(v)}$ denotes the subset obtained according to the $v$-th value of feature
+$a$. Random forests then make predictions by ensembling multiple decision
+trees, and their output can be expressed as
+\begin{equation}
+    \hat{y}=\operatorname{mode}\left\{T_1(\mathbf{x}),T_2(\mathbf{x}),\ldots,T_K(\mathbf{x})\right\}
+    \label{eq:random-forest-basic}
+\end{equation}
+\par where $T_k(\mathbf{x})$ denotes the prediction result of the $k$-th
+decision tree, and $\operatorname{mode}$ denotes majority voting.
+
+\par When the input is a high-dimensional pixel vector, principal component
+analysis is also commonly used to map the original features into a low-
+dimensional subspace. Let the sample vector be
+$\tilde{\mathbf{z}}\in\mathbb{R}^{d}$, then the dimensionality-reduced
+representation of principal component analysis (PCA)
+\cite{perry2025inference,zheng2021application} can be written as
+\begin{equation}
+    \mathbf{r}=W^\top(\tilde{\mathbf{z}}-\boldsymbol{\mu}),\qquad
+    W\in\mathbb{R}^{d\times k},\; k<d
+    \label{eq:pca-basic}
+\end{equation}
+\par where $\boldsymbol{\mu}$ denotes the mean of the training samples, and $W$
+is composed of the first $k$ principal component directions. The role of PCA is
+to compress redundant dimensions, reduce the influence of noise, and provide a
+more compact representation for subsequent classifiers.
+
+\par In classical machine learning pipelines, in addition to dimensionality
+reduction, input features are often standardized so that different dimensions
+have similar numerical scales. If one feature dimension is denoted by $x_j$,
+its standardized result can be written as
+\begin{equation}
+    x'_j=\frac{x_j-\mu_j}{\sigma_j}
+    \label{eq:standardization-basic}
+\end{equation}
+\par where $\mu_j$ and $\sigma_j$ denote the mean and standard deviation of the
+$j$-th feature dimension on the training set, respectively. Standardization
+prevents large-scale features from dominating too strongly during distance
+calculation, margin optimization, or kernel approximation, thereby improving
+the training stability of subsequent linear classifiers and kernel methods. For
+models such as support vector machines that are sensitive to feature scale,
+standardization is usually an important preprocessing step to ensure that
+information from different dimensions can be used in a relatively balanced way.
+
+\par In addition to linear SVM, support vector machines can also describe
+nonlinear class boundaries through kernel functions. However, standard kernel
+SVM usually needs to process a large kernel matrix explicitly or implicitly,
+and its training and storage cost increases significantly as the number of
+samples grows. To alleviate this problem, kernel approximation methods are
+often used to transform the originally expensive kernel computation into a
+finite-dimensional feature mapping. Among them, the Nystr\"{o}m method is a
+typical low-rank kernel approximation strategy. Its basic idea is to use some
+representative samples to approximate the kernel matrix and then construct an
+explicit mapping $\phi(\mathbf{x})$ such that the kernel function satisfies
+\begin{equation}
+    k(\mathbf{x},\mathbf{x}')\approx \phi(\mathbf{x})^\top\phi(\mathbf{x}')
+    \label{eq:nystrom-basic}
+\end{equation}
+\par In this way, a nonlinear classification problem that originally relied on
+the kernel trick can be approximately transformed into a linear discrimination
+problem in an explicit feature space, which reduces computational complexity
+while retaining certain nonlinear expressive ability. For the task of this
+thesis, this idea provides the theoretical basis for the subsequent use of SVM
+based on Nystr\"{o}m kernel approximation.
+
+\section{Convolutional Neural Networks for Image Analysis}
+\subsection{Advantages of CNNs for Patch Analysis}
+\par Convolutional neural networks (CNNs)
+\cite{lecun2002gradient,krizhevsky2012imagenet} are among the most important
+deep learning models in current image analysis. Their core advantage is that
+they can automatically learn multi-level feature representations directly from
+raw pixels, without relying completely on hand-crafted features. Through
+mechanisms such as convolution, nonlinear activation, and pooling, CNNs can
+gradually extract hierarchical information ranging from local edges to higher-
+level semantic structures, and they have therefore been widely applied in tasks
+such as classification, detection, and segmentation.
+
+\par For image focus detection, the potential advantage of CNNs is that they can
+automatically learn discriminative patterns related to sharpness, such as
+complex combinations among edge strength, texture structure, and local
+contrast. Especially under the patch-based setting, CNNs can directly take
+local image patches as input and avoid the information loss that may arise in
+manual feature selection. However, deep models usually require more training
+data to perform stably. When the sample size is limited, complex networks are
+prone to overfitting. Therefore, in small-sample research, using a lightweight
+CNN with fewer parameters and a shallower structure is a reasonable choice to
+balance model representation ability and training feasibility.
+
+\subsection{Basic Operations of CNNs}
+\par In mathematical form, the basic operation of a convolutional layer can be
+expressed as
+\begin{equation}
+    z_{i,j}^{(k)}=
+    \sum_{c=1}^{C}\sum_{m}\sum_{n}
+    w_{m,n}^{(k,c)}x_{i+m,j+n}^{(c)}+b^{(k)}
+    \label{eq:cnn-conv-basic}
+\end{equation}
+\begin{equation}
+    a_{i,j}^{(k)}=\sigma\!\left(z_{i,j}^{(k)}\right)
+    \label{eq:cnn-activation-basic}
+\end{equation}
+\par where $x^{(c)}$ denotes the $c$-th input channel, $w^{(k,c)}$ denotes the
+weight of the $k$-th convolution kernel on the $c$-th channel, $b^{(k)}$
+denotes the bias term, and $\sigma(\cdot)$ denotes the nonlinear activation
+function. After several layers of convolution and pooling, the network finally
+outputs class probabilities through softmax:
+\begin{equation}
+    \hat{p}_c=
+    \frac{\exp(o_c)}{\sum_{t=1}^{C}\exp(o_t)}
+    \label{eq:softmax-basic}
+\end{equation}
+\par The corresponding classification loss usually takes the form of
+cross-entropy:
+\begin{equation}
+    \mathcal{L}=
+    -\sum_{c=1}^{C} y_c\log \hat{p}_c
+    \label{eq:cross-entropy-basic}
+\end{equation}
+\par where $o_c$ denotes the output score of the model for class $c$, and $y_c$
+denotes the one-hot encoding of the true label. If the input patch is denoted
+by $P\in\mathbb{R}^{p\times p}$, then the input tensor of the CNN can be
+written as
+\begin{equation}
+    X(P)\in\mathbb{R}^{1\times p\times p}
+    \label{eq:cnn-input-basic}
+\end{equation}
+\par that is, a single-channel dimension is added on the basis of the grayscale
+image. By minimizing the loss function, the CNN can learn feature
+representations suitable for focus state discrimination in an end-to-end
+manner.
+
+\section{Learning under Limited Data Conditions}
+\subsection{Challenges of Limited Data}
+\par Small-sample learning is a common issue in many practical image tasks,
+especially when the cost of local annotation is high. When the available
+training data are insufficient, the model often finds it difficult to learn
+stable class boundaries and tends to overfit accidental patterns in the
+training samples, thereby reducing its generalization ability on new samples.
+This problem exists for both classical methods and deep learning methods, but
+its form is different. Classical methods are more easily limited by feature
+representation ability, while deep models are more easily limited by the
+mismatch between parameter scale and data demand.
+
+\par To alleviate the influence of limited data, common strategies in research
+include data augmentation, class reweighting, model lightweighting, and
+controlling experimental variables. Data augmentation expands the training
+distribution by applying perturbations to the original samples and helps the
+model obtain stronger robustness. Class reweighting can alleviate the class
+imbalance problem. Model lightweighting reduces the risk of overfitting by
+decreasing the number of parameters. For this thesis, the low-sample condition
+is not only an experimental limitation, but also the core premise for
+comparing the applicability of different methods. Therefore, understanding the
+learning characteristics under limited data conditions is a necessary
+theoretical basis for analyzing the performance differences between classical
+machine learning and lightweight CNNs.
+
+\par When the training data are also accompanied by imbalanced class
+distribution, in addition to directly introducing class weights into the loss
+function, the frequency of training samples can also be adjusted through
+resampling strategies. The former increases the proportion of minority-class
+errors in the optimization objective so that the model pays more attention to
+categories that are difficult to cover during parameter updates. The latter
+changes the class composition in mini-batches or in the training set, so that
+minority-class samples are seen more frequently during training. Both methods
+aim to alleviate the bias caused by class imbalance, but their mechanisms are
+not the same. Reweighting mainly acts at the loss level, while resampling acts
+at the data sampling distribution level. Therefore, the two methods may also
+have different effects on the balance between precision and recall.
+
+\subsection{Risk Minimization and Weighted Learning}
+\par From the perspective of statistical learning, model training can usually be
+viewed as an empirical risk minimization problem \cite{murphy2022pml}:
+\begin{equation}
+    \min_{\theta}\;
+    \frac{1}{N}\sum_{i=1}^{N}\ell\!\left(f(\mathbf{x}_i;\theta),y_i\right)
+    +\lambda\,\Omega(\theta)
+    \label{eq:erm-basic}
+\end{equation}
+\par where $N$ denotes the number of training samples, $\ell(\cdot)$ denotes
+the loss function, $\Omega(\theta)$ denotes the regularization term, and
+$\lambda$ is the regularization coefficient. When $N$ is small, the empirical
+risk becomes less representative of the overall distribution, and the model is
+more likely to memorize accidental noise in the training samples, which leads
+to low training error but high generalization error. To alleviate the influence
+of class imbalance, weighted loss is also often introduced in practical
+training:
+\begin{equation}
+    \mathcal{L}_{w}=
+    -\sum_{c=1}^{C}\alpha_c\,y_c\log \hat{p}_c
+    \label{eq:weighted-loss-basic}
+\end{equation}
+\par where $\alpha_c$ denotes the weight of class $c$. The above form indicates
+that under limited data conditions, controlling model complexity, introducing
+regularization constraints, and performing class balancing are important
+theoretical means to improve model stability.
+
+\section{Performance Evaluation for Patch Classification}
+\subsection{Overall and Class-Wise Metrics}
+\par In patch-level focus detection tasks, model performance is reflected not
+only in whether the overall classification is correct, but also in whether the
+model can distinguish different classes of patches in a balanced way.
+Therefore, experimental evaluation usually needs to examine overall accuracy,
+class-wise precision and recall, and the confusion relations among different
+classes at the same time. For the binary and three-class settings involved in
+this thesis, such metrics can reflect both the model's ability to recognize
+clear regions and whether it tends to confuse blurred, intermediate, or other
+categories with each other.
+
+\par The most basic overall metric is accuracy. Suppose there are $N_v$ valid
+patches in the validation set, with true labels $y_i$ and predicted labels
+$\hat{y}_i$. Then accuracy is defined as
+\begin{equation}
+    \operatorname{Acc}=\frac{1}{N_v}\sum_{i=1}^{N_v}\mathbf{1}(\hat{y}_i=y_i)
+    \label{eq:accuracy-basic}
+\end{equation}
+\par where $\mathbf{1}(\cdot)$ is the indicator function. It takes the value
+$1$ when the predicted label is equal to the true label, and $0$ otherwise.
+Accuracy can summarize the overall correctness of the model on all samples, but
+when the class distribution is imbalanced, relying on accuracy alone may hide
+the performance decline of minority classes. Therefore, class-wise metrics are
+usually needed for joint analysis.
+
+\par For any class $c$, precision, recall, and $F_1$ score can be further
+defined. Let the true positives, false positives, and false negatives of this
+class be denoted by $TP_c$, $FP_c$, and $FN_c$, respectively. Then we have
+\begin{equation}
+    \operatorname{Precision}_c=\frac{TP_c}{TP_c+FP_c}
+    \label{eq:precision-basic}
+\end{equation}
+\begin{equation}
+    \operatorname{Recall}_c=\frac{TP_c}{TP_c+FN_c}
+    \label{eq:recall-basic}
+\end{equation}
+\begin{equation}
+    F_{1,c}=
+    \frac{2\cdot \operatorname{Precision}_c\cdot \operatorname{Recall}_c}
+    {\operatorname{Precision}_c+\operatorname{Recall}_c}
+    \label{eq:f1-basic}
+\end{equation}
+\par Precision, recall, and $F_1$ score \cite{schutze2008introduction} reflect,
+respectively, how many samples predicted as a class truly belong to that class,
+how many samples that truly belong to that class are successfully detected, and
+the balance between the two. In focus detection tasks, if the clear class is
+usually the minority class, recall is particularly important, because it can
+directly reflect whether the model misses true clear regions. If it is further
+necessary to compare class balance in a multi-class task from an overall
+perspective, the arithmetic mean of the $F_1$ scores of all classes can be
+taken to obtain macro $F_1$:
+\begin{equation}
+    F_1^{\mathrm{macro}}=\frac{1}{C}\sum_{c=1}^{C}F_{1,c}
+    \label{eq:macro-f1-basic}
+\end{equation}
+\par This metric assigns the same weight to each class. Therefore, when the
+class distribution is imbalanced, it often reflects the true discrimination
+ability of the model on minority classes better than overall accuracy alone.
+
+\subsection{Confusion Analysis and Decision Rules}
+\par To observe the misclassification patterns among classes more intuitively,
+the confusion matrix is also commonly used \cite{schutze2008introduction}. For
+a $C$-class classification problem, the element of the confusion matrix
+$M\in\mathbb{N}^{C\times C}$ can be defined as
+\begin{equation}
+    M_{i,j}=
+    \sum_{n=1}^{N_v}\mathbf{1}(y_n=i)\mathbf{1}(\hat{y}_n=j)
+    \label{eq:confusion-basic}
+\end{equation}
+\par where $M_{i,j}$ denotes the number of patches whose true class is $i$ but
+are predicted as $j$. The confusion matrix can reveal between which class
+pairs the model's errors are mainly concentrated, and it is therefore important
+for analyzing the difficulty difference between binary and three-class tasks.
+For example, in a three-class task, the model may more often misclassify the
+intermediate state as clear or blurred, rather than directly causing large-
+scale confusion between clear and blurred.
+
+\par From the prediction mechanism, a multi-class model usually takes the class
+with the largest output score as the final result, namely
+\begin{equation}
+    \hat{y}=\arg\max_{c\in\{0,\dots,C-1\}} o_c
+    \label{eq:argmax-basic}
+\end{equation}
+\par where $o_c$ denotes the output score of the model for class $c$. For a
+binary classification task, the decision can also be made based on the
+posterior probability threshold of one class. Let the clear class be class $1$,
+its predicted probability be $\hat{p}_1$, and the threshold be $\tau$. Then
+we have
+\begin{equation}
+    \hat{y}=
+    \begin{cases}
+        1, & \hat{p}_1\ge \tau, \\
+        0, & \hat{p}_1<\tau,
+    \end{cases}
+    \label{eq:binary-threshold-basic}
+\end{equation}
+\par This form shows that binary classification output does not have to rely
+only on the fixed maximum-probability decision rule. Instead, it can trade off
+between the precision and recall of the clear class by adjusting the threshold.
+This is especially important when the class distribution is imbalanced and the
+research focus is more concerned with the detection ability of clear regions.
+
+\subsection{Projection-Based Visualization of Predictions}
+\par In addition to numerical metrics, patch-level tasks often project the
+prediction results back to the original image space for visualization. The
+basic idea is to fill each local predicted label back into its corresponding
+region according to the patch grid position in the original image
+\cite{Long_2015_CVPR,Zhou_2016_CVPR}, and then restore it to the original image
+size through nearest-neighbor interpolation, finally generating the overlay
+display result. Although this process does not change the classification result
+itself, it can present the spatial prediction distribution of the model in a
+more intuitive way, thus helping analyze focus boundaries, local misclassified
+regions, and prediction differences among different methods. Based on the above
+theoretical foundation, the next chapter will further explain how this thesis
+organizes patch-level prediction, metric calculation, and result visualization
+on a unified validation set.
+
+\subsection{Performance-Cost Tradeoff}
+\par For image patch classification tasks, the quality of a model is usually not
+determined only by recognition metrics themselves, but is also related to the
+computational cost required for training and inference. In general, a more
+complex model may obtain stronger representation ability, but it is often
+accompanied by higher training time, memory consumption, or parameter tuning
+cost. A relatively simple model, although limited in expressive ability, may
+still have advantages in reproducibility, deployment efficiency, and resource
+consumption. Therefore, when comparing different methods, in addition to
+performance metrics such as accuracy, precision, recall, $F_1$, and macro
+$F_1$, efficiency indicators such as training time are also commonly analyzed
+together, so as to evaluate the practical applicability of a model more
+comprehensively.

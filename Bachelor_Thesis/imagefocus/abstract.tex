@@ -1,66 +1,37 @@
 \cleardoublepage
 \section*{Abstract}
 
-% Three equations
-\begin{equation}
-E = mc^2
-\label{eq:einstein}
-\end{equation}
+\par Image focus detection aims to determine whether local image regions are
+clear or blurred, and it is important for image quality analysis, autofocus
+assistance, and subsequent vision tasks. This thesis studies patch-based image
+focus detection under limited data conditions and builds a unified experimental
+pipeline covering image preprocessing, grayscale conversion, $32\times32$ patch
+division, automatic labeling, model training, and prediction evaluation. To
+reduce the cost of manual patch-level annotation, this thesis designs a
+rule-based automatic labeling method by combining three kinds of sharpness
+features, namely Laplacian, Sobel, and fast Fourier transform (FFT), and
+organizes both binary and three-class classification tasks based on these
+labels. Using a dataset constructed from $350$ original images, this thesis
+systematically compares the performance of decision trees, random forests,
+support vector machines based on Nystr\"{o}m kernel approximation, and a
+lightweight convolutional neural network (CNN) under the same data split and
+unified evaluation metrics.
 
-\begin{equation}
-a^2 + b^2 = c^2
-\label{eq:pythagoras}
-\end{equation}
-
-\begin{equation}
-e^{i\pi} + 1 = 0\cite{murphy2022pml}
-\label{eq:euler}
-\end{equation}
-
-% Three references
-As shown in Equation \eqref{eq:einstein}, mass and energy are equivalent.
-
-According to Equation \eqref{eq:pythagoras}, a right triangle satisfies the Pythagorean theorem.
-
-Finally, Equation \eqref{eq:euler} is one of the most elegant identities in mathematics.
-
-\begin{lstlisting}[language=Python, caption={Simple loop}, label={lst:loop}]
-for i in range(10):
-    print(i)
-\end{lstlisting}
-As shown in Listing~\ref{lst:loop}, the loop prints numbers.
-
-\begin{algorithm}
-\caption{Example algorithm}
-\label{alg:example}
-
-\For{$i=1$ to $n$}{
-    do something\;
-}
-\end{algorithm}
-As shown in Algorithm~\ref{alg:example}, \ldots
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.6\textwidth]{images/HHU_Logo_WortBildMarke}
-    \caption{An example image}
-    \label{fig:example}
-\end{figure}
-As shown in Figure~\ref{fig:example}, the result is clear.
-
-\begin{theorem}\label{thm:main}
-    $E=mc^2$
-\end{theorem}
-As shown in Theorem~\ref{thm:main}, addition is commutative.
-
-\begin{table}[htbp]
-\centering
-\begin{tabular}{c|c}
-A & B \\
-\hline
-1 & 2
-\end{tabular}
-\caption{Example table}
-\label{tab:example}
-\end{table}
-I will show you a Table~\ref{tab:example}
+\par The experimental results show that, under the current task setting and data
+organization of this thesis, increasing the training sample ratio from $20\%$ to
+$100\%$ brings only limited performance improvement, while the training time
+keeps increasing. This indicates that the marginal benefit of data expansion is
+limited within the scope of this study. Specifically, the lightweight CNN
+achieves the best overall result in the binary classification task, reaching an
+F1-score of $0.84$ for the clear class and a macro F1 of $0.91$ with $100\%$
+training samples. In the three-class classification task, the random forest
+obtains the highest F1-score of $0.83$ for the clear class, while the SVM
+maintains a relatively stable macro F1 of about $0.89$. Overall, traditional
+machine learning methods, especially random forest and SVM, are able to learn
+competitive decision boundaries under a unified grayscale patch representation
+and provide relatively stable results with lower training cost. Based on these
+findings, this thesis argues that for patch-level focus detection tasks with
+relatively clear local boundaries and limited samples, deep learning is not the
+only approach that should be considered first. When the performance gap is
+limited, traditional methods can still achieve a good balance between
+recognition performance and computational efficiency.

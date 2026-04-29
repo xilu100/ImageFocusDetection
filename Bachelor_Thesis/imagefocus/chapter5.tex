@@ -1,0 +1,150 @@
+\chapter{Discussion}
+\section{Overall Findings}
+\par Based on the above experimental results, this thesis systematically
+compares the performance of classical machine learning methods and a
+lightweight convolutional neural network in the patch-based image focus
+detection task. Overall, the experiments show that under a unified data
+pipeline, unified automatic labeling rules, and unified evaluation criteria,
+different methods indeed present clear and stable performance differences.
+However, the more important conclusion is not that one class of models achieves
+the highest metric in a single experiment, but that under the current
+experimental setting of this thesis, the performance gain brought by increasing
+the training sample ratio from $20\%$ to $100\%$ is generally limited. Under
+both the binary and three-class settings, the metric changes of most models are
+relatively moderate, and are reflected more as slight fluctuation or limited
+improvement, while the training time increases clearly. It should be emphasized
+that the ``sample size'' here mainly refers to the ratio of patch training
+samples obtained by splitting a limited number of original images, rather than
+the unlimited expansion of independently collected image quantity. Therefore,
+the result of this thesis is better understood as follows: under the current
+conditions of $32\times32$ patches, automatic labeling rules, and fixed data
+source, continuing to enlarge the training sample ratio changes the overall
+performance pattern only to a limited extent.
+
+\par From the perspective of model performance trends, this thesis observes
+that the advantages of different methods are closely related to task
+definition. In the binary task, although the CNN achieves the highest overall
+sharp-class metric, the SVM and random forest can also maintain stable
+performance at relatively close evaluation levels, and their training cost is
+lower. In the three-class task, the results of random forest and SVM further
+show that traditional methods also have strong applicability in the current
+task. By combining the complete sample-size scan results, it can be seen that
+model performance is related not only to structural complexity, but also to
+the boundary characteristics of the task itself. In the setting of this
+thesis, patch labels are generated according to local sharpness-related
+information, and both traditional models and CNN are trained on unified
+grayscale patch input. The experimental results show that this patch
+representation is already sufficient to support classical machine learning
+methods in learning competitive decision boundaries. Under the binary setting,
+the boundary between sharp and non-sharp is relatively direct. Under the three-
+class setting, however, the boundary between the sharp class and the
+intermediate-state class is clearly more complex. Therefore, under the task
+conditions defined in this thesis, machine learning (ML) methods already have
+high applicability, but this judgment should be understood as a conclusion
+under the current input representation and experimental scope, rather than a
+universal summary for all focus detection tasks.
+
+\section{Practical Significance}
+\par One important significance of this research is that it provides reference
+for model selection in practical applications. For scenarios with limited data
+scale, constrained computational resources, or a higher requirement for model
+interpretability, classical machine learning methods may still be more feasible
+choices \cite{murphy2022pml}, because they usually train faster, require lower
+implementation cost, and can maintain relatively stable discrimination effect
+under a unified patch input representation. In particular, from the
+experimental results, the SVM maintains high recall at relatively low training
+cost in the binary task, and the random forest achieves a relatively strong
+sharp-class F1-score in the three-class task, while their training times are
+both significantly lower than that of the CNN. This indicates that when the
+difference in evaluation results is not large, traditional methods often have
+higher practical cost-effectiveness in engineering applications, rather than
+serving only as baseline models.
+
+\par At the same time, if the application scenario has more available samples,
+allows higher training cost, or places more emphasis on the model's automatic
+learning ability for complex local patterns, the lightweight CNN
+\cite{lecun2002gradient,krizhevsky2012imagenet} still has room for further
+optimization. The experiments in this thesis show that the CNN can indeed
+obtain relatively strong overall recognition results in the binary task, but
+this advantage is accompanied by higher training cost. It should be noted that
+the epoch setting of the CNN in the main text is itself the result of a trade-
+off between performance and time cost. Its purpose is to ensure that different
+experiments can be completed under a unified and acceptable computational cost,
+rather than waiting until the model reaches the fullest possible convergence
+under every setting. Even so, the CNN still shows relatively high accuracy and
+strong overall sharp-class discrimination ability, which indicates that its
+automatic representation ability has already shown some advantage in the
+current task. However, from the perspective of training time, its cost is still
+higher than that of classical machine learning methods. It should also be added
+that in the three-class task, the CNN under the default main experimental
+configuration performs worse than random forest and SVM, but the supplementary
+experiment already shows that training strategies such as weighted sampling can
+clearly improve its sharp-class recall and F1-score. Therefore, from a
+practical perspective, when the effects of ML and DL are close, whether it is
+necessary to invest more computational resources for limited performance gain
+still needs to be judged according to the specific application requirement. At
+the same time, the evaluation of CNN should not be reduced simply to the
+advantages or disadvantages of the model category itself, but should be
+analyzed together with the training configuration.
+
+\section{Limitations of the Study}
+\par Although this thesis compares multiple kinds of models under a unified
+experimental framework, the study still has several limitations. First, the
+experimental data scale is relatively limited, and the patch labels are
+generated by automatic rules rather than precise manual annotation. Therefore,
+the labels themselves may contain some noise. This noise may affect model
+training quality and, to some extent, limit the external generalization of the
+experimental conclusions. If some models in the experiments show bias in
+recall, precision, or class boundary behavior, the reason may partly come from
+the approximate partition of the sharp-blur boundary by the automatic labeling
+mechanism itself, rather than being determined completely by model capability.
+
+\par Second, the model range adopted in this thesis mainly focuses on decision
+tree, random forest, SVM based on Nystr\"{o}m kernel approximation, and a
+lightweight CNN, and does not yet include more complex deep network structures
+or more advanced representation learning strategies. Therefore, the current
+conclusion is more suitable for the low-sample and lightweight comparison
+scenario defined in this thesis, and cannot be directly generalized to all
+image focus detection tasks. More specifically, the conclusion of this thesis
+mainly targets cases where local boundary features are relatively clear and the
+patch representation can effectively preserve discriminative information. If
+the task is further extended to more complex blur types, stronger semantic
+interference, or more difficult cross-domain conditions, the potential
+advantage of DL methods may still appear more clearly. In addition, although
+the preprocessing pipeline, patch size, and evaluation method are uniformly
+controlled in the experiments, the results may still be affected by threshold
+setting, class distribution, automatic labeling parameters, and differences in
+data source. Therefore, the conclusion of this thesis should be understood as
+follows: under the experimental conditions based on $32\times32$ patches,
+rule-based automatic labeling, and limited-sample training, ML can already
+handle this kind of problem well at relatively low cost, rather than providing
+an absolute conclusion that is universally valid for all scenarios.
+
+\section{Future Work}
+\par In future work, this research can be further improved from three aspects:
+data, model, and task extension. First, at the data level, larger-scale and
+more diverse image datasets can be introduced, together with higher-quality
+manual annotation or semi-automatic correction mechanisms, so as to improve
+the reliability of patch labels and the robustness of experimental conclusions.
+If conditions allow, the influence of different data sources, different blur
+types, and different patch-size settings on model performance can also be
+further compared, so as to verify the applicability of the conclusions of this
+thesis in broader scenarios.
+
+\par Second, at the model level, more complex deep network structures than the
+lightweight CNN can be explored, or transfer learning, attention mechanisms,
+self-supervised learning, and more systematic threshold calibration strategies
+can be introduced, so as to examine whether DL methods can bring more
+significant gains when task complexity continues to increase. At the same time,
+feature design, feature fusion strategy, and class-imbalance handling in
+traditional methods can also be further optimized to examine their performance
+upper bound under low-cost conditions. Finally, at the task level, future
+research can extend patch-level classification to more continuous sharpness
+estimation, focus saliency map prediction, or finer focus-region segmentation
+tasks, so as to improve the applicability of the method in practical image
+quality analysis and visual perception applications. Based on the results of
+this thesis, future research can focus on how to further improve the detection
+ability of minority sharp regions while maintaining lower labeling cost and
+higher training efficiency, and evaluate whether increasing model complexity
+and computational resource investment is really necessary in more complex
+tasks.

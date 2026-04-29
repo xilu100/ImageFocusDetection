@@ -2,6 +2,8 @@
 
 ## 0. Patch size selection
 
+Patch-based local classification is the core representation in this workflow [@Hou_2016_CVPR], and fixed-size image patches are also consistent with transformer-style patch tokenization [@dosovitskiy2020image].
+
 ```yaml
 - Title: "Deep Neural Networks for No-Reference and Full-Reference Image Quality Assessment"
   URL: "https://ieeexplore.ieee.org/abstract/document/8063957"
@@ -30,6 +32,8 @@
 ```
 
 ## 1. Image normalization
+
+Grayscale normalization and size alignment are used here to keep the focus-measure pipeline and downstream patch extraction comparable across images [@1284395; @dosovitskiy2020image].
 
 ```yaml
 - Title: "Image quality assessment: from error visibility to structural similarity"
@@ -62,6 +66,8 @@
 
 ## 2. Image segmentation
 
+This step follows a patch-based image analysis strategy, where the original image is decomposed into local regions before classification [@Hou_2016_CVPR].
+
 ```yaml
 - Title: "Patch-based convolutional neural network for whole slide tissue image classification"
   Field: "Kernel of This Thesis"
@@ -79,6 +85,8 @@
 ## 3. Patch labeling
 
 ### 3.1 Image sharpness scoring strategy
+
+The sharpness scoring stage combines no-reference blur assessment and structure-aware image quality cues to build rule-based labels [@5739529; @1284395].
 
 ```yaml
 - Title: "A No-Reference Image Blur Metric Based on the Cumulative Probability of Blur Detection (CPBD)"
@@ -115,6 +123,8 @@
 
 ### 3.2
 
+This stage is related to pseudo-label style supervision in the broad weak-labeling sense, although the thesis itself distinguishes rule-based auto-labeling from model-generated pseudo-labels [@lee2013pseudo].
+
 ```yaml
 - Title: "Pseudo-label: The simple and efficient semi-supervised learning method for deep neural networks"
   Field: "Pseudo-label"
@@ -133,6 +143,8 @@
 ```
 
 ## 4. Original image reconstruction with labels
+
+Projection of patch predictions back to image space is conceptually close to dense prediction and localization-style visualization workflows [@Long_2015_CVPR; @Zhou_2016_CVPR].
 
 ```yaml
 - Title: "Fully Convolutional Networks for Semantic Segmentation"
@@ -163,6 +175,8 @@
 
 ## 0. Principal Component Analysis
 
+PCA is used here as a dimensionality-reduction baseline, while keeping in mind that explained variance alone does not guarantee better classification performance [@perry2025inference; @zheng2021application].
+
 ```yaml
 - Title: "Inference on the Proportion of Variance Explained in Principal Component Analysis"
   Field: "explained variance"
@@ -189,6 +203,8 @@
 
 ## 1. Decision Tree
 
+Decision trees provide an interpretable classical baseline for patch classification [@breiman2017classification].
+
 ```yaml
 - Title: "Classification and Regression Trees"
   Field: "Decision Tree"
@@ -203,6 +219,8 @@
 ```
 
 ## 2. Random Forest
+
+Random forests extend single-tree decision rules through ensemble aggregation and usually improve robustness [@breiman2001random].
 
 ```yaml
 - Title: "Random Forests"
@@ -222,6 +240,8 @@
 ```
 
 ## 3. Support Vector Machine (SVM)
+
+SVM is included as a strong margin-based classifier for medium-scale pixel-vector features [@cortes1995support].
 
 ```yaml
 - Title: "Support-Vector Networks"
@@ -257,6 +277,8 @@
 # Model selection - Deep Learning
 
 ## 1. Convolutional Neural Networks (CNN)
+
+CNNs serve as the deep learning baseline for directly learning patch-level discriminative patterns from pixels [@lecun2002gradient; @krizhevsky2012imagenet].
 
 ```yaml
 - Title: "ImageNet Classification with Deep Convolutional Neural Networks"
@@ -303,6 +325,8 @@
 
 ## 1. Accuracy, Precision, Recall, F1-score
 
+These metrics are standard for classification evaluation and are especially important under class imbalance [@schutze2008introduction].
+
 ```yaml
 - Title: "Introduction to information retrieval"
   Field: "Defined Precision, Recall, F1-score"
@@ -318,6 +342,8 @@
 ```
 
 ## 2. Confusion matrix
+
+The confusion matrix is used to inspect which focus states are most frequently confused with each other [@schutze2008introduction].
 
 ```yaml
 - Title: "Introduction to information retrieval"
@@ -347,6 +373,8 @@
 ```
 
 ## 4. Training efficiency and computational cost (Time , Speed)
+
+Optimization efficiency, mini-batch behavior, and learning-rate sensitivity are discussed here in line with standard SGD practice [@bottou2012stochastic].
 
 ```yaml
 - Title: "Stochastic Gradient Descent Tricks"
@@ -379,6 +407,8 @@
 ```
 
 ## 2. GLCM, LBP
+
+Texture descriptors such as GLCM and LBP are optional handcrafted references for describing local structure patterns [@haralick2007textural; @ojala2002multiresolution].
 
 ```yaml
 - Title: "Textural Features for Image Classification"
