@@ -1,0 +1,5 @@
+model_name,patch_size,sharp_threshold,blur_threshold,PCA_components,sample_percentage,epochs,batch_base,seed,learning_rate,use_weighted_sampler,sampler_weight_power,loss_weight_power
+CNN,32,0.75,0.4,0.95,100,10,128,42,0.001,auto,1.0,1.0
+CNN,32,0.75,0.4,0.99,100,10,128,42,0.001,auto,1.0,1.0
+CNN,32,0.75,0.4,0.995,100,10,128,42,0.001,auto,1.0,1.0
+CNN,32,0.75,0.4,0.999,100,10,128,42,0.001,auto,1.0,1.0

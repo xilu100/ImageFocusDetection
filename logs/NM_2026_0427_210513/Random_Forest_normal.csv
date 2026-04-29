@@ -1,0 +1,2 @@
+model_name,patch_size,sharp_threshold,blur_threshold,PCA_components,sample_percentage,n_estimators,max_depth,random_state,class_weight,n_jobs
+Random Forest,32,0.75,0.4,0.995,100,100,16,42,balanced_subsample,-1

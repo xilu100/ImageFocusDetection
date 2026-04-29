@@ -1,0 +1,6 @@
+model_name,patch_size,sharp_threshold,blur_threshold,PCA_components,sample_percentage,epochs,max_depth,min_samples_split,min_samples_leaf,class_weight,random_state
+Decision Tree,32,0.75,0.75,0.995,100,10,16,50,20,balanced,42
+Decision Tree,32,0.75,0.75,0.995,100,20,16,50,20,balanced,42
+Decision Tree,32,0.75,0.75,0.995,100,30,16,50,20,balanced,42
+Decision Tree,32,0.75,0.75,0.995,100,50,16,50,20,balanced,42
+Decision Tree,32,0.75,0.75,0.995,100,60,16,50,20,balanced,42

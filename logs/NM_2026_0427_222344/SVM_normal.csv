@@ -1,0 +1,2 @@
+model_name,patch_size,sharp_threshold,blur_threshold,PCA_components,sample_percentage,nystroem_components,nystroem_kernel,nystroem_gamma,random_state,svc_c,class_weight,max_iter
+SVM,32,0.75,0.75,0.995,100,300,rbf,,42,1.0,balanced,5000

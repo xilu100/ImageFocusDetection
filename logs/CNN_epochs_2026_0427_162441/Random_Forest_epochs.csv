@@ -1,0 +1,6 @@
+model_name,patch_size,sharp_threshold,blur_threshold,PCA_components,sample_percentage,epochs,n_estimators,max_depth,random_state,class_weight,n_jobs
+Random Forest,32,0.75,0.75,0.995,100,10,100,16,42,balanced_subsample,-1
+Random Forest,32,0.75,0.75,0.995,100,20,100,16,42,balanced_subsample,-1
+Random Forest,32,0.75,0.75,0.995,100,30,100,16,42,balanced_subsample,-1
+Random Forest,32,0.75,0.75,0.995,100,50,100,16,42,balanced_subsample,-1
+Random Forest,32,0.75,0.75,0.995,100,60,100,16,42,balanced_subsample,-1

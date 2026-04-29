@@ -40,4 +40,5 @@ src/training/model_save
 *.pdfsync
 *.pdf
 # Log files
-/logs
+#/logs
+predict_images
