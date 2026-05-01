@@ -1,10 +1,11 @@
-\documentclass{report}
+\documentclass{article}
 
 \input{preamble.tex}
 
 \sloppy
 
 \begin{document}
+\pagenumbering{gobble}
 
 \input{title.tex}
 \input{declaration.tex}
@@ -13,6 +14,8 @@
 
 \input{toc.tex}
 
+\clearpage
+\pagenumbering{arabic}
 \input{chapter1}
 \input{chapter2}
 \input{chapter3}
