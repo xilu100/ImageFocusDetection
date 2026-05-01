@@ -1,5 +1,5 @@
-\chapter{Methodology}
-\section{Overall Framework}
+\section{Methodology}
+\subsection{Overall Framework}
 \par This study builds a complete experimental pipeline for patch-based image
 focus detection \cite{Hou_2016_CVPR}, covering the full process from data
 preprocessing to result evaluation. From the perspective of practical
@@ -13,7 +13,7 @@ execution, the method mainly contains the following three connected stages:
     \item \textbf{Evaluation stage}: metric calculation, result comparison, and
     prediction visualization output.
 \end{itemize}
-\par At the same time, for clearer methodological description, this chapter
+\par At the same time, for clearer methodological description, this section
 also lists the experimental design as a separate part to explain the overall
 arrangement of pre-experiments, main experiments, and supplementary analyses.
 This pipeline connects classical machine learning methods and the lightweight
@@ -101,8 +101,8 @@ will be described in the following subsections.
     \label{fig:overall-framework}
 \end{figure}
 
-\section{Preprocessing}
-\subsection{Size Normalization and Grayscale Conversion}
+\subsection{Preprocessing}
+\subsubsection{Size Normalization and Grayscale Conversion}
 \par To reduce the heterogeneity of input data and ensure consistency of patch
 representation, this thesis first preprocesses the original images, as shown
 in Fig.~\ref{fig:preprocessing}. Preprocessing starts with size alignment. To
@@ -177,7 +177,7 @@ as
 $B(x,y)$ denote the values of pixel $(x,y)$ in the three color channels,
 respectively.
 
-\subsection{Patch Extraction Strategy}
+\subsubsection{Patch Extraction Strategy}
 \par After grayscale conversion and size alignment, the image is divided into
 fixed-size non-overlapping patches to form a regular grid representation
 \cite{Hou_2016_CVPR}. The row and column positions of each patch in the grid
@@ -207,7 +207,7 @@ original distribution.
 $\{P_{i,j}\}$, where $(i,j)$ corresponds to the position index of the patch in
 the original image grid.
 
-\subsection{Feature Extraction and Labeling}
+\subsubsection{Feature Extraction and Labeling}
 \subsubsection{Focus Features and Their Physical Meaning}
 \par After patch division, this thesis extracts sharpness features related to
 focus state from each local image block. Specifically, three types of features
@@ -583,8 +583,8 @@ discrete label visualization clearer.
     \label{fig:comparison}
 \end{figure}
 
-\section{Model Training}
-\subsection{Class Imbalance Consideration}
+\subsection{Model Training}
+\subsubsection{Class Imbalance Consideration}
 \par In this task, label $1$ corresponds to the sharp-class patch, and this
 class usually accounts for a relatively small proportion in the actual data.
 This phenomenon is related to the focus distribution of the image itself. For
@@ -607,7 +607,7 @@ For this reason, this thesis introduces class weighting in the subsequent
 classical machine learning models to alleviate the training bias caused by
 uneven sample distribution.
 
-\subsection{Classical Machine Learning Models}
+\subsubsection{Classical Machine Learning Models}
 \par In the classical machine learning part, this thesis selects three
 representative classification models, namely decision tree, random forest, and
 support vector machine. Their common characteristic is that they take the
@@ -715,7 +715,7 @@ corresponding PCA transformer are retained so that consistent feature
 transformation and prediction can be performed on new patches in the validation
 stage.
 
-\subsection{Lightweight CNN Model}
+\subsubsection{Lightweight CNN Model}
 \par To compare with classical machine learning methods, this thesis also builds
 a lightweight convolutional neural network (CNN) for patch classification
 \cite{lecun2002gradient,krizhevsky2012imagenet}. Different from models based on
@@ -800,7 +800,7 @@ $n_c$, the loss weight satisfies
 number of each class and then incorporated into the weighted cross-entropy loss
 function. At the same time, whether the resampling strategy is enabled depends
 on the specific experimental setting and will be compared separately in the
-later experimental chapter. Therefore, this section only explains that it is
+later experimental section. Therefore, this section only explains that it is
 included in the training framework and does not draw conclusions in advance.
 In addition, a small Gaussian noise perturbation is added to the input during
 data loading. This design is not intended to compensate for insufficient basic
@@ -819,8 +819,8 @@ $\sigma_n=0.03$. This design provides a lightweight and controllable robustness
 enhancement for limited-sample scenarios without significantly changing the
 focus property itself.
 
-\section{Evaluation}
-\subsection{Evaluation and Prediction Settings}
+\subsection{Evaluation}
+\subsubsection{Evaluation and Prediction Settings}
 \par In the evaluation setting, both the training set and validation set are
 generated by the same preprocessing, patch division, and automatic labeling
 pipeline. In the validation stage, patches with the textureless label $y=-1$
@@ -871,8 +871,8 @@ projection-based visualization, the discrimination characteristics of
 different methods in local focus-state recognition can be compared more
 intuitively.
 
-\section{Experimental Design}
-\subsection{Overall Experimental Logic}
+\subsection{Experimental Design}
+\subsubsection{Overall Experimental Logic}
 \par To ensure fairness and interpretability of the comparison results, this
 thesis keeps the preprocessing pipeline unchanged in the experimental design.
 That is, all experiments share the same image normalization, patch division,
@@ -907,7 +907,7 @@ pursue strict architectural isomorphism, but to examine the actual performance
 that different methods can achieve after reasonable configuration under a
 unified task, unified data source, and unified evaluation standard.
 
-\subsection{Pre-Experiments for Parameter Selection}
+\subsubsection{Pre-Experiments for Parameter Selection}
 \par The pre-experiment part contains four groups of comparisons, whose goal is
 to determine the values of two key parameters, namely PCA dimension and number
 of training epochs, under different task settings. Specifically, they include:
@@ -927,7 +927,7 @@ their role is to provide unified and reasonable settings for the subsequent
 main experiments rather than to serve directly as the final basis for judging
 which model is better.
 
-\subsection{Main Experiments}
+\subsubsection{Main Experiments}
 \par After completing the pre-experiments, this thesis further conducts the
 main experiments. In this stage, classical machine learning models and the
 lightweight CNN are independently trained and evaluated under the binary and
@@ -942,7 +942,7 @@ objectives:
     size and their applicability in low-sample scenarios.
 \end{itemize}
 
-\subsection{Sample-Size Analysis}
+\subsubsection{Sample-Size Analysis}
 \par Based on this objective, the main experiments do not focus only on the
 final result under a single training ratio. Instead, both task setting and
 sample size are incorporated into the analysis as comparison dimensions. With
@@ -951,7 +951,7 @@ classical machine learning methods and lightweight CNNs in binary and three-
 class tasks, but also further reveal their stability, advantages, and
 limitations under training sample conditions from $20\%$ to $100\%$.
 
-\subsection{Supplementary Analyses}
+\subsubsection{Supplementary Analyses}
 \par In addition, this thesis sets two supplementary analyses:
 \begin{itemize}
     \item for the resampling strategy in CNN training, comparing the influence

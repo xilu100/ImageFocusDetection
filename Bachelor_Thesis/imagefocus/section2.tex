@@ -1,6 +1,6 @@
-\chapter{Theoretical Background}
-\section{Image Focus and Blur Fundamentals}
-\subsection{Concept of Focus and Blur}
+\section{Theoretical Background}
+\subsection{Image Focus and Blur Fundamentals}
+\subsubsection{Concept of Focus and Blur}
 \par The focus state of an image is usually reflected by the degree to which
 edges, textures, and high-frequency information are preserved in local regions.
 When the imaging system is accurately focused on the target plane, boundaries
@@ -23,7 +23,7 @@ regions. For the patch-level classification task studied in this thesis, how to
 effectively describe the difference between clear and blurred regions is the
 theoretical basis for subsequent feature design and model learning.
 
-\subsection{Imaging Degradation Model}
+\subsubsection{Imaging Degradation Model}
 \par From the perspective of the imaging degradation model, a blurred image can
 usually be expressed as the convolution of a clear image and a point spread
 function, plus a noise term, namely
@@ -44,8 +44,8 @@ components of an image. As a result, details such as edges and textures are
 weakened by defocus or motion, which also provides the theoretical basis for
 the construction of subsequent sharpness features.
 
-\section{Patch-Based Image Representation}
-\subsection{Rationale for Patch-Based Modeling}
+\subsection{Patch-Based Image Representation}
+\subsubsection{Rationale for Patch-Based Modeling}
 \par In image analysis tasks, using the whole image directly as input can retain
 global context, but it is not suitable for describing spatial changes in local
 focus states. In contrast, dividing the image into multiple local patches of
@@ -66,7 +66,7 @@ basic unit for label generation, model training, and result projection.
 Therefore, patch-based representation is not only a data organization strategy,
 but also the core modeling foundation of the research method in this thesis.
 
-\subsection{Mathematical Formulation of Patch Grids}
+\subsubsection{Mathematical Formulation of Patch Grids}
 \par Let the input image be denoted by $I\in\mathbb{R}^{H\times W}$, and let
 the patch side length be $p$. When the image size is divisible by $p$, it can
 be divided into
@@ -92,8 +92,8 @@ classification. The above derivation assumes that the input size is compatible
 with the patch size. If the original image size is not divisible by $p$,
 corresponding adjustment is required in advance.
 
-\section{Patch Representations and Automatic Labeling}
-\subsection{Two Types of Patch Representation}
+\subsection{Patch Representations and Automatic Labeling}
+\subsubsection{Two Types of Patch Representation}
 \par In image focus analysis, the representation of local patches can be roughly
 divided into two categories. The first category is focus measures based on
 hand-crafted sharpness indicators \cite{5739529,1284395}, whose purpose is to
@@ -118,7 +118,7 @@ for models to learn discriminative patterns automatically. These two
 representations correspond to the two stages of ``automatic labeling'' and
 ``supervised classification'' in the method of this thesis.
 
-\subsection{Focus Measures in Spatial and Frequency Domains}
+\subsubsection{Focus Measures in Spatial and Frequency Domains}
 \par Laplacian features reflect second-order grayscale variation and are
 sensitive to edge and detail changes, so they are often used to measure local
 sharpness. Sobel features describe the gradient strength in the horizontal and
@@ -181,7 +181,7 @@ subsequent sharpness analysis can be obtained as
     \left[s_{\mathrm{lap}}(P),\; s_{\mathrm{sob}}(P),\; s_{\mathrm{fft}}(P)\right]^\top
     \label{eq:feature-vector-basic}
 \end{equation}
-\subsection{Pixel-Level Vector Representation}
+\subsubsection{Pixel-Level Vector Representation}
 \par Complementary to the above statistical features is the direct use of raw
 patch pixels to construct the input for supervised learning. Let a grayscale
 patch be denoted by $P\in\mathbb{R}^{p\times p}$, then its vectorized
@@ -204,7 +204,7 @@ the patch size is large, the dimension of the raw pixel vector becomes $p^2$.
 Therefore, dimensionality reduction methods are often combined in practical
 modeling to control the complexity of the feature space.
 
-\subsection{From Focus Scores to Automatic Labels}
+\subsubsection{From Focus Scores to Automatic Labels}
 \par A further distinction should be made here. The process of generating
 supervisory signals from the above sharpness indicators is more appropriately
 called ``automatic labeling'' rather than strict ``pseudo-labeling''.
@@ -228,8 +228,8 @@ from local observation alone. In such cases, they are usually regarded as
 low-confidence samples and are ignored or filtered out before subsequent
 training.
 
-\section{Classical Machine Learning Methods}
-\subsection{General Characteristics of Classical Models}
+\subsection{Classical Machine Learning Methods}
+\subsubsection{General Characteristics of Classical Models}
 \par Image classification tasks based on patch vector representation can often be
 implemented with classical machine learning methods \cite{murphy2022pml}.
 Compared with end-to-end deep learning, these methods do not automatically
@@ -252,7 +252,7 @@ $p^2$, classical models often need to combine procedures such as feature
 standardization, kernel approximation, or principal component analysis, so as
 to reduce training complexity while preserving the main information.
 
-\subsection{Support Vector Machine, Tree Models and PCA}
+\subsubsection{Support Vector Machine, Tree Models and PCA}
 \par For a binary classification problem based on the feature vector
 $\mathbf{x}\in\mathbb{R}^d$, the linear decision function of a support vector
 machine \cite{cortes1995support} is usually written as
@@ -345,8 +345,8 @@ while retaining certain nonlinear expressive ability. For the task of this
 thesis, this idea provides the theoretical basis for the subsequent use of SVM
 based on Nystr\"{o}m kernel approximation.
 
-\section{Convolutional Neural Networks for Image Analysis}
-\subsection{Advantages of CNNs for Patch Analysis}
+\subsection{Convolutional Neural Networks for Image Analysis}
+\subsubsection{Advantages of CNNs for Patch Analysis}
 \par Convolutional neural networks (CNNs)
 \cite{lecun2002gradient,krizhevsky2012imagenet} are among the most important
 deep learning models in current image analysis. Their core advantage is that
@@ -368,7 +368,7 @@ prone to overfitting. Therefore, in small-sample research, using a lightweight
 CNN with fewer parameters and a shallower structure is a reasonable choice to
 balance model representation ability and training feasibility.
 
-\subsection{Basic Operations of CNNs}
+\subsubsection{Basic Operations of CNNs}
 \par In mathematical form, the basic operation of a convolutional layer can be
 expressed as
 \begin{equation}
@@ -411,8 +411,8 @@ image. By minimizing the loss function, the CNN can learn feature
 representations suitable for focus state discrimination in an end-to-end
 manner.
 
-\section{Learning under Limited Data Conditions}
-\subsection{Challenges of Limited Data}
+\subsection{Learning under Limited Data Conditions}
+\subsubsection{Challenges of Limited Data}
 \par Small-sample learning is a common issue in many practical image tasks,
 especially when the cost of local annotation is high. When the available
 training data are insufficient, the model often finds it difficult to learn
@@ -449,7 +449,7 @@ not the same. Reweighting mainly acts at the loss level, while resampling acts
 at the data sampling distribution level. Therefore, the two methods may also
 have different effects on the balance between precision and recall.
 
-\subsection{Risk Minimization and Weighted Learning}
+\subsubsection{Risk Minimization and Weighted Learning}
 \par From the perspective of statistical learning, model training can usually be
 viewed as an empirical risk minimization problem \cite{murphy2022pml}:
 \begin{equation}
@@ -476,8 +476,8 @@ that under limited data conditions, controlling model complexity, introducing
 regularization constraints, and performing class balancing are important
 theoretical means to improve model stability.
 
-\section{Performance Evaluation for Patch Classification}
-\subsection{Overall and Class-Wise Metrics}
+\subsection{Performance Evaluation for Patch Classification}
+\subsubsection{Overall and Class-Wise Metrics}
 \par In patch-level focus detection tasks, model performance is reflected not
 only in whether the overall classification is correct, but also in whether the
 model can distinguish different classes of patches in a balanced way.
@@ -536,7 +536,7 @@ taken to obtain macro $F_1$:
 class distribution is imbalanced, it often reflects the true discrimination
 ability of the model on minority classes better than overall accuracy alone.
 
-\subsection{Confusion Analysis and Decision Rules}
+\subsubsection{Confusion Analysis and Decision Rules}
 \par To observe the misclassification patterns among classes more intuitively,
 the confusion matrix is also commonly used \cite{schutze2008introduction}. For
 a $C$-class classification problem, the element of the confusion matrix
@@ -579,7 +579,7 @@ between the precision and recall of the clear class by adjusting the threshold.
 This is especially important when the class distribution is imbalanced and the
 research focus is more concerned with the detection ability of clear regions.
 
-\subsection{Projection-Based Visualization of Predictions}
+\subsubsection{Projection-Based Visualization of Predictions}
 \par In addition to numerical metrics, patch-level tasks often project the
 prediction results back to the original image space for visualization. The
 basic idea is to fill each local predicted label back into its corresponding
@@ -590,11 +590,11 @@ display result. Although this process does not change the classification result
 itself, it can present the spatial prediction distribution of the model in a
 more intuitive way, thus helping analyze focus boundaries, local misclassified
 regions, and prediction differences among different methods. Based on the above
-theoretical foundation, the next chapter will further explain how this thesis
+theoretical foundation, the next section will further explain how this thesis
 organizes patch-level prediction, metric calculation, and result visualization
 on a unified validation set.
 
-\subsection{Performance-Cost Tradeoff}
+\subsubsection{Performance-Cost Tradeoff}
 \par For image patch classification tasks, the quality of a model is usually not
 determined only by recognition metrics themselves, but is also related to the
 computational cost required for training and inference. In general, a more

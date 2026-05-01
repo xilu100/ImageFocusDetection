@@ -1,5 +1,5 @@
-\chapter{Introduction}
-\section{Background and Context}
+\section{Introduction}
+\subsection{Background and Context}
 
 \par During natural scene imaging, not all objects are projected onto the image
 plane with the same level of clarity. Affected by factors such as lens focusing
@@ -34,7 +34,7 @@ defocus or detail loss. In this way, the optical concept of being ``close to
 the focal plane'' is transformed into a computable discrimination problem in
 the image domain.
 
-\par To avoid ambiguity caused by mixed use of terms in the following chapters,
+\par To avoid ambiguity caused by mixed use of terms in the following sections,
 this thesis adopts the following convention for class labels and descriptive
 expressions. At the label level, the thesis uniformly uses \textit{blur},
 \textit{sharp}, and \textit{intermediate} as class names. The binary
@@ -94,7 +94,7 @@ and what are their performance boundaries under a unified task definition. This
 question has both engineering value and research significance, and it forms the
 starting point of this work.
 
-\section{Problem Formulation}
+\subsection{Problem Formulation}
 
 \par To organize image focus detection as a repeatable and comparable supervised
 learning task, this thesis adopts a unified patch-based modeling framework
@@ -128,7 +128,7 @@ same data basis. With this design, the thesis can analyze more clearly the
 applicability and performance boundaries of different modeling methods under
 the same task definition.
 
-\section{Research Gap and Challenges}
+\subsection{Research Gap and Challenges}
 
 \par Although there has already been substantial research on blur analysis,
 sharpness evaluation, and local image classification, there are still several
@@ -166,7 +166,7 @@ imbalance handling, and binary versus three-class task settings on the final
 results. These issues together form the core challenges that the research
 design of this thesis aims to address.
 
-\section{Research Motivation}
+\subsection{Research Motivation}
 
 \par The motivation of this thesis comes from both engineering practice and
 methodological research. From the engineering perspective, it is often
@@ -196,7 +196,7 @@ applicable scenarios of different methods? Answers to these questions serve not
 only practical method selection, but also help supplement empirical knowledge
 in small-sample visual classification research.
 
-\section{Objectives and Contributions}
+\subsection{Objectives and Contributions}
 
 \par Around the above research questions, this thesis takes patch-based image
 focus detection \cite{Hou_2016_CVPR} as the target task, builds a unified
@@ -229,7 +229,7 @@ and contributions of this thesis can be summarized as follows:
           tasks.
 \end{itemize}
 
-\section{Overview of Research Approach}
+\subsection{Overview of Research Approach}
 
 \par From the perspective of the overall technical route, the method of this
 thesis can be summarized into four stages. In the first stage, uniform
@@ -248,19 +248,19 @@ conditions. In this way, the thesis can observe more comprehensively the
 applicable boundaries of different methods in the patch-based image focus
 detection task.
 
-\section{Organization of the Thesis}
+\subsection{Organization of the Thesis}
 
-\par The rest of this thesis is organized as follows. Chapter 2 introduces the
+\par The rest of this thesis is organized as follows. Section 2 introduces the
 theoretical foundations related to this work, including the imaging degradation
 mechanism of focus and blur, patch-based image representation, sharpness
 features, traditional machine learning models, convolutional neural networks,
 and learning characteristics under limited data conditions. It also provides
 the main mathematical definitions and evaluation metrics used in the subsequent
-experiments. Chapter 3 describes in detail the method design and implementation
+experiments. Section 3 describes in detail the method design and implementation
 process of this thesis, including image preprocessing, patch division,
 automatic labeling rules, the training strategy of traditional models and
 lightweight CNNs, and the overall comparative experimental design. The
-following chapters present the experimental results based on the above theory
+following sections present the experimental results based on the above theory
 and methods, analyze the performance of different models under different task
 settings, and finally summarize the whole work and the main conclusions of this
 thesis.
