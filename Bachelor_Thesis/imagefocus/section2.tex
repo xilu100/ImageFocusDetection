@@ -11,7 +11,8 @@ defocus blur and motion blur. Defocus blur usually results from the limitation
 of depth of field or the shift of the focal plane, while motion blur is mainly
 caused by relative displacement during exposure. Although their generation
 mechanisms are different, both may lead to local edge diffusion, texture
-weakening, and loss of high-frequency components.
+weakening, and loss of high-frequency components
+\cite{pertuz2013analysis,yi2016lbp,fergus2006removing}.
 
 \par From the perspective of image features, clear regions usually have more
 obvious grayscale variation, stronger local gradients, and richer texture
@@ -20,13 +21,14 @@ smoothed details, and a frequency distribution more concentrated in the
 low-frequency range. Therefore, the essence of focus detection can be
 understood as the analysis of the fidelity of structural information in local
 regions. For the patch-level classification task studied in this thesis, how to
-effectively describe the difference between clear and blurred regions is the
-theoretical basis for subsequent feature design and model learning.
+effectively describe the difference between clear and blurred regions
+\cite{pertuz2013analysis,5739529} is the theoretical basis for subsequent
+feature design and model learning.
 
 \subsubsection{Imaging Degradation Model}
 \par From the perspective of the imaging degradation model, a blurred image can
 usually be expressed as the convolution of a clear image and a point spread
-function, plus a noise term, namely
+function, plus a noise term \cite{lam2000iterative}, namely
 \begin{equation}
     g(x,y)=f(x,y)*h(x,y)+n(x,y)
     \label{eq:blur-model}
@@ -42,7 +44,7 @@ frequency domain, the above equation can be further written as
 \par This shows that the blur process essentially suppresses the high-frequency
 components of an image. As a result, details such as edges and textures are
 weakened by defocus or motion, which also provides the theoretical basis for
-the construction of subsequent sharpness features.
+the construction of subsequent sharpness features \cite{lam2000iterative}.
 
 \subsection{Patch-Based Image Representation}
 \subsubsection{Rationale for Patch-Based Modeling}
@@ -60,11 +62,12 @@ information, allowing the model to focus more directly on local visual features
 related to focus state. Second, fixed-size patches make it convenient to
 extract statistical features in a unified way or to construct the input of
 neural networks, thus reducing the complexity of model design and training
-procedures. In this thesis, the image is divided into a non-overlapping grid,
+procedures \cite{Hou_2016_CVPR,dosovitskiy2020image}. In this thesis, the image is divided into a non-overlapping grid,
 and each patch is not only the basic unit for feature extraction, but also the
 basic unit for label generation, model training, and result projection.
-Therefore, patch-based representation is not only a data organization strategy,
-but also the core modeling foundation of the research method in this thesis.
+Therefore, patch-based representation is not only a data
+organization strategy, but also the core modeling foundation of the research
+method in this thesis \cite{Hou_2016_CVPR}.
 
 \subsubsection{Mathematical Formulation of Patch Grids}
 \par Let the input image be denoted by $I\in\mathbb{R}^{H\times W}$, and let
@@ -105,7 +108,7 @@ it automatically \cite{murphy2022pml}. The former has strong interpretability
 and is suitable for constructing automatic labels or explicit scoring rules,
 while the latter preserves more complete local intensity distribution
 information and is more suitable as a general input representation for
-supervised learning models.
+supervised learning models \cite{5739529,1284395,murphy2022pml}.
 
 \par For the task in this thesis, Laplacian, Sobel, and frequency-domain
 high-frequency energy are mainly used to measure the absolute sharpness of a
@@ -121,16 +124,17 @@ representations correspond to the two stages of ``automatic labeling'' and
 \subsubsection{Focus Measures in Spatial and Frequency Domains}
 \par Laplacian features reflect second-order grayscale variation and are
 sensitive to edge and detail changes, so they are often used to measure local
-sharpness. Sobel features describe the gradient strength in the horizontal and
+sharpness \cite{pertuz2013analysis}. Sobel features describe the gradient strength in the horizontal and
 vertical directions through first-order derivative approximation and can
-represent local edge saliency well. FFT features analyze image signals from the
+represent local edge saliency well \cite{pertuz2013analysis}. FFT features analyze image signals from the
 frequency-domain perspective and use the proportion or energy of high-frequency
-components as an important indicator of sharpness \cite{5739529,1284395},
-because clear regions usually preserve more high-frequency details. Combining
+components as an important indicator of sharpness \cite{yap2004image},
+because clear regions usually preserve more high-frequency details
+\cite{pertuz2013analysis}. Combining
 these features makes it possible to describe the focus state of a patch from
 both the spatial and frequency domains. Compared with a single feature, fused
-features usually have better stability and are also more suitable for
-subsequent automatic label generation.
+features \cite{pertuz2013analysis,yap2004image} usually have better stability
+and are also more suitable for subsequent automatic label generation.
 
 \par For a local grayscale patch $P(x,y)$, the Laplacian operator can be
 written as
@@ -138,7 +142,8 @@ written as
     \nabla^2 P=\frac{\partial^2 P}{\partial x^2}+\frac{\partial^2 P}{\partial y^2}
     \label{eq:laplacian-basic}
 \end{equation}
-\par A common local sharpness measure is the variance of the Laplacian response:
+\par A common local sharpness measure is the variance of the Laplacian response
+\cite{pertuz2013analysis}:
 \begin{equation}
     s_{\mathrm{lap}}(P)=\operatorname{Var}\!\left(\nabla^2 P\right)
     \label{eq:laplacian-var-basic}
@@ -159,7 +164,8 @@ two directions:
     \label{eq:sobel-score-basic}
 \end{equation}
 \par In the frequency domain, the two-dimensional discrete Fourier transform can
-be expressed as
+be expressed as below and is typically computed efficiently by FFT algorithms
+\cite{cooley1965algorithm}:
 \begin{equation}
     \hat{P}(u,v)=\sum_{x=0}^{m-1}\sum_{y=0}^{n-1}
     P(x,y)\exp\!\left[-j2\pi\left(\frac{ux}{m}+\frac{vy}{n}\right)\right]
@@ -201,8 +207,8 @@ statistics are most important. Instead, it preserves the complete local
 distribution of all pixels within the patch, and the subsequent classifier or
 convolutional network learns effective discriminative features by itself. When
 the patch size is large, the dimension of the raw pixel vector becomes $p^2$.
-Therefore, dimensionality reduction methods are often combined in practical
-modeling to control the complexity of the feature space.
+Therefore, dimensionality reduction methods \cite{murphy2022pml} are often
+combined in practical modeling to control the complexity of the feature space.
 
 \subsubsection{From Focus Scores to Automatic Labels}
 \par A further distinction should be made here. The process of generating
@@ -225,8 +231,8 @@ then divided into several discrete categories according to pre-defined rules.
 When some local regions simultaneously lack sufficient texture, edge, or
 intensity variation, their sharpness is often difficult to determine stably
 from local observation alone. In such cases, they are usually regarded as
-low-confidence samples and are ignored or filtered out before subsequent
-training.
+low-confidence samples \cite{sohn2020fixmatch} and are ignored or filtered out
+before subsequent training.
 
 \subsection{Classical Machine Learning Methods}
 \subsubsection{General Characteristics of Classical Models}
@@ -236,18 +242,19 @@ Compared with end-to-end deep learning, these methods do not automatically
 learn hierarchical representations in multi-layer networks, but rely on input
 feature vectors for discrimination. Their advantages lie in relatively simple
 model structure, lower training cost, and often better controllability in
-small-sample scenarios.
+small-sample scenarios \cite{cortes1995support,breiman2001random}.
 
 \par The typical classical classifiers involved in this thesis include support
 vector machines, decision trees, and random forests. Support vector machines
 maximize the class margin by finding an optimal separating hyperplane
-\cite{cortes1995support}, and they have strong discriminative ability in
-small- and medium-scale datasets as well as high-dimensional feature spaces.
+\cite{cortes1995support} and they have strong discriminative ability in
+small- and medium-scale datasets as well as high-dimensional feature spaces
+\cite{cortes1995support}.
 Decision trees build tree-structured decision rules by recursively partitioning
-the feature space \cite{breiman2017classification}, and they are highly
+the feature space \cite{breiman2017classification} and they are highly
 interpretable. Random forests improve model stability and generalization by
 ensembling multiple decision trees, and they usually resist overfitting better
-than a single tree. Since the dimension of vectorized patches grows with
+than a single tree \cite{breiman2001random}. Since the dimension of vectorized patches grows with
 $p^2$, classical models often need to combine procedures such as feature
 standardization, kernel approximation, or principal component analysis, so as
 to reduce training complexity while preserving the main information.
@@ -305,7 +312,8 @@ representation of principal component analysis (PCA)
 \par where $\boldsymbol{\mu}$ denotes the mean of the training samples, and $W$
 is composed of the first $k$ principal component directions. The role of PCA is
 to compress redundant dimensions, reduce the influence of noise, and provide a
-more compact representation for subsequent classifiers.
+more compact representation for subsequent classifiers, as commonly motivated
+in PCA-based dimensionality reduction \cite{perry2025inference,zheng2021application}.
 
 \par In classical machine learning pipelines, in addition to dimensionality
 reduction, input features are often standardized so that different dimensions
@@ -321,8 +329,9 @@ prevents large-scale features from dominating too strongly during distance
 calculation, margin optimization, or kernel approximation, thereby improving
 the training stability of subsequent linear classifiers and kernel methods. For
 models such as support vector machines that are sensitive to feature scale,
-standardization is usually an important preprocessing step to ensure that
-information from different dimensions can be used in a relatively balanced way.
+standardization \cite{hsu2003practical} is usually an important preprocessing
+step to ensure that information from different dimensions can be used in a
+relatively balanced way.
 
 \par In addition to linear SVM, support vector machines can also describe
 nonlinear class boundaries through kernel functions. However, standard kernel
@@ -343,7 +352,7 @@ the kernel trick can be approximately transformed into a linear discrimination
 problem in an explicit feature space, which reduces computational complexity
 while retaining certain nonlinear expressive ability. For the task of this
 thesis, this idea provides the theoretical basis for the subsequent use of SVM
-based on Nystr\"{o}m kernel approximation.
+based on Nystr\"{o}m kernel approximation \cite{williams2001using,scholkopf2002learning}.
 
 \subsection{Convolutional Neural Networks for Image Analysis}
 \subsubsection{Advantages of CNNs for Patch Analysis}
@@ -362,11 +371,12 @@ automatically learn discriminative patterns related to sharpness, such as
 complex combinations among edge strength, texture structure, and local
 contrast. Especially under the patch-based setting, CNNs can directly take
 local image patches as input and avoid the information loss that may arise in
-manual feature selection. However, deep models usually require more training
-data to perform stably. When the sample size is limited, complex networks are
-prone to overfitting. Therefore, in small-sample research, using a lightweight
-CNN with fewer parameters and a shallower structure is a reasonable choice to
-balance model representation ability and training feasibility.
+manual feature selection \cite{lecun2002gradient,krizhevsky2012imagenet}. However, deep models usually require more training
+data to perform stably \cite{goodfellow2016deep,shorten2019survey}. When the sample size is limited, complex networks are
+prone to overfitting \cite{goodfellow2016deep}. Therefore, in small-sample research, using a lightweight
+CNN \cite{howard2017mobilenets} with fewer parameters and a shallower structure
+is a reasonable choice to balance model representation ability and training
+feasibility under limited-data conditions \cite{goodfellow2016deep,shorten2019survey}.
 
 \subsubsection{Basic Operations of CNNs}
 \par In mathematical form, the basic operation of a convolutional layer can be
@@ -414,22 +424,23 @@ manner.
 \subsection{Learning under Limited Data Conditions}
 \subsubsection{Challenges of Limited Data}
 \par Small-sample learning is a common issue in many practical image tasks,
-especially when the cost of local annotation is high. When the available
+especially when the cost of local annotation is high \cite{shu2018small}. When the available
 training data are insufficient, the model often finds it difficult to learn
 stable class boundaries and tends to overfit accidental patterns in the
 training samples, thereby reducing its generalization ability on new samples.
 This problem exists for both classical methods and deep learning methods, but
 its form is different. Classical methods are more easily limited by feature
 representation ability, while deep models are more easily limited by the
-mismatch between parameter scale and data demand.
+mismatch between parameter scale and data demand \cite{goodfellow2016deep}.
 
 \par To alleviate the influence of limited data, common strategies in research
 include data augmentation, class reweighting, model lightweighting, and
-controlling experimental variables. Data augmentation expands the training
+controlling experimental variables \cite{shorten2019survey,he2009learning,howard2017mobilenets}.
+Data augmentation expands the training
 distribution by applying perturbations to the original samples and helps the
-model obtain stronger robustness. Class reweighting can alleviate the class
-imbalance problem. Model lightweighting reduces the risk of overfitting by
-decreasing the number of parameters. For this thesis, the low-sample condition
+model obtain stronger robustness \cite{shorten2019survey}. Class reweighting can alleviate the class
+imbalance problem \cite{he2009learning}. Model lightweighting reduces the risk of overfitting by
+decreasing the number of parameters \cite{howard2017mobilenets}. For this thesis, the low-sample condition
 is not only an experimental limitation, but also the core premise for
 comparing the applicability of different methods. Therefore, understanding the
 learning characteristics under limited data conditions is a necessary
@@ -445,9 +456,10 @@ categories that are difficult to cover during parameter updates. The latter
 changes the class composition in mini-batches or in the training set, so that
 minority-class samples are seen more frequently during training. Both methods
 aim to alleviate the bias caused by class imbalance, but their mechanisms are
-not the same. Reweighting mainly acts at the loss level, while resampling acts
-at the data sampling distribution level. Therefore, the two methods may also
-have different effects on the balance between precision and recall.
+not the same \cite{Cui_2019_CVPR,buda2018systematic}. Reweighting mainly acts
+at the loss level, while resampling acts at the data sampling distribution
+level. Therefore, the two methods may also have different effects on the
+balance between precision and recall.
 
 \subsubsection{Risk Minimization and Weighted Learning}
 \par From the perspective of statistical learning, model training can usually be
@@ -473,8 +485,9 @@ training:
 \end{equation}
 \par where $\alpha_c$ denotes the weight of class $c$. The above form indicates
 that under limited data conditions, controlling model complexity, introducing
-regularization constraints, and performing class balancing are important
-theoretical means to improve model stability.
+regularization constraints, and performing class balancing
+\cite{goodfellow2016deep,Cui_2019_CVPR} are important theoretical means to
+improve model stability.
 
 \subsection{Performance Evaluation for Patch Classification}
 \subsubsection{Overall and Class-Wise Metrics}
@@ -483,10 +496,10 @@ only in whether the overall classification is correct, but also in whether the
 model can distinguish different classes of patches in a balanced way.
 Therefore, experimental evaluation usually needs to examine overall accuracy,
 class-wise precision and recall, and the confusion relations among different
-classes at the same time. For the binary and three-class settings involved in
-this thesis, such metrics can reflect both the model's ability to recognize
-clear regions and whether it tends to confuse blurred, intermediate, or other
-categories with each other.
+classes at the same time \cite{schutze2008introduction}. For the binary and
+three-class settings involved in this thesis, such metrics can reflect both the
+model's ability to recognize clear regions and whether it tends to confuse
+blurred, intermediate, or other categories with each other.
 
 \par The most basic overall metric is accuracy. Suppose there are $N_v$ valid
 patches in the validation set, with true labels $y_i$ and predicted labels
@@ -534,7 +547,8 @@ taken to obtain macro $F_1$:
 \end{equation}
 \par This metric assigns the same weight to each class. Therefore, when the
 class distribution is imbalanced, it often reflects the true discrimination
-ability of the model on minority classes better than overall accuracy alone.
+ability of the model on minority classes better than overall accuracy alone
+\cite{schutze2008introduction}.
 
 \subsubsection{Confusion Analysis and Decision Rules}
 \par To observe the misclassification patterns among classes more intuitively,
@@ -575,9 +589,10 @@ we have
 \end{equation}
 \par This form shows that binary classification output does not have to rely
 only on the fixed maximum-probability decision rule. Instead, it can trade off
-between the precision and recall of the clear class by adjusting the threshold.
-This is especially important when the class distribution is imbalanced and the
-research focus is more concerned with the detection ability of clear regions.
+between the precision and recall of the clear class by adjusting the threshold
+\cite{davis2006relationship}. This is especially important when the class
+distribution is imbalanced and the research focus is more concerned with the
+detection ability of clear regions.
 
 \subsubsection{Projection-Based Visualization of Predictions}
 \par In addition to numerical metrics, patch-level tasks often project the
@@ -606,4 +621,4 @@ consumption. Therefore, when comparing different methods, in addition to
 performance metrics such as accuracy, precision, recall, $F_1$, and macro
 $F_1$, efficiency indicators such as training time are also commonly analyzed
 together, so as to evaluate the practical applicability of a model more
-comprehensively.
+comprehensively \cite{murphy2022pml,goodfellow2016deep}.

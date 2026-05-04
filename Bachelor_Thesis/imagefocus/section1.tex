@@ -19,14 +19,14 @@ the edge transition in its corresponding region becomes sharper and the texture
 details are better preserved. In contrast, when the object point deviates from
 the focal plane, the optical energy spreads on the imaging plane, which leads
 to edge broadening, attenuation of high-frequency information, and finally
-defocus blur. Therefore, whether an object is close to the focal plane is the
+defocus blur \cite{lam2000iterative,yi2016lbp}. Therefore, whether an object is close to the focal plane is the
 physical basis of the difference between clear and blurred regions in an image.
 
 \par Based on this understanding, image focus detection in computer vision does
 not directly measure the geometric position of the focal plane in the optical
 system. Instead, it estimates the relative focus level of different regions
 according to observable cues in the image, such as intensity variation, texture
-structure, and high-frequency response \cite{5739529,1284395}. In other words,
+structure, and high-frequency response \cite{pertuz2013analysis,5739529}. In other words,
 this task does not focus on giving a single clarity score for the whole image.
 Rather, it analyzes the global image or its local regions and determines which
 regions are in a better focused state and which regions suffer from obvious
@@ -61,7 +61,7 @@ relies on local modeling rather than purely global modeling. This is because
 focus state itself has obvious spatial non-uniformity, and image-level average
 statistics are often not sufficient to accurately reflect the specific
 locations of local edge diffusion, texture weakening, or high-frequency
-information loss. For this reason, patch-based representation
+information loss \cite{yi2016lbp,pertuz2013analysis}. For this reason, patch-based representation
 \cite{Hou_2016_CVPR} has gradually become a common practice in this kind of
 task. The image is first divided into local patches of fixed size, and then
 each patch is treated as the basic analysis unit for sharpness evaluation or
@@ -72,19 +72,21 @@ projected-back results.
 
 \par Existing related methods can be roughly divided into two categories. The
 first category is traditional methods based on hand-crafted features
-\cite{murphy2022pml}. These methods usually use gradient, edge, Laplacian
+\cite{pertuz2013analysis,5739529}. These methods usually use gradient, edge, Laplacian
 response, or high-frequency information in the frequency domain to describe
 local clarity, and then combine classifiers such as support vector machines,
-decision trees, or random forests for discrimination. Such methods are simple
-to implement, relatively interpretable, and usually friendly to small or
-medium-sized datasets. The second category is methods based on convolutional
+decision trees, or random forests for discrimination
+\cite{cortes1995support,breiman2017classification,breiman2001random}. Such methods are often relatively
+easy to implement and interpret, and they can remain competitive on small- or
+medium-sized datasets \cite{pertuz2013analysis,cortes1995support,breiman2001random}. The second category is methods based on convolutional
 neural networks (CNNs) \cite{lecun2002gradient,krizhevsky2012imagenet}. Their
 main advantage is that they can automatically learn discriminative patterns
 directly from pixels, and they often have stronger representation ability in
 scenes with complex textures and nonlinear feature combinations. However, deep
-models usually depend more on sufficient data support. Especially for
+models usually depend more on sufficient data support
+\cite{goodfellow2016deep,shu2018small}. Especially for
 patch-level tasks, both the quality and quantity of training samples directly
-affect model stability.
+affect model stability \cite{shu2018small,shorten2019survey}.
 
 \par This thesis focuses exactly on this practical problem: in patch-based image
 focus detection, when the available training data are limited and the cost of
@@ -136,16 +138,18 @@ issues worth further discussion for the patch-level image focus detection task
 studied in this thesis, especially under limited data conditions.
 
 \par First, deep learning methods perform strongly in many image tasks, but
-their advantages are often built on relatively sufficient training data. When
+their advantages are often built on relatively sufficient training data
+\cite{krizhevsky2012imagenet,shu2018small,shorten2019survey}. When
 the number of patch-level samples is limited and the labels do not come from
 high-cost manual fine annotation, whether a CNN can stably learn effective
 discriminative patterns and maintain generalization ability is not a conclusion
 that can be assumed in advance. Second, although traditional machine learning
-methods are usually easier to train and control under small-sample conditions,
+methods are usually easier to train and control under small-sample conditions
+\cite{cortes1995support,breiman2001random},
 their performance may be limited by the expressive ability of the input
 representation. When facing samples with complex texture structures, weakened
 edges, or ambiguous class boundaries, their classification ability may also be
-unstable.
+unstable \cite{pertuz2013analysis}.
 
 \par More importantly, existing studies often focus on optimizing only one kind
 of method, while systematic comparisons between traditional methods and
@@ -172,8 +176,8 @@ design of this thesis aims to address.
 methodological research. From the engineering perspective, it is often
 difficult to obtain large-scale and high-quality manual patch-level annotation
 data in practical image focus analysis tasks, and computing resources may also
-be limited. Under such conditions, complex deep models are not always the best
-choice. Therefore, it is necessary to clarify the applicable boundaries of
+be limited. Under such conditions, complex deep models may not always be the
+most practical choice \cite{shu2018small,howard2017mobilenets,shorten2019survey}. Therefore, it is necessary to clarify the applicable boundaries of
 different methods under low-sample conditions and provide a more operational
 basis for subsequent system design.
 

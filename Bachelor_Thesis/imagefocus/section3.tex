@@ -674,7 +674,7 @@ nonlinear distribution, its expressive ability may be insufficient. In
 contrast, a pure kernel SVM can construct more flexible classification
 boundaries in implicit high-dimensional space through the kernel trick, and is
 therefore more suitable for handling nonlinear differences among local texture
-and edge patterns. The cost, however, is that the training process usually
+and edge patterns \cite{cortes1995support,scholkopf2002learning}. The cost, however, is that the training process usually
 depends on kernel-matrix computation, which brings higher time and memory
 burden when the sample number is large, and is also not favorable for the
 efficient execution of later comparative experiments involving multiple
@@ -690,7 +690,7 @@ support vector classifier. The purpose is to retain as much nonlinear
 expressive ability of kernel methods as possible while transforming the
 training process into a linear classification problem in an approximately
 explicit feature space, thereby balancing representation ability and
-computational efficiency. If $\varphi(\cdot)$ denotes the approximate kernel
+computational efficiency \cite{williams2001using,scholkopf2002learning}. If $\varphi(\cdot)$ denotes the approximate kernel
 mapping, the implemented SVM form can be written as
 \begin{equation}
     f(\mathbf{r})=\mathbf{w}^\top \varphi(\mathbf{r})+b
@@ -737,7 +737,8 @@ weighting or resampling strategies. It should be noted that although resampling
 and loss weighting both serve minority-class learning, their mechanisms are
 different. The former increases the occurrence frequency of minority classes by
 adjusting the sampling distribution of mini-batches, while the latter directly
-adjusts the error weights of different classes in the loss function. This
+adjusts the error weights of different classes in the loss function
+\cite{buda2018systematic,Cui_2019_CVPR}. This
 thesis keeps both strategies in the training framework so that later
 experiments can compare the effects of different imbalance-handling schemes.
 Considering that CNNs can already achieve good discriminative accuracy in image
@@ -745,7 +746,7 @@ classification tasks, this thesis does not introduce large-scale additional
 augmentation, but only adds lightweight noise perturbation within a controlled
 range to improve the model's general applicability under different acquisition
 conditions. This is also consistent with the common practice of improving the
-robustness of vision models. The purpose of choosing a lightweight CNN is not
+robustness of vision models \cite{shorten2019survey}. The purpose of choosing a lightweight CNN is not
 to compete with large deep models, but to examine whether, when network
 complexity is controlled, it can show stronger automatic feature learning
 ability than traditional methods in limited-data scenarios.
@@ -789,7 +790,7 @@ flattened and fed into a fully connected layer to obtain the class score:
 
 \subsubsection{Optimization and Noise Augmentation}
 \par Training uses the Adam optimizer and weighted cross-entropy loss
-\cite{bottou2012stochastic}. For the training sample set
+\cite{kingma2014adam}. For the training sample set
 $\{(\mathbf{x}_i,y_i)\}_{i=1}^{N}$, if the sample number of class $c$ is
 $n_c$, the loss weight satisfies
 \begin{equation}
@@ -864,7 +865,7 @@ the probability threshold $\tau_c$ of class $1$:
 \par Since this threshold can significantly change the partition result between
 the sharp and blur classes in the binary task, it should be regarded in the
 subsequent experimental analysis as one of the important prediction parameters
-affecting the binary performance of the CNN. In contrast, under the three-
+affecting the binary performance of the CNN \cite{davis2006relationship}. In contrast, under the three-
 class setting, both the CNN and classical classifiers use the class with the
 maximum score as the final prediction output. Through unified evaluation and
 projection-based visualization, the discrimination characteristics of

@@ -74,7 +74,8 @@ basis determines the unified parameters used in the formal experiments.
 \subsubsection{PCA Parameter Selection}
 \par The feature dimension of a flattened original patch is $1024$. If it is
 directly fed into classical classifiers, the training cost becomes high and
-more redundant information may also be introduced. Therefore, this thesis first
+more redundant information may also be introduced
+\cite{perry2025inference,zheng2021application}. Therefore, this thesis first
 determines the PCA parameter used in the subsequent experiments through
 comparative experiments. Specifically, under both the three-class and binary
 task settings, the same decision tree, random forest, and Nystr\"{o}m-SVM
@@ -876,7 +877,8 @@ calculated according to class frequency, but does not enable weighted sampling.
 Therefore, the ``weighted sampler'' discussed in this section more precisely
 means enabling an additional weighted sampling strategy while keeping the loss
 weights unchanged, and observing whether this can further improve the
-recognition performance of the minority sharp class. Since this supplementary
+recognition performance of the minority sharp class
+\cite{Cui_2019_CVPR,buda2018systematic}. Since this supplementary
 experiment is only conducted on the CNN, the results of the classical models
 remain unchanged.
 
