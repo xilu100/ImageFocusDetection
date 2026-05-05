@@ -2,13 +2,14 @@
 \subsection{Motivation}
 
 \par During natural scene imaging, not all objects are projected onto the image
-plane with the same level of clarity. Affected by factors such as lens focusing
-state, shooting distance, and depth of field, only some regions in a scene can
-present clear edges and textures, while other regions show different degrees of
-detail attenuation and defocus blur. As shown in Fig.~\ref{fig:Zoom1}, a single
+plane with the same level of clarity \cite{yi2016lbp,pertuz2013analysis}.
+Affected by factors such as lens focusing state, shooting distance, and depth of
+field, only some regions in a scene can present clear edges and textures, while
+other regions show different degrees of detail attenuation and defocus blur
+\cite{yi2016lbp,lam2000iterative}. As shown in Fig.~\ref{fig:Zoom1}, a single
 image often contains both clear and blurred regions at the same time. How to
 describe this spatially uneven distribution of clarity is a basic problem that
-image focus analysis needs to address.
+image focus analysis needs to address \cite{yi2016lbp,pertuz2013analysis}.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.6\textwidth]{images/Zoom1}
@@ -26,37 +27,38 @@ necessary to clarify the applicable boundaries of different methods under
 limited-data conditions and to provide a more operational basis for subsequent
 system design.
 
-\par From the research perspective, no unified conclusion has been formed on
-the relative advantages of traditional machine learning methods and lightweight
-CNNs in small-sample local visual classification tasks. Especially in the
-patch-level focus detection scenario considered in this thesis, the
-discrimination ability, stability, and applicable boundaries of different
-methods under limited data conditions still need to be answered through
-systematic comparison within a unified experimental framework.
+\par From the research perspective, no unified conclusion has been formed on the
+relative advantages of traditional machine learning methods and lightweight CNNs
+in small-sample local visual classification tasks
+\cite{shu2018small,howard2017mobilenets,cortes1995support,breiman2001random}.
+Especially in the patch-level focus detection scenario considered in this
+thesis, the discrimination ability, stability, and applicable boundaries of
+different methods under limited data conditions still need to be answered
+through systematic comparison within a unified experimental framework.
 
 \par Based on the above considerations, this thesis focuses on three core
 questions. First, can an automatic labeling mechanism provide usable and
 relatively stable supervisory signals for subsequent patch-level supervised
 learning? Second, under the same training set, validation set, and evaluation
 metrics, how do traditional machine learning methods and lightweight CNNs
-perform respectively? Third, when the task setting and training data
-conditions change, what differences appear in the performance trends and
-applicable scenarios of different methods? These questions define the
-motivation and starting point of this work.
+perform respectively? Third, when the task setting and training data conditions
+change, what differences appear in the performance trends and applicable
+scenarios of different methods? These questions define the motivation and
+starting point of this work.
 
 \subsection{Problem Formulation}
 
 \par To organize image focus detection as a repeatable and comparable supervised
-learning task, this thesis adopts a unified patch-based modeling framework
-\cite{Hou_2016_CVPR}. For each input image, uniform preprocessing is first
-performed, and then the image is divided into local patches. Each patch is
-treated as the most basic analysis object. In this way, the spatial focus
-distribution in the original image can be transformed into a local visual
-classification problem that is easier to model, train, and compare.
+learning task, this thesis adopts a unified patch-based modeling framework . For
+each input image, uniform preprocessing is first performed, and then the image
+is divided into local patches. Each patch is treated as the most basic analysis
+object. In this way, the spatial focus distribution in the original image can be
+transformed into a local visual classification problem that is easier to model,
+train, and compare \cite{Hou_2016_CVPR}.
 
 \par Under this framework, image focus detection is no longer expressed only as
-a subjective visual judgment problem, but is uniformly represented as a
-standard supervised learning task \cite{murphy2022pml}. This thesis focuses on
+a subjective visual judgment problem, but is uniformly represented as a standard
+supervised learning task \cite[pp.~1--8]{murphy2022pml}. This thesis focuses on
 the discrimination of focus states in different local regions, and further
 compares the changes in model performance under different task settings, so as
 to analyze the modeling characteristics of patch-level focus detection more
@@ -64,9 +66,9 @@ systematically.
 
 \par Under this formulation, each patch is assigned to a discrete focus-state
 category so that the local focus distribution in an image can be learned and
-evaluated in a consistent way. Accordingly, this thesis considers both a
-binary setting that distinguishes blurred and sharp patches and a three-class
-setting that further includes an intermediate state.
+evaluated in a consistent way. Accordingly, this thesis considers both a binary
+setting that distinguishes blurred and sharp patches and a three-class setting
+that further includes an intermediate state.
 
 \par Because manual patch annotation is costly, this thesis uses automatic
 labeling to construct patch-level labels and compares different models under a
@@ -81,44 +83,44 @@ studied in this thesis, especially under limited data conditions.
 
 \par First, deep learning methods perform strongly in many image tasks, but
 their advantages are often built on relatively sufficient training data
-\cite{krizhevsky2012imagenet,shu2018small,shorten2019survey}. When
-the number of patch-level samples is limited and the labels do not come from
-high-cost manual fine annotation, whether a CNN can stably learn effective
-discriminative patterns and maintain generalization ability is not a conclusion
-that can be assumed in advance. Second, although traditional machine learning
-methods are usually easier to train and control under small-sample conditions
-\cite{cortes1995support,breiman2001random},
-their performance may be limited by the expressive ability of the input
-representation. When facing samples with complex texture structures, weakened
-edges, or ambiguous class boundaries, their classification ability may also be
-unstable \cite{pertuz2013analysis}.
+\cite{krizhevsky2012imagenet,shu2018small,shorten2019survey}. When the number of
+patch-level samples is limited and the labels do not come from high-cost manual
+fine annotation, whether a CNN can stably learn effective discriminative
+patterns and maintain generalization ability is not a conclusion that can be
+assumed in advance \cite{shu2018small,shorten2019survey}. Second, although
+traditional machine learning methods are usually easier to train and control
+under small-sample conditions their performance may be limited by the expressive
+ability of the input representation \cite{cortes1995support,breiman2001random}.
+When facing samples with complex texture structures, weakened edges, or
+ambiguous class boundaries, their classification ability may also be unstable
+\cite{pertuz2013analysis}.
 
 \par More importantly, existing studies often focus on optimizing only one kind
 of method, while systematic comparisons between traditional methods and
-lightweight CNNs under a unified data processing pipeline, unified label
-system, and unified evaluation criteria are still lacking. For patch-based
-image focus detection \cite{Hou_2016_CVPR}, it is still unclear how different
-methods should be balanced in terms of accuracy, robustness, training cost, and
-dependence on sample size.
+lightweight CNNs under a unified data processing pipeline, unified label system,
+and unified evaluation criteria are still lacking. For patch-based image focus
+detection, it is still unclear how different methods should be balanced in terms
+of accuracy, robustness, training cost, and dependence on sample size
+\cite{Hou_2016_CVPR}.
 
 \par In addition to the gap in model comparison, the task itself also faces
-several direct challenges. The first is how to construct sufficiently
-consistent and repeatable patch-level supervisory signals without relying on
-manual patch-by-patch annotation. The second is how to organize the input,
-training, and evaluation of traditional machine learning models
-\cite{murphy2022pml} and CNNs under a unified pipeline, so that the comparison
-is fair. The third is how to analyze the influence of sample size, class
-imbalance handling, and binary versus three-class task settings on the final
-results. These issues together form the core challenges that the research
-design of this thesis aims to address.
+several direct challenges. The first is how to construct sufficiently consistent
+and repeatable patch-level supervisory signals without relying on manual
+patch-by-patch annotation. The second is how to organize the input, training,
+and evaluation of traditional machine learning models and CNNs under a unified
+pipeline, so that the comparison is fair
+\cite[pp.~321--423,~465--500]{murphy2022pml}. The third is how to analyze the
+influence of sample size, class imbalance handling, and binary versus
+three-class task settings on the final results. These issues together form the
+core challenges that the research design of this thesis aims to address.
 
 \subsection{Objectives and Contributions}
 
 \par Around the above research questions, this thesis takes patch-based image
-focus detection \cite{Hou_2016_CVPR} as the target task, builds a unified
-experimental pipeline, and systematically compares the performance of
-traditional machine learning methods and lightweight CNNs. The main objectives
-and contributions of this thesis can be summarized as follows:
+focus detection as the target task, builds a unified experimental pipeline, and
+systematically compares the performance of traditional machine learning methods
+and lightweight CNNs \cite{Hou_2016_CVPR}. The main objectives and contributions
+of this thesis can be summarized as follows:
 
 \begin{itemize}
     \item To build a complete and unified experimental framework covering image
@@ -132,11 +134,11 @@ and contributions of this thesis can be summarized as follows:
           tasks.
 
     \item To systematically compare the classification performance of
-          traditional machine learning methods \cite{murphy2022pml} and
-          lightweight CNNs under low-sample conditions with unified data
-          organization and evaluation criteria, and to analyze the differences
-          between different modeling paradigms in accuracy, class recognition
-          ability, robustness, and training complexity.
+          traditional machine learning methods and lightweight CNNs under
+          low-sample conditions with unified data organization and evaluation
+          criteria, and to analyze the differences between different modeling
+          paradigms in accuracy, class recognition ability, robustness, and
+          training complexity \cite[pp.~321--423,~465--500]{murphy2022pml}.
 
     \item To further examine the influence of sample size, class imbalance
           handling strategies, and binary versus three-class task settings on
@@ -151,13 +153,12 @@ and contributions of this thesis can be summarized as follows:
 theoretical foundations related to this work, including the imaging degradation
 mechanism of focus and blur, patch-based image representation, sharpness
 features, traditional machine learning models, convolutional neural networks,
-and learning characteristics under limited data conditions. It also provides
-the main mathematical definitions and evaluation metrics used in the subsequent
+and learning characteristics under limited data conditions. It also provides the
+main mathematical definitions and evaluation metrics used in the subsequent
 experiments. Section 3 describes in detail the method design and implementation
-process of this thesis, including image preprocessing, patch division,
-automatic labeling rules, the training strategy of traditional models and
-lightweight CNNs, and the overall comparative experimental design. The
-following sections present the experimental results based on the above theory
-and methods, analyze the performance of different models under different task
-settings, and finally summarize the whole work and the main conclusions of this
-thesis.
+process of this thesis, including image preprocessing, patch division, automatic
+labeling rules, the training strategy of traditional models and lightweight
+CNNs, and the overall comparative experimental design. The following sections
+present the experimental results based on the above theory and methods, analyze
+the performance of different models under different task settings, and finally
+summarize the whole work and the main conclusions of this thesis.
