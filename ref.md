@@ -362,6 +362,7 @@
         year      = {2022},
         publisher = {The MIT Press},
         address   = {Cambridge, MA},
+        pages     = {1--2},
         isbn      = {9780262046824}
         }
 
@@ -568,6 +569,7 @@
         year      = {2022},
         publisher = {The MIT Press},
         address   = {Cambridge, MA},
+        pages     = {1--2},
         isbn      = {9780262046824}
         }
 
@@ -920,6 +922,7 @@
         title={Deep Learning},
         author={Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron},
         year={2016},
+        pages={108--120, 421--422},
         publisher={MIT Press}
         }
     - Title: "Small Sample Learning in Big Data Era"
@@ -1012,6 +1015,7 @@
         title={Deep Learning},
         author={Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron},
         year={2016},
+        pages={108--120},
         publisher={MIT Press}
         }
 
@@ -1122,6 +1126,7 @@
         year      = {2022},
         publisher = {The MIT Press},
         address   = {Cambridge, MA},
+        pages     = {111--112, 186--189},
         isbn      = {9780262046824}
         }
 
@@ -1135,6 +1140,7 @@
         title={Deep Learning},
         author={Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron},
         year={2016},
+        pages={224--267},
         publisher={MIT Press}
         }
 
@@ -1175,6 +1181,7 @@
         title={Deep Learning},
         author={Goodfellow, Ian and Bengio, Yoshua and Courville, Aaron},
         year={2016},
+        pages={108--120, 224--267},
         publisher={MIT Press}
         }
     - Title: "Class-Balanced Loss Based on Effective Number of Samples"
@@ -1200,6 +1207,7 @@
         author={Sch{\"u}tze, Hinrich and Manning, Christopher D and Raghavan, Prabhakar},
         volume={39},
         year={2008},
+        pages={155--156},
         publisher={Cambridge University Press Cambridge}
         }
 
@@ -1214,6 +1222,7 @@
         author={Sch{\"u}tze, Hinrich and Manning, Christopher D and Raghavan, Prabhakar},
         volume={39},
         year={2008},
+        pages={154--155},
         publisher={Cambridge University Press Cambridge}
         }
 
@@ -1228,6 +1237,7 @@
         author={Sch{\"u}tze, Hinrich and Manning, Christopher D and Raghavan, Prabhakar},
         volume={39},
         year={2008},
+        pages={154--155},
         publisher={Cambridge University Press Cambridge}
         }
 
@@ -1242,6 +1252,7 @@
         author={Sch{\"u}tze, Hinrich and Manning, Christopher D and Raghavan, Prabhakar},
         volume={39},
         year={2008},
+        pages={156},
         publisher={Cambridge University Press Cambridge}
         }
 
@@ -1256,6 +1267,7 @@
         author={Sch{\"u}tze, Hinrich and Manning, Christopher D and Raghavan, Prabhakar},
         volume={39},
         year={2008},
+        pages={279--281, 330--332},
         publisher={Cambridge University Press Cambridge}
         }
 
@@ -1270,6 +1282,7 @@
         author={Sch{\"u}tze, Hinrich and Manning, Christopher D and Raghavan, Prabhakar},
         volume={39},
         year={2008},
+        pages={155--156},
         publisher={Cambridge University Press Cambridge}
         }
 
@@ -1284,6 +1297,7 @@
         author={Sch{\"u}tze, Hinrich and Manning, Christopher D and Raghavan, Prabhakar},
         volume={39},
         year={2008},
+        pages={279--281, 330--332},
         publisher={Cambridge University Press Cambridge}
         }
 
@@ -1298,6 +1312,7 @@
         author={Sch{\"u}tze, Hinrich and Manning, Christopher D and Raghavan, Prabhakar},
         volume={39},
         year={2008},
+        pages={155},
         publisher={Cambridge University Press Cambridge}
         }
 
