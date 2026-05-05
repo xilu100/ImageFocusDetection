@@ -24,10 +24,11 @@ overall experimental logic remains clear.
 
 \subsubsection{Pre-Experiments}
 \par The pre-experiments are used to determine the unified parameter settings
-for the later formal comparison. Specifically, they examine the PCA retention
-ratio for the classical machine learning models and the number of training
-epochs for the CNN under both the binary and three-class tasks. The selected
-settings are then fixed in the subsequent main experiments.
+for the later formal comparison. Specifically, they examine the threshold
+selection for automatic labeling, the PCA retention ratio for the classical
+machine learning models, and the number of training epochs for the CNN under
+both the binary and three-class tasks. The selected settings are then fixed in
+the subsequent main experiments.
 
 \subsubsection{Main Experiments}
 \par The main experiments compare the classical models and the lightweight CNN
@@ -45,6 +46,51 @@ to evaluate the trade-off between recognition performance and computational
 cost.
 
 \subsection{Pre-Experiments for Parameter Selection}
+\subsubsection{Threshold Parameter Selection}
+\par Before comparing different classifiers, this thesis first calibrates the
+thresholds used in the automatic labeling stage. Since the subsequent
+supervised learning task depends directly on the generated patch labels, the
+thresholds need to produce a spatial distribution of blur, sharp, and
+intermediate regions that is broadly consistent with human visual judgment of
+the focal plane. Therefore, the threshold selection is treated as a
+pre-experimental step before model training.
+
+\par In this subsection, $T_b$ denotes the blur threshold and $T_s$ denotes the
+sharp threshold in the fused sharpness score used for automatic labeling.
+
+\par The calibration starts from the three-class setting. The reason is that the
+three-class task provides a more explicit decomposition of local focus states:
+patches are separated into blur, intermediate, and sharp regions, so the
+appropriateness of the thresholds can be checked more directly through visual
+inspection of the generated focus maps. In the initial trial, the blur and
+sharp thresholds were set to $T_b=0.50$ and $T_s=0.85$. Under this setting,
+the labeled maps showed that the blur region occupied too large an area, the
+intermediate region was too limited, and the sharp region was also too small.
+This indicated that the partition was too strict and could not reflect the
+human judgment of the focal plane satisfactorily.
+
+\par To further adjust the thresholds, this thesis manually checked nearly
+$50\%$ of the training samples and compared the generated heatmaps and
+three-class focus maps with the corresponding original images. Starting from
+the initial setting, the thresholds were then increased or decreased in steps
+of $5\%$ and multiple groups of visual comparison experiments were conducted.
+After this iterative process, the final three-class setting was determined as
+$T_b=0.40$ and $T_s=0.75$. Under this setting, the spatial distribution of blur,
+intermediate, and sharp patches was judged to be more consistent with human
+visual perception of focus transitions and focal regions.
+
+\par After fixing the three-class thresholds, the sharp threshold
+$T_s=0.75$ was further adopted as the decision boundary of the binary task.
+This choice is also consistent with the labeling logic of the task itself. In
+the binary setting, the intermediate and blur regions are merged into the same
+non-sharp category, whereas only the sharp region is kept as an independent
+positive class. Therefore, using $0.75$ as the binary threshold preserves the
+same sharp-region judgment criterion as that used in the three-class setting,
+and the resulting binary focus maps were also found to be visually consistent
+with human judgment. Based on this calibration process, the subsequent
+experiments in this thesis use $T_b=0.40$ and $T_s=0.75$ for the three-class
+task, and $T=0.75$ for the binary task.
+
 \subsubsection{PCA Parameter Selection}
 \par The feature dimension of a flattened original patch is $1,024$. If it is
 directly fed into classical classifiers, the training cost becomes high and
