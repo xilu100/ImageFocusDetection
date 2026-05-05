@@ -60,32 +60,26 @@ difference in evaluation results is not large, traditional methods often have
 higher practical cost-effectiveness in engineering applications, rather than
 serving only as baseline models.
 
-\par At the same time, if the application scenario has more available samples,
-allows higher training cost, or places more emphasis on the model's automatic
-learning ability for complex local patterns, the lightweight CNN
-\cite{lecun2002gradient,krizhevsky2012imagenet} still has room for further
-optimization. The experiments in this thesis show that the CNN can indeed
-obtain relatively strong overall recognition results in the binary task, but
-this advantage is accompanied by higher training cost. It should be noted that
-the epoch setting of the CNN in the main text is itself the result of a trade-
-off between performance and time cost. Its purpose is to ensure that different
-experiments can be completed under a unified and acceptable computational cost,
-rather than waiting until the model reaches the fullest possible convergence
-under every setting. Even so, the CNN still shows relatively high accuracy and
-strong overall sharp-class discrimination ability, which indicates that its
-automatic representation ability has already shown some advantage in the
-current task. However, from the perspective of training time, its cost is still
-higher than that of classical machine learning methods. It should also be added
-that in the three-class task, the CNN under the default main experimental
-configuration performs worse than random forest and SVM, but the supplementary
-experiment already shows that training strategies such as weighted sampling can
-clearly improve its sharp-class recall and F1-score. Therefore, from a
-practical perspective, when the effects of ML and DL are close, whether it is
-necessary to invest more computational resources for limited performance gain
-still needs to be judged according to the specific application requirement. At
-the same time, the evaluation of CNN should not be reduced simply to the
-advantages or disadvantages of the model category itself, but should be
-analyzed together with the training configuration.
+\par At the same time, when an application provides more samples, permits higher
+training cost, or places greater emphasis on automatically learning complex
+local patterns, lightweight CNNs
+\cite{lecun2002gradient,krizhevsky2012imagenet} still offer room for further
+optimization. The experiments in this thesis show that CNNs can achieve strong
+overall performance in the binary task, but at a higher training cost. Notably,
+the epoch setting in the main text reflects a trade-off between performance and
+time, aiming to keep all experiments within an acceptable and unified
+computational budget rather than pursuing full convergence in every case. Even
+under this constraint, the CNN still maintains relatively high accuracy and
+strong sharp-class discrimination, suggesting an advantage in automatic feature
+representation. However, its training cost remains higher than that of
+classical machine learning methods. In the three-class task, the CNN under the
+default setting performs worse than random forest and SVM, although
+supplementary experiments show that strategies such as weighted sampling can
+significantly improve sharp-class recall and F1-score. Therefore, when ML and
+DL achieve similar results, whether the extra computational cost of CNNs is
+worth the limited performance gain should be judged by practical application
+needs, together with the training configuration rather than the model category
+alone.
 
 \subsection{Limitations of the Study}
 \par Although this thesis compares multiple kinds of models under a unified
@@ -148,3 +142,64 @@ ability of minority sharp regions while maintaining lower labeling cost and
 higher training efficiency, and evaluate whether increasing model complexity
 and computational resource investment is really necessary in more complex
 tasks.
+
+\subsection{Concluding}
+\par This thesis focuses on the patch-based image focus detection task
+\cite{Hou_2016_CVPR} and builds a unified experimental framework under
+low-sample conditions, integrating image preprocessing, patch division,
+automatic labeling, model training, and result evaluation into a complete
+pipeline. On this basis, this thesis systematically compares the performance
+of decision tree, random forest, support vector machine based on
+Nystr\"{o}m kernel approximation, and a lightweight CNN
+\cite{lecun2002gradient,krizhevsky2012imagenet} under the same data
+condition and the same task definition, so as to analyze the applicability of
+different modeling methods in this kind of task.
+
+\par The results show that model selection still needs to be judged according
+to specific task conditions. The lightweight CNN can obtain relatively strong
+overall recognition performance in the binary task, but its training cost is
+also higher than that of classical machine learning methods. At the same time,
+random forest and support vector machine also show strong classification
+ability in multiple groups of experiments, while requiring lower training cost
+and more direct implementation. Especially in the low-sample, patch-level
+image focus detection scenario studied in this thesis, both classical machine
+learning methods and CNN are trained on a unified grayscale patch
+representation. The experimental results show that under this input
+representation and task definition, classical machine learning methods do not
+lose effectiveness simply because they lack deep hierarchical representation.
+On the contrary, they show relatively high practical value between
+effectiveness and efficiency. It should also be recognized that the training
+setting of the CNN in this thesis itself contains a realistic trade-off
+between training time and recognition effect. The main text does not adopt
+full convergence as the sole objective in setting the training procedure. Even
+under this premise,
+the CNN still shows high accuracy and strong overall sharp-class recognition
+ability, but its time cost remains clearly higher than that of classical
+machine learning methods.
+
+\par Furthermore, the sample-size analysis shows that as the training ratio
+increases from $20\%$ to $100\%$, the accuracy, sharp-class F1-score, and
+macro F1 of most models improve only to a limited extent, while training time
+continues to rise. This indicates that under the current task setting,
+additional computational resources do not automatically turn into performance
+gain of the same magnitude. It should be emphasized that this conclusion is
+drawn for the scan over patch training sample ratios constructed from the
+fixed set of original images in this thesis, and should not be directly
+generalized to mean that increasing independent training data is always of
+limited benefit. Within this scope, the results of this thesis further
+support the following judgment: for image tasks, although CNNs have strong
+modeling ability, they are not necessarily always the first choice. When task
+structure, data scale, class-boundary characteristics, and resource
+constraints act together, classical machine learning methods may still be more
+appropriate engineering choices.
+
+\par Overall, this thesis provides a reproducible comparison framework for
+low-sample image focus detection and also offers a more targeted basis for
+model selection in practical applications. For similar tasks, method selection
+should consider recognition effect, training cost, data scale, and
+application requirements together, rather than directly adopting deep learning
+solutions only according to common experience from general vision tasks. The
+supplementary experiments in this thesis already show that the performance of
+the three-class CNN is clearly affected by training strategies such as
+weighted sampling, and therefore the final evaluation of different models
+should consider both model structure and training configuration.
