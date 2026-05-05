@@ -22,7 +22,7 @@ __pycache__
 src/training/model_save
 # LaTeX auxiliary files
 *.aux
-*.log
+Bachelor_Thesis/*/*.log
 *.out
 *.toc
 *.lof

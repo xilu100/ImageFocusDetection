@@ -1,0 +1,779 @@
+2026-04-27 18:01:49 [INFO] experiment_cfg = {'training': {'patch_size': 32, 'sharp_threshold': 0.75, 'blur_threshold': 0.75, 'PCA_components': 0.995, 'sample_percentage': [20, 40, 60, 80, 100]}, 'models': {'decision_tree': {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}, 'random_forest': {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}, 'svm': {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}, 'cnn': {'epochs': 30, 'batch_base': 128, 'seed': 42, 'learning_rate': 0.001, 'use_weighted_sampler': False, 'sampler_weight_power': 1.0, 'loss_weight_power': 1.0, 'build_lmdb_if_missing': True, 'assume_fixed_size': True}}}
+2026-04-27 18:01:49 [INFO] control_cfg = {'pipeline': {'preprocess': 1, 'train_evaluate': 1}, 'models': {'decision_tree': 1, 'random_forest': 1, 'svm': 1, 'cnn': 1}}
+2026-04-27 18:01:49 [INFO] 
+
+2026-04-27 18:01:49 [INFO] Sweep target: training.sample_percentage -> [20, 40, 60, 80, 100]
+2026-04-27 18:01:49 [INFO] === Step 1: Preprocessing (Run Once) ===
+2026-04-27 18:09:44 [INFO] Preprocessing total time: 475.38s
+2026-04-27 18:09:44 [INFO] === Mode: Train + Evaluate ===
+2026-04-27 18:09:44 [INFO] === Run 1/5 | training.sample_percentage=20 ===
+2026-04-27 18:09:44 [INFO] Evaluate output tag: TR_sample_percentage_20
+2026-04-27 18:09:44 [INFO] Enabled models: decision_tree, random_forest, svm, cnn
+2026-04-27 18:09:44 [INFO] === Step 2: Training ===
+2026-04-27 18:09:47 [INFO] [Decision Tree] Detected classes: [0, 1]
+2026-04-27 18:09:47 [INFO] [Decision Tree] Using 5 CPU cores for image loading.
+2026-04-27 18:09:55 [INFO] [Decision Tree] Image loading done, time: 7.69s
+2026-04-27 18:09:55 [INFO] [Decision Tree] X shape before PCA: (127631, 1024)
+2026-04-27 18:10:01 [INFO] [Decision Tree] PCA preprocessing done, time: 5.97s
+2026-04-27 18:10:01 [INFO] [Decision Tree] X shape after PCA: (127631, 107)
+2026-04-27 18:10:01 [INFO] final_model_params = {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}
+2026-04-27 18:10:19 [INFO] [Decision Tree] Training done, time: 17.98s
+2026-04-27 18:10:19 [INFO] 
+
+2026-04-27 18:10:19 [INFO] [Random Forest] Detected classes: [0, 1]
+2026-04-27 18:10:19 [INFO] [Random Forest] Using 5 CPU cores for image loading.
+2026-04-27 18:10:21 [INFO] [Random Forest] Image loading done, time: 2.17s
+2026-04-27 18:10:21 [INFO] [Random Forest] X shape before PCA: (127631, 1024)
+2026-04-27 18:10:27 [INFO] [Random Forest] PCA preprocessing done, time: 5.71s
+2026-04-27 18:10:27 [INFO] [Random Forest] X shape after PCA: (127631, 107)
+2026-04-27 18:10:27 [INFO] final_model_params = {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}
+2026-04-27 18:10:46 [INFO] [Random Forest] Training done, time: 19.46s
+2026-04-27 18:10:46 [INFO] 
+
+2026-04-27 18:10:46 [INFO] [SVM] Detected classes: [0, 1]
+2026-04-27 18:10:46 [INFO] [SVM] Using 5 CPU cores for image loading.
+2026-04-27 18:10:48 [INFO] [SVM] Image loading done, time: 2.19s
+2026-04-27 18:10:48 [INFO] [SVM] X shape before PCA: (127631, 1024)
+2026-04-27 18:10:54 [INFO] [SVM] PCA preprocessing done, time: 5.81s
+2026-04-27 18:10:54 [INFO] [SVM] X shape after PCA: (127631, 107)
+2026-04-27 18:10:54 [INFO] final_model_params = {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}
+2026-04-27 18:10:58 [INFO] [SVM] Training done, time: 3.64s
+2026-04-27 18:10:58 [INFO] 
+
+2026-04-27 18:10:58 [INFO] [CNN] Detected classes: [0, 1], num_classes=2
+2026-04-27 18:10:58 [INFO] ==== Device & Training Configuration ====
+2026-04-27 18:10:58 [INFO] MPS Device detected
+2026-04-27 18:10:58 [INFO] Using device: mps, AMP enabled: False
+2026-04-27 18:10:58 [INFO] Batch size: 128, num_workers: 5
+2026-04-27 18:10:58 [INFO] ========================================
+2026-04-27 18:11:03 [INFO] [LMDB] Build done in 5.50s
+2026-04-27 18:11:03 [INFO] [CNN] Using LMDB dataset: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 18:11:03 [INFO] [CNN] Weighted sampler disabled.
+2026-04-27 18:11:03 [INFO] [CNN] Class counts: [115735, 11896]
+2026-04-27 18:11:03 [INFO] [CNN] Class weights: [0.5514000058174133, 5.364500045776367]
+2026-04-27 18:11:11 [INFO] Epoch 1/30, Loss: 197.4539
+2026-04-27 18:11:16 [INFO] Epoch 2/30, Loss: 107.2549
+2026-04-27 18:11:21 [INFO] Epoch 3/30, Loss: 90.2837
+2026-04-27 18:11:25 [INFO] Epoch 4/30, Loss: 88.6483
+2026-04-27 18:11:30 [INFO] Epoch 5/30, Loss: 72.3892
+2026-04-27 18:11:35 [INFO] Epoch 6/30, Loss: 68.0624
+2026-04-27 18:11:39 [INFO] Epoch 7/30, Loss: 71.3261
+2026-04-27 18:11:44 [INFO] Epoch 8/30, Loss: 64.1194
+2026-04-27 18:11:49 [INFO] Epoch 9/30, Loss: 62.4474
+2026-04-27 18:11:53 [INFO] Epoch 10/30, Loss: 60.8312
+2026-04-27 18:11:58 [INFO] Epoch 11/30, Loss: 57.2377
+2026-04-27 18:12:03 [INFO] Epoch 12/30, Loss: 54.8519
+2026-04-27 18:12:07 [INFO] Epoch 13/30, Loss: 55.4841
+2026-04-27 18:12:12 [INFO] Epoch 14/30, Loss: 53.1644
+2026-04-27 18:12:17 [INFO] Epoch 15/30, Loss: 49.9174
+2026-04-27 18:12:21 [INFO] Epoch 16/30, Loss: 51.0038
+2026-04-27 18:12:26 [INFO] Epoch 17/30, Loss: 46.4145
+2026-04-27 18:12:31 [INFO] Epoch 18/30, Loss: 45.7554
+2026-04-27 18:12:35 [INFO] Epoch 19/30, Loss: 47.3209
+2026-04-27 18:12:40 [INFO] Epoch 20/30, Loss: 49.6260
+2026-04-27 18:12:45 [INFO] Epoch 21/30, Loss: 47.4991
+2026-04-27 18:12:49 [INFO] Epoch 22/30, Loss: 46.2287
+2026-04-27 18:12:54 [INFO] Epoch 23/30, Loss: 43.6475
+2026-04-27 18:12:59 [INFO] Epoch 24/30, Loss: 45.0579
+2026-04-27 18:13:04 [INFO] Epoch 25/30, Loss: 44.9121
+2026-04-27 18:13:08 [INFO] Epoch 26/30, Loss: 42.6849
+2026-04-27 18:13:13 [INFO] Epoch 27/30, Loss: 42.0852
+2026-04-27 18:13:18 [INFO] Epoch 28/30, Loss: 42.2190
+2026-04-27 18:13:22 [INFO] Epoch 29/30, Loss: 41.0873
+2026-04-27 18:13:27 [INFO] Epoch 30/30, Loss: 39.5759
+2026-04-27 18:13:27 [INFO] [CNN] Training time: 143.14 seconds
+2026-04-27 18:13:27 [INFO] 
+
+2026-04-27 18:13:27 [INFO] === Step 3: Evaluate ===
+2026-04-27 18:14:11 [INFO] ========== Decision Tree ==========
+2026-04-27 18:14:11 [INFO] Accuracy: 0.9143
+2026-04-27 18:14:11 [INFO] Classification Report:
+2026-04-27 18:14:11 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.98      0.92      0.95    121405
+           1       0.57      0.87      0.69     14665
+
+    accuracy                           0.91    136070
+   macro avg       0.77      0.89      0.82    136070
+weighted avg       0.94      0.91      0.92    136070
+
+2026-04-27 18:14:11 [INFO] Confusion Matrix:
+2026-04-27 18:14:11 [INFO] 
+ [[111657   9748]
+ [  1918  12747]]
+2026-04-27 18:14:21 [INFO] [Decision Tree] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:14:22 [INFO] ========== Random Forest ==========
+2026-04-27 18:14:22 [INFO] Accuracy: 0.9586
+2026-04-27 18:14:22 [INFO] Classification Report:
+2026-04-27 18:14:22 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.98      0.97      0.98    121405
+           1       0.79      0.84      0.81     14665
+
+    accuracy                           0.96    136070
+   macro avg       0.88      0.91      0.90    136070
+weighted avg       0.96      0.96      0.96    136070
+
+2026-04-27 18:14:22 [INFO] Confusion Matrix:
+2026-04-27 18:14:22 [INFO] 
+ [[118114   3291]
+ [  2337  12328]]
+2026-04-27 18:14:31 [INFO] [Random Forest] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:14:32 [INFO] ========== SVM ==========
+2026-04-27 18:14:32 [INFO] Accuracy: 0.9254
+2026-04-27 18:14:32 [INFO] Classification Report:
+2026-04-27 18:14:32 [INFO] 
+               precision    recall  f1-score   support
+
+           0       1.00      0.92      0.96    121405
+           1       0.59      0.97      0.74     14665
+
+    accuracy                           0.93    136070
+   macro avg       0.80      0.94      0.85    136070
+weighted avg       0.95      0.93      0.93    136070
+
+2026-04-27 18:14:32 [INFO] Confusion Matrix:
+2026-04-27 18:14:32 [INFO] 
+ [[111742   9663]
+ [   488  14177]]
+2026-04-27 18:14:42 [INFO] [SVM] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:14:42 [INFO] [CNN] Using class1_threshold=0.5000 for binary prediction.
+2026-04-27 18:15:06 [INFO] ========== CNN ==========
+2026-04-27 18:15:06 [INFO] Accuracy: 0.9660
+2026-04-27 18:15:06 [INFO] Classification Report:
+2026-04-27 18:15:06 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.96      1.00      0.98    121405
+           1       1.00      0.69      0.81     14665
+
+    accuracy                           0.97    136070
+   macro avg       0.98      0.84      0.90    136070
+weighted avg       0.97      0.97      0.96    136070
+
+2026-04-27 18:15:06 [INFO] Confusion Matrix:
+2026-04-27 18:15:06 [INFO] 
+ [[121370     35]
+ [  4588  10077]]
+2026-04-27 18:15:16 [INFO] [CNN] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:15:16 [INFO] === Run 2/5 | training.sample_percentage=40 ===
+2026-04-27 18:15:16 [INFO] Evaluate output tag: TR_sample_percentage_40
+2026-04-27 18:15:16 [INFO] Enabled models: decision_tree, random_forest, svm, cnn
+2026-04-27 18:15:16 [INFO] === Step 2: Training ===
+2026-04-27 18:15:21 [INFO] [Decision Tree] Detected classes: [0, 1]
+2026-04-27 18:15:21 [INFO] [Decision Tree] Using 5 CPU cores for image loading.
+2026-04-27 18:15:35 [INFO] [Decision Tree] Image loading done, time: 14.07s
+2026-04-27 18:15:35 [INFO] [Decision Tree] X shape before PCA: (255261, 1024)
+2026-04-27 18:15:47 [INFO] [Decision Tree] PCA preprocessing done, time: 11.52s
+2026-04-27 18:15:47 [INFO] [Decision Tree] X shape after PCA: (255261, 108)
+2026-04-27 18:15:47 [INFO] final_model_params = {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}
+2026-04-27 18:16:25 [INFO] [Decision Tree] Training done, time: 38.77s
+2026-04-27 18:16:25 [INFO] 
+
+2026-04-27 18:16:25 [INFO] [Random Forest] Detected classes: [0, 1]
+2026-04-27 18:16:25 [INFO] [Random Forest] Using 5 CPU cores for image loading.
+2026-04-27 18:16:39 [INFO] [Random Forest] Image loading done, time: 13.18s
+2026-04-27 18:16:39 [INFO] [Random Forest] X shape before PCA: (255261, 1024)
+2026-04-27 18:16:50 [INFO] [Random Forest] PCA preprocessing done, time: 11.70s
+2026-04-27 18:16:50 [INFO] [Random Forest] X shape after PCA: (255261, 108)
+2026-04-27 18:16:50 [INFO] final_model_params = {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}
+2026-04-27 18:17:34 [INFO] [Random Forest] Training done, time: 43.79s
+2026-04-27 18:17:34 [INFO] 
+
+2026-04-27 18:17:34 [INFO] [SVM] Detected classes: [0, 1]
+2026-04-27 18:17:34 [INFO] [SVM] Using 5 CPU cores for image loading.
+2026-04-27 18:17:48 [INFO] [SVM] Image loading done, time: 13.84s
+2026-04-27 18:17:48 [INFO] [SVM] X shape before PCA: (255261, 1024)
+2026-04-27 18:18:00 [INFO] [SVM] PCA preprocessing done, time: 11.61s
+2026-04-27 18:18:00 [INFO] [SVM] X shape after PCA: (255261, 108)
+2026-04-27 18:18:00 [INFO] final_model_params = {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}
+2026-04-27 18:18:07 [INFO] [SVM] Training done, time: 7.66s
+2026-04-27 18:18:07 [INFO] 
+
+2026-04-27 18:18:07 [INFO] [CNN] Detected classes: [0, 1], num_classes=2
+2026-04-27 18:18:07 [INFO] ==== Device & Training Configuration ====
+2026-04-27 18:18:07 [INFO] MPS Device detected
+2026-04-27 18:18:07 [INFO] Using device: mps, AMP enabled: False
+2026-04-27 18:18:07 [INFO] Batch size: 128, num_workers: 5
+2026-04-27 18:18:07 [INFO] ========================================
+2026-04-27 18:18:07 [INFO] [LMDB] Removed existing cache: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 18:18:07 [INFO] [LMDB] Removed existing lock: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb-lock
+2026-04-27 18:19:09 [INFO] [LMDB] Build done in 61.61s
+2026-04-27 18:19:09 [INFO] [CNN] Using LMDB dataset: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 18:19:09 [INFO] [CNN] Weighted sampler disabled.
+2026-04-27 18:19:09 [INFO] [CNN] Class counts: [231293, 23968]
+2026-04-27 18:19:09 [INFO] [CNN] Class weights: [0.551800012588501, 5.324999809265137]
+2026-04-27 18:19:21 [INFO] Epoch 1/30, Loss: 310.2633
+2026-04-27 18:19:31 [INFO] Epoch 2/30, Loss: 177.5153
+2026-04-27 18:19:40 [INFO] Epoch 3/30, Loss: 149.1617
+2026-04-27 18:19:49 [INFO] Epoch 4/30, Loss: 131.8300
+2026-04-27 18:19:59 [INFO] Epoch 5/30, Loss: 123.8777
+2026-04-27 18:20:08 [INFO] Epoch 6/30, Loss: 115.9674
+2026-04-27 18:20:17 [INFO] Epoch 7/30, Loss: 108.0987
+2026-04-27 18:20:27 [INFO] Epoch 8/30, Loss: 107.5599
+2026-04-27 18:20:36 [INFO] Epoch 9/30, Loss: 101.4591
+2026-04-27 18:20:45 [INFO] Epoch 10/30, Loss: 100.0564
+2026-04-27 18:20:55 [INFO] Epoch 11/30, Loss: 97.5720
+2026-04-27 18:21:04 [INFO] Epoch 12/30, Loss: 89.8014
+2026-04-27 18:21:14 [INFO] Epoch 13/30, Loss: 92.6137
+2026-04-27 18:21:23 [INFO] Epoch 14/30, Loss: 89.3220
+2026-04-27 18:21:32 [INFO] Epoch 15/30, Loss: 87.5207
+2026-04-27 18:21:42 [INFO] Epoch 16/30, Loss: 86.8221
+2026-04-27 18:21:51 [INFO] Epoch 17/30, Loss: 85.6973
+2026-04-27 18:22:00 [INFO] Epoch 18/30, Loss: 85.2774
+2026-04-27 18:22:09 [INFO] Epoch 19/30, Loss: 83.9515
+2026-04-27 18:22:19 [INFO] Epoch 20/30, Loss: 83.6359
+2026-04-27 18:22:28 [INFO] Epoch 21/30, Loss: 80.7661
+2026-04-27 18:22:37 [INFO] Epoch 22/30, Loss: 78.6864
+2026-04-27 18:22:47 [INFO] Epoch 23/30, Loss: 79.9010
+2026-04-27 18:22:56 [INFO] Epoch 24/30, Loss: 75.6932
+2026-04-27 18:23:06 [INFO] Epoch 25/30, Loss: 78.7156
+2026-04-27 18:23:15 [INFO] Epoch 26/30, Loss: 76.1338
+2026-04-27 18:23:24 [INFO] Epoch 27/30, Loss: 73.6839
+2026-04-27 18:23:34 [INFO] Epoch 28/30, Loss: 78.9000
+2026-04-27 18:23:43 [INFO] Epoch 29/30, Loss: 74.1740
+2026-04-27 18:23:52 [INFO] Epoch 30/30, Loss: 72.7509
+2026-04-27 18:23:52 [INFO] [CNN] Training time: 283.39 seconds
+2026-04-27 18:23:52 [INFO] 
+
+2026-04-27 18:23:52 [INFO] === Step 3: Evaluate ===
+2026-04-27 18:24:37 [INFO] ========== Decision Tree ==========
+2026-04-27 18:24:37 [INFO] Accuracy: 0.9168
+2026-04-27 18:24:37 [INFO] Classification Report:
+2026-04-27 18:24:37 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.99      0.92      0.95    121405
+           1       0.57      0.89      0.70     14665
+
+    accuracy                           0.92    136070
+   macro avg       0.78      0.90      0.82    136070
+weighted avg       0.94      0.92      0.92    136070
+
+2026-04-27 18:24:37 [INFO] Confusion Matrix:
+2026-04-27 18:24:37 [INFO] 
+ [[111713   9692]
+ [  1635  13030]]
+2026-04-27 18:24:47 [INFO] [Decision Tree] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:24:47 [INFO] ========== Random Forest ==========
+2026-04-27 18:24:47 [INFO] Accuracy: 0.9535
+2026-04-27 18:24:47 [INFO] Classification Report:
+2026-04-27 18:24:47 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.99      0.96      0.97    121405
+           1       0.73      0.91      0.81     14665
+
+    accuracy                           0.95    136070
+   macro avg       0.86      0.94      0.89    136070
+weighted avg       0.96      0.95      0.96    136070
+
+2026-04-27 18:24:47 [INFO] Confusion Matrix:
+2026-04-27 18:24:47 [INFO] 
+ [[116335   5070]
+ [  1260  13405]]
+2026-04-27 18:24:57 [INFO] [Random Forest] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:24:58 [INFO] ========== SVM ==========
+2026-04-27 18:24:58 [INFO] Accuracy: 0.9260
+2026-04-27 18:24:58 [INFO] Classification Report:
+2026-04-27 18:24:58 [INFO] 
+               precision    recall  f1-score   support
+
+           0       1.00      0.92      0.96    121405
+           1       0.60      0.97      0.74     14665
+
+    accuracy                           0.93    136070
+   macro avg       0.80      0.94      0.85    136070
+weighted avg       0.95      0.93      0.93    136070
+
+2026-04-27 18:24:58 [INFO] Confusion Matrix:
+2026-04-27 18:24:58 [INFO] 
+ [[111795   9610]
+ [   457  14208]]
+2026-04-27 18:25:07 [INFO] [SVM] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:25:07 [INFO] [CNN] Using class1_threshold=0.5000 for binary prediction.
+2026-04-27 18:25:31 [INFO] ========== CNN ==========
+2026-04-27 18:25:31 [INFO] Accuracy: 0.9645
+2026-04-27 18:25:31 [INFO] Classification Report:
+2026-04-27 18:25:31 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.96      1.00      0.98    121405
+           1       1.00      0.67      0.80     14665
+
+    accuracy                           0.96    136070
+   macro avg       0.98      0.84      0.89    136070
+weighted avg       0.97      0.96      0.96    136070
+
+2026-04-27 18:25:31 [INFO] Confusion Matrix:
+2026-04-27 18:25:31 [INFO] 
+ [[121391     14]
+ [  4816   9849]]
+2026-04-27 18:25:41 [INFO] [CNN] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:25:41 [INFO] === Run 3/5 | training.sample_percentage=60 ===
+2026-04-27 18:25:41 [INFO] Evaluate output tag: TR_sample_percentage_60
+2026-04-27 18:25:41 [INFO] Enabled models: decision_tree, random_forest, svm, cnn
+2026-04-27 18:25:41 [INFO] === Step 2: Training ===
+2026-04-27 18:25:48 [INFO] [Decision Tree] Detected classes: [0, 1]
+2026-04-27 18:25:48 [INFO] [Decision Tree] Using 5 CPU cores for image loading.
+2026-04-27 18:26:10 [INFO] [Decision Tree] Image loading done, time: 21.55s
+2026-04-27 18:26:10 [INFO] [Decision Tree] X shape before PCA: (382892, 1024)
+2026-04-27 18:26:28 [INFO] [Decision Tree] PCA preprocessing done, time: 17.76s
+2026-04-27 18:26:28 [INFO] [Decision Tree] X shape after PCA: (382892, 109)
+2026-04-27 18:26:28 [INFO] final_model_params = {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}
+2026-04-27 18:27:28 [INFO] [Decision Tree] Training done, time: 60.58s
+2026-04-27 18:27:28 [INFO] 
+
+2026-04-27 18:27:28 [INFO] [Random Forest] Detected classes: [0, 1]
+2026-04-27 18:27:28 [INFO] [Random Forest] Using 5 CPU cores for image loading.
+2026-04-27 18:27:49 [INFO] [Random Forest] Image loading done, time: 20.54s
+2026-04-27 18:27:49 [INFO] [Random Forest] X shape before PCA: (382892, 1024)
+2026-04-27 18:28:06 [INFO] [Random Forest] PCA preprocessing done, time: 17.37s
+2026-04-27 18:28:06 [INFO] [Random Forest] X shape after PCA: (382892, 109)
+2026-04-27 18:28:06 [INFO] final_model_params = {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}
+2026-04-27 18:29:16 [INFO] [Random Forest] Training done, time: 69.38s
+2026-04-27 18:29:16 [INFO] 
+
+2026-04-27 18:29:16 [INFO] [SVM] Detected classes: [0, 1]
+2026-04-27 18:29:16 [INFO] [SVM] Using 5 CPU cores for image loading.
+2026-04-27 18:29:37 [INFO] [SVM] Image loading done, time: 20.96s
+2026-04-27 18:29:37 [INFO] [SVM] X shape before PCA: (382892, 1024)
+2026-04-27 18:29:54 [INFO] [SVM] PCA preprocessing done, time: 17.10s
+2026-04-27 18:29:54 [INFO] [SVM] X shape after PCA: (382892, 109)
+2026-04-27 18:29:54 [INFO] final_model_params = {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}
+2026-04-27 18:30:06 [INFO] [SVM] Training done, time: 11.98s
+2026-04-27 18:30:06 [INFO] 
+
+2026-04-27 18:30:06 [INFO] [CNN] Detected classes: [0, 1], num_classes=2
+2026-04-27 18:30:06 [INFO] ==== Device & Training Configuration ====
+2026-04-27 18:30:06 [INFO] MPS Device detected
+2026-04-27 18:30:06 [INFO] Using device: mps, AMP enabled: False
+2026-04-27 18:30:06 [INFO] Batch size: 128, num_workers: 5
+2026-04-27 18:30:06 [INFO] ========================================
+2026-04-27 18:30:06 [INFO] [LMDB] Removed existing cache: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 18:30:06 [INFO] [LMDB] Removed existing lock: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb-lock
+2026-04-27 18:31:40 [INFO] [LMDB] Build done in 94.44s
+2026-04-27 18:31:40 [INFO] [CNN] Using LMDB dataset: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 18:31:40 [INFO] [CNN] Weighted sampler disabled.
+2026-04-27 18:31:40 [INFO] [CNN] Class counts: [346874, 36018]
+2026-04-27 18:31:40 [INFO] [CNN] Class weights: [0.5519000291824341, 5.315299987792969]
+2026-04-27 18:31:58 [INFO] Epoch 1/30, Loss: 400.1242
+2026-04-27 18:32:12 [INFO] Epoch 2/30, Loss: 209.2780
+2026-04-27 18:32:26 [INFO] Epoch 3/30, Loss: 189.4067
+2026-04-27 18:32:39 [INFO] Epoch 4/30, Loss: 175.7822
+2026-04-27 18:32:53 [INFO] Epoch 5/30, Loss: 161.3962
+2026-04-27 18:33:07 [INFO] Epoch 6/30, Loss: 153.7349
+2026-04-27 18:33:21 [INFO] Epoch 7/30, Loss: 150.7845
+2026-04-27 18:33:35 [INFO] Epoch 8/30, Loss: 146.7533
+2026-04-27 18:33:49 [INFO] Epoch 9/30, Loss: 136.6980
+2026-04-27 18:34:03 [INFO] Epoch 10/30, Loss: 133.4700
+2026-04-27 18:34:17 [INFO] Epoch 11/30, Loss: 135.1620
+2026-04-27 18:34:31 [INFO] Epoch 12/30, Loss: 127.8342
+2026-04-27 18:34:45 [INFO] Epoch 13/30, Loss: 124.8305
+2026-04-27 18:34:59 [INFO] Epoch 14/30, Loss: 120.9126
+2026-04-27 18:35:13 [INFO] Epoch 15/30, Loss: 119.4743
+2026-04-27 18:35:26 [INFO] Epoch 16/30, Loss: 118.3266
+2026-04-27 18:35:40 [INFO] Epoch 17/30, Loss: 113.6881
+2026-04-27 18:35:54 [INFO] Epoch 18/30, Loss: 114.6721
+2026-04-27 18:36:07 [INFO] Epoch 19/30, Loss: 112.0547
+2026-04-27 18:36:21 [INFO] Epoch 20/30, Loss: 113.0109
+2026-04-27 18:36:35 [INFO] Epoch 21/30, Loss: 111.8361
+2026-04-27 18:36:48 [INFO] Epoch 22/30, Loss: 108.3494
+2026-04-27 18:37:02 [INFO] Epoch 23/30, Loss: 107.5646
+2026-04-27 18:37:16 [INFO] Epoch 24/30, Loss: 107.1194
+2026-04-27 18:37:29 [INFO] Epoch 25/30, Loss: 106.9024
+2026-04-27 18:37:43 [INFO] Epoch 26/30, Loss: 109.3194
+2026-04-27 18:37:57 [INFO] Epoch 27/30, Loss: 102.1233
+2026-04-27 18:38:10 [INFO] Epoch 28/30, Loss: 106.8677
+2026-04-27 18:38:24 [INFO] Epoch 29/30, Loss: 107.4408
+2026-04-27 18:38:38 [INFO] Epoch 30/30, Loss: 104.4635
+2026-04-27 18:38:38 [INFO] [CNN] Training time: 417.44 seconds
+2026-04-27 18:38:38 [INFO] 
+
+2026-04-27 18:38:38 [INFO] === Step 3: Evaluate ===
+2026-04-27 18:40:01 [INFO] ========== Decision Tree ==========
+2026-04-27 18:40:01 [INFO] Accuracy: 0.9210
+2026-04-27 18:40:01 [INFO] Classification Report:
+2026-04-27 18:40:01 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.99      0.92      0.95    121405
+           1       0.59      0.89      0.71     14665
+
+    accuracy                           0.92    136070
+   macro avg       0.79      0.91      0.83    136070
+weighted avg       0.94      0.92      0.93    136070
+
+2026-04-27 18:40:01 [INFO] Confusion Matrix:
+2026-04-27 18:40:01 [INFO] 
+ [[112240   9165]
+ [  1578  13087]]
+2026-04-27 18:40:12 [INFO] [Decision Tree] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:40:12 [INFO] ========== Random Forest ==========
+2026-04-27 18:40:12 [INFO] Accuracy: 0.9498
+2026-04-27 18:40:12 [INFO] Classification Report:
+2026-04-27 18:40:12 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.99      0.95      0.97    121405
+           1       0.70      0.94      0.80     14665
+
+    accuracy                           0.95    136070
+   macro avg       0.85      0.95      0.89    136070
+weighted avg       0.96      0.95      0.95    136070
+
+2026-04-27 18:40:12 [INFO] Confusion Matrix:
+2026-04-27 18:40:12 [INFO] 
+ [[115463   5942]
+ [   887  13778]]
+2026-04-27 18:40:22 [INFO] [Random Forest] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:40:22 [INFO] ========== SVM ==========
+2026-04-27 18:40:23 [INFO] Accuracy: 0.9271
+2026-04-27 18:40:23 [INFO] Classification Report:
+2026-04-27 18:40:23 [INFO] 
+               precision    recall  f1-score   support
+
+           0       1.00      0.92      0.96    121405
+           1       0.60      0.97      0.74     14665
+
+    accuracy                           0.93    136070
+   macro avg       0.80      0.94      0.85    136070
+weighted avg       0.95      0.93      0.93    136070
+
+2026-04-27 18:40:23 [INFO] Confusion Matrix:
+2026-04-27 18:40:23 [INFO] 
+ [[111986   9419]
+ [   494  14171]]
+2026-04-27 18:40:33 [INFO] [SVM] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:40:33 [INFO] [CNN] Using class1_threshold=0.5000 for binary prediction.
+2026-04-27 18:41:06 [INFO] ========== CNN ==========
+2026-04-27 18:41:06 [INFO] Accuracy: 0.9684
+2026-04-27 18:41:06 [INFO] Classification Report:
+2026-04-27 18:41:07 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.97      1.00      0.98    121405
+           1       1.00      0.71      0.83     14665
+
+    accuracy                           0.97    136070
+   macro avg       0.98      0.85      0.91    136070
+weighted avg       0.97      0.97      0.97    136070
+
+2026-04-27 18:41:07 [INFO] Confusion Matrix:
+2026-04-27 18:41:07 [INFO] 
+ [[121378     27]
+ [  4276  10389]]
+2026-04-27 18:41:17 [INFO] [CNN] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 18:41:17 [INFO] === Run 4/5 | training.sample_percentage=80 ===
+2026-04-27 18:41:17 [INFO] Evaluate output tag: TR_sample_percentage_80
+2026-04-27 18:41:17 [INFO] Enabled models: decision_tree, random_forest, svm, cnn
+2026-04-27 18:41:17 [INFO] === Step 2: Training ===
+2026-04-27 18:41:27 [INFO] [Decision Tree] Detected classes: [0, 1]
+2026-04-27 18:41:27 [INFO] [Decision Tree] Using 5 CPU cores for image loading.
+2026-04-27 18:42:17 [INFO] [Decision Tree] Image loading done, time: 50.25s
+2026-04-27 18:42:17 [INFO] [Decision Tree] X shape before PCA: (510522, 1024)
+2026-04-27 18:42:39 [INFO] [Decision Tree] PCA preprocessing done, time: 22.52s
+2026-04-27 18:42:39 [INFO] [Decision Tree] X shape after PCA: (510522, 108)
+2026-04-27 18:42:39 [INFO] final_model_params = {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}
+2026-04-27 18:44:01 [INFO] [Decision Tree] Training done, time: 81.44s
+2026-04-27 18:44:01 [INFO] 
+
+2026-04-27 18:44:01 [INFO] [Random Forest] Detected classes: [0, 1]
+2026-04-27 18:44:01 [INFO] [Random Forest] Using 5 CPU cores for image loading.
+2026-04-27 18:44:50 [INFO] [Random Forest] Image loading done, time: 48.84s
+2026-04-27 18:44:50 [INFO] [Random Forest] X shape before PCA: (510522, 1024)
+2026-04-27 18:45:12 [INFO] [Random Forest] PCA preprocessing done, time: 21.86s
+2026-04-27 18:45:12 [INFO] [Random Forest] X shape after PCA: (510522, 108)
+2026-04-27 18:45:12 [INFO] final_model_params = {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}
+2026-04-27 18:46:50 [INFO] [Random Forest] Training done, time: 98.18s
+2026-04-27 18:46:50 [INFO] 
+
+2026-04-27 18:46:50 [INFO] [SVM] Detected classes: [0, 1]
+2026-04-27 18:46:50 [INFO] [SVM] Using 5 CPU cores for image loading.
+2026-04-27 18:47:38 [INFO] [SVM] Image loading done, time: 48.49s
+2026-04-27 18:47:38 [INFO] [SVM] X shape before PCA: (510522, 1024)
+2026-04-27 18:48:00 [INFO] [SVM] PCA preprocessing done, time: 21.70s
+2026-04-27 18:48:00 [INFO] [SVM] X shape after PCA: (510522, 108)
+2026-04-27 18:48:00 [INFO] final_model_params = {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}
+2026-04-27 18:48:16 [INFO] [SVM] Training done, time: 15.80s
+2026-04-27 18:48:16 [INFO] 
+
+2026-04-27 18:48:16 [INFO] [CNN] Detected classes: [0, 1], num_classes=2
+2026-04-27 18:48:16 [INFO] ==== Device & Training Configuration ====
+2026-04-27 18:48:16 [INFO] MPS Device detected
+2026-04-27 18:48:16 [INFO] Using device: mps, AMP enabled: False
+2026-04-27 18:48:16 [INFO] Batch size: 128, num_workers: 5
+2026-04-27 18:48:16 [INFO] ========================================
+2026-04-27 18:48:16 [INFO] [LMDB] Removed existing cache: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 18:48:16 [INFO] [LMDB] Removed existing lock: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb-lock
+2026-04-27 18:51:47 [INFO] [LMDB] Build done in 210.63s
+2026-04-27 18:51:47 [INFO] [CNN] Using LMDB dataset: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 18:51:47 [INFO] [CNN] Weighted sampler disabled.
+2026-04-27 18:51:47 [INFO] [CNN] Class counts: [462583, 47939]
+2026-04-27 18:51:47 [INFO] [CNN] Class weights: [0.551800012588501, 5.324699878692627]
+2026-04-27 18:52:07 [INFO] Epoch 1/30, Loss: 485.3815
+2026-04-27 18:52:26 [INFO] Epoch 2/30, Loss: 260.8463
+2026-04-27 18:52:44 [INFO] Epoch 3/30, Loss: 231.4381
+2026-04-27 18:53:02 [INFO] Epoch 4/30, Loss: 214.0866
+2026-04-27 18:53:20 [INFO] Epoch 5/30, Loss: 200.4605
+2026-04-27 18:53:39 [INFO] Epoch 6/30, Loss: 192.9395
+2026-04-27 18:53:57 [INFO] Epoch 7/30, Loss: 181.6800
+2026-04-27 18:54:15 [INFO] Epoch 8/30, Loss: 181.6115
+2026-04-27 18:54:33 [INFO] Epoch 9/30, Loss: 169.6771
+2026-04-27 18:54:51 [INFO] Epoch 10/30, Loss: 173.2797
+2026-04-27 18:55:10 [INFO] Epoch 11/30, Loss: 168.6543
+2026-04-27 18:55:28 [INFO] Epoch 12/30, Loss: 160.4213
+2026-04-27 18:55:46 [INFO] Epoch 13/30, Loss: 155.4783
+2026-04-27 18:56:04 [INFO] Epoch 14/30, Loss: 152.9048
+2026-04-27 18:56:23 [INFO] Epoch 15/30, Loss: 151.7787
+2026-04-27 18:56:41 [INFO] Epoch 16/30, Loss: 149.6737
+2026-04-27 18:56:59 [INFO] Epoch 17/30, Loss: 150.0393
+2026-04-27 18:57:17 [INFO] Epoch 18/30, Loss: 146.0742
+2026-04-27 18:57:36 [INFO] Epoch 19/30, Loss: 147.3351
+2026-04-27 18:57:54 [INFO] Epoch 20/30, Loss: 144.7425
+2026-04-27 18:58:12 [INFO] Epoch 21/30, Loss: 144.2470
+2026-04-27 18:58:30 [INFO] Epoch 22/30, Loss: 142.3632
+2026-04-27 18:58:48 [INFO] Epoch 23/30, Loss: 139.1149
+2026-04-27 18:59:07 [INFO] Epoch 24/30, Loss: 139.9324
+2026-04-27 18:59:25 [INFO] Epoch 25/30, Loss: 138.8032
+2026-04-27 18:59:43 [INFO] Epoch 26/30, Loss: 135.7932
+2026-04-27 19:00:01 [INFO] Epoch 27/30, Loss: 136.4663
+2026-04-27 19:00:20 [INFO] Epoch 28/30, Loss: 133.6423
+2026-04-27 19:00:38 [INFO] Epoch 29/30, Loss: 135.1367
+2026-04-27 19:00:56 [INFO] Epoch 30/30, Loss: 133.1351
+2026-04-27 19:00:56 [INFO] [CNN] Training time: 549.55 seconds
+2026-04-27 19:00:56 [INFO] 
+
+2026-04-27 19:00:56 [INFO] === Step 3: Evaluate ===
+2026-04-27 19:01:52 [INFO] ========== Decision Tree ==========
+2026-04-27 19:01:52 [INFO] Accuracy: 0.9220
+2026-04-27 19:01:52 [INFO] Classification Report:
+2026-04-27 19:01:52 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.99      0.92      0.95    121405
+           1       0.59      0.90      0.71     14665
+
+    accuracy                           0.92    136070
+   macro avg       0.79      0.91      0.83    136070
+weighted avg       0.94      0.92      0.93    136070
+
+2026-04-27 19:01:52 [INFO] Confusion Matrix:
+2026-04-27 19:01:52 [INFO] 
+ [[112232   9173]
+ [  1440  13225]]
+2026-04-27 19:02:02 [INFO] [Decision Tree] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 19:02:03 [INFO] ========== Random Forest ==========
+2026-04-27 19:02:03 [INFO] Accuracy: 0.9461
+2026-04-27 19:02:03 [INFO] Classification Report:
+2026-04-27 19:02:03 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.99      0.95      0.97    121405
+           1       0.68      0.95      0.79     14665
+
+    accuracy                           0.95    136070
+   macro avg       0.84      0.95      0.88    136070
+weighted avg       0.96      0.95      0.95    136070
+
+2026-04-27 19:02:03 [INFO] Confusion Matrix:
+2026-04-27 19:02:03 [INFO] 
+ [[114774   6631]
+ [   703  13962]]
+2026-04-27 19:02:12 [INFO] [Random Forest] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 19:02:13 [INFO] ========== SVM ==========
+2026-04-27 19:02:13 [INFO] Accuracy: 0.9275
+2026-04-27 19:02:13 [INFO] Classification Report:
+2026-04-27 19:02:13 [INFO] 
+               precision    recall  f1-score   support
+
+           0       1.00      0.92      0.96    121405
+           1       0.60      0.97      0.74     14665
+
+    accuracy                           0.93    136070
+   macro avg       0.80      0.95      0.85    136070
+weighted avg       0.95      0.93      0.93    136070
+
+2026-04-27 19:02:13 [INFO] Confusion Matrix:
+2026-04-27 19:02:13 [INFO] 
+ [[111992   9413]
+ [   454  14211]]
+2026-04-27 19:02:23 [INFO] [SVM] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 19:02:23 [INFO] [CNN] Using class1_threshold=0.5000 for binary prediction.
+2026-04-27 19:03:12 [INFO] ========== CNN ==========
+2026-04-27 19:03:12 [INFO] Accuracy: 0.9650
+2026-04-27 19:03:12 [INFO] Classification Report:
+2026-04-27 19:03:12 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.96      1.00      0.98    121405
+           1       1.00      0.68      0.81     14665
+
+    accuracy                           0.97    136070
+   macro avg       0.98      0.84      0.89    136070
+weighted avg       0.97      0.97      0.96    136070
+
+2026-04-27 19:03:12 [INFO] Confusion Matrix:
+2026-04-27 19:03:12 [INFO] 
+ [[121378     27]
+ [  4732   9933]]
+2026-04-27 19:03:22 [INFO] [CNN] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 19:03:22 [INFO] === Run 5/5 | training.sample_percentage=100 ===
+2026-04-27 19:03:22 [INFO] Evaluate output tag: TR_sample_percentage_100
+2026-04-27 19:03:22 [INFO] Enabled models: decision_tree, random_forest, svm, cnn
+2026-04-27 19:03:22 [INFO] === Step 2: Training ===
+2026-04-27 19:03:35 [INFO] [Decision Tree] Detected classes: [0, 1]
+2026-04-27 19:03:35 [INFO] [Decision Tree] Using 5 CPU cores for image loading.
+2026-04-27 19:04:12 [INFO] [Decision Tree] Image loading done, time: 37.69s
+2026-04-27 19:04:12 [INFO] [Decision Tree] X shape before PCA: (638153, 1024)
+2026-04-27 19:04:40 [INFO] [Decision Tree] PCA preprocessing done, time: 27.62s
+2026-04-27 19:04:40 [INFO] [Decision Tree] X shape after PCA: (638153, 108)
+2026-04-27 19:04:40 [INFO] final_model_params = {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}
+2026-04-27 19:06:23 [INFO] [Decision Tree] Training done, time: 103.48s
+2026-04-27 19:06:23 [INFO] 
+
+2026-04-27 19:06:23 [INFO] [Random Forest] Detected classes: [0, 1]
+2026-04-27 19:06:23 [INFO] [Random Forest] Using 5 CPU cores for image loading.
+2026-04-27 19:06:59 [INFO] [Random Forest] Image loading done, time: 35.91s
+2026-04-27 19:06:59 [INFO] [Random Forest] X shape before PCA: (638153, 1024)
+2026-04-27 19:07:25 [INFO] [Random Forest] PCA preprocessing done, time: 26.14s
+2026-04-27 19:07:25 [INFO] [Random Forest] X shape after PCA: (638153, 108)
+2026-04-27 19:07:25 [INFO] final_model_params = {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}
+2026-04-27 19:09:26 [INFO] [Random Forest] Training done, time: 120.80s
+2026-04-27 19:09:26 [INFO] 
+
+2026-04-27 19:09:26 [INFO] [SVM] Detected classes: [0, 1]
+2026-04-27 19:09:26 [INFO] [SVM] Using 5 CPU cores for image loading.
+2026-04-27 19:10:02 [INFO] [SVM] Image loading done, time: 35.70s
+2026-04-27 19:10:02 [INFO] [SVM] X shape before PCA: (638153, 1024)
+2026-04-27 19:10:28 [INFO] [SVM] PCA preprocessing done, time: 26.30s
+2026-04-27 19:10:28 [INFO] [SVM] X shape after PCA: (638153, 108)
+2026-04-27 19:10:28 [INFO] final_model_params = {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}
+2026-04-27 19:10:46 [INFO] [SVM] Training done, time: 17.68s
+2026-04-27 19:10:46 [INFO] 
+
+2026-04-27 19:10:46 [INFO] [CNN] Detected classes: [0, 1], num_classes=2
+2026-04-27 19:10:46 [INFO] ==== Device & Training Configuration ====
+2026-04-27 19:10:46 [INFO] MPS Device detected
+2026-04-27 19:10:46 [INFO] Using device: mps, AMP enabled: False
+2026-04-27 19:10:46 [INFO] Batch size: 128, num_workers: 5
+2026-04-27 19:10:46 [INFO] ========================================
+2026-04-27 19:10:46 [INFO] [LMDB] Removed existing cache: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 19:10:46 [INFO] [LMDB] Removed existing lock: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb-lock
+2026-04-27 19:13:23 [INFO] [LMDB] Build done in 156.55s
+2026-04-27 19:13:23 [INFO] [CNN] Using LMDB dataset: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 19:13:23 [INFO] [CNN] Weighted sampler disabled.
+2026-04-27 19:13:23 [INFO] [CNN] Class counts: [578212, 59941]
+2026-04-27 19:13:23 [INFO] [CNN] Class weights: [0.551800012588501, 5.323200225830078]
+2026-04-27 19:13:48 [INFO] Epoch 1/30, Loss: 553.4204
+2026-04-27 19:14:11 [INFO] Epoch 2/30, Loss: 331.0824
+2026-04-27 19:14:33 [INFO] Epoch 3/30, Loss: 280.5711
+2026-04-27 19:14:56 [INFO] Epoch 4/30, Loss: 249.7161
+2026-04-27 19:15:19 [INFO] Epoch 5/30, Loss: 242.7907
+2026-04-27 19:15:41 [INFO] Epoch 6/30, Loss: 229.7404
+2026-04-27 19:16:04 [INFO] Epoch 7/30, Loss: 219.7448
+2026-04-27 19:16:27 [INFO] Epoch 8/30, Loss: 207.7128
+2026-04-27 19:16:49 [INFO] Epoch 9/30, Loss: 203.9472
+2026-04-27 19:17:12 [INFO] Epoch 10/30, Loss: 197.3924
+2026-04-27 19:17:35 [INFO] Epoch 11/30, Loss: 200.6698
+2026-04-27 19:17:57 [INFO] Epoch 12/30, Loss: 194.3645
+2026-04-27 19:18:20 [INFO] Epoch 13/30, Loss: 187.4326
+2026-04-27 19:18:43 [INFO] Epoch 14/30, Loss: 183.5730
+2026-04-27 19:19:06 [INFO] Epoch 15/30, Loss: 181.9798
+2026-04-27 19:19:28 [INFO] Epoch 16/30, Loss: 179.3221
+2026-04-27 19:19:51 [INFO] Epoch 17/30, Loss: 176.4662
+2026-04-27 19:20:14 [INFO] Epoch 18/30, Loss: 176.3765
+2026-04-27 19:20:37 [INFO] Epoch 19/30, Loss: 173.8947
+2026-04-27 19:20:59 [INFO] Epoch 20/30, Loss: 174.0933
+2026-04-27 19:21:22 [INFO] Epoch 21/30, Loss: 173.3074
+2026-04-27 19:21:45 [INFO] Epoch 22/30, Loss: 170.4865
+2026-04-27 19:22:08 [INFO] Epoch 23/30, Loss: 169.3056
+2026-04-27 19:22:30 [INFO] Epoch 24/30, Loss: 167.1511
+2026-04-27 19:22:53 [INFO] Epoch 25/30, Loss: 167.7817
+2026-04-27 19:23:16 [INFO] Epoch 26/30, Loss: 164.1624
+2026-04-27 19:23:39 [INFO] Epoch 27/30, Loss: 165.3838
+2026-04-27 19:24:01 [INFO] Epoch 28/30, Loss: 164.8317
+2026-04-27 19:24:24 [INFO] Epoch 29/30, Loss: 164.4425
+2026-04-27 19:24:47 [INFO] Epoch 30/30, Loss: 162.9519
+2026-04-27 19:24:47 [INFO] [CNN] Training time: 684.51 seconds
+2026-04-27 19:24:47 [INFO] 
+
+2026-04-27 19:24:47 [INFO] === Step 3: Evaluate ===
+2026-04-27 19:25:43 [INFO] ========== Decision Tree ==========
+2026-04-27 19:25:43 [INFO] Accuracy: 0.9223
+2026-04-27 19:25:43 [INFO] Classification Report:
+2026-04-27 19:25:43 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.99      0.93      0.96    121405
+           1       0.59      0.90      0.71     14665
+
+    accuracy                           0.92    136070
+   macro avg       0.79      0.91      0.83    136070
+weighted avg       0.94      0.92      0.93    136070
+
+2026-04-27 19:25:43 [INFO] Confusion Matrix:
+2026-04-27 19:25:43 [INFO] 
+ [[112309   9096]
+ [  1481  13184]]
+2026-04-27 19:25:53 [INFO] [Decision Tree] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 19:25:54 [INFO] ========== Random Forest ==========
+2026-04-27 19:25:54 [INFO] Accuracy: 0.9413
+2026-04-27 19:25:54 [INFO] Classification Report:
+2026-04-27 19:25:54 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.99      0.94      0.97    121405
+           1       0.66      0.96      0.78     14665
+
+    accuracy                           0.94    136070
+   macro avg       0.83      0.95      0.87    136070
+weighted avg       0.96      0.94      0.95    136070
+
+2026-04-27 19:25:54 [INFO] Confusion Matrix:
+2026-04-27 19:25:54 [INFO] 
+ [[114012   7393]
+ [   588  14077]]
+2026-04-27 19:26:03 [INFO] [Random Forest] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 19:26:04 [INFO] ========== SVM ==========
+2026-04-27 19:26:04 [INFO] Accuracy: 0.9268
+2026-04-27 19:26:04 [INFO] Classification Report:
+2026-04-27 19:26:04 [INFO] 
+               precision    recall  f1-score   support
+
+           0       1.00      0.92      0.96    121405
+           1       0.60      0.97      0.74     14665
+
+    accuracy                           0.93    136070
+   macro avg       0.80      0.95      0.85    136070
+weighted avg       0.95      0.93      0.93    136070
+
+2026-04-27 19:26:04 [INFO] Confusion Matrix:
+2026-04-27 19:26:04 [INFO] 
+ [[111897   9508]
+ [   452  14213]]
+2026-04-27 19:26:14 [INFO] [SVM] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 19:26:14 [INFO] [CNN] Using class1_threshold=0.5000 for binary prediction.
+2026-04-27 19:26:27 [INFO] ========== CNN ==========
+2026-04-27 19:26:27 [INFO] Accuracy: 0.9709
+2026-04-27 19:26:27 [INFO] Classification Report:
+2026-04-27 19:26:27 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.97      1.00      0.98    121405
+           1       0.99      0.73      0.84     14665
+
+    accuracy                           0.97    136070
+   macro avg       0.98      0.87      0.91    136070
+weighted avg       0.97      0.97      0.97    136070
+
+2026-04-27 19:26:27 [INFO] Confusion Matrix:
+2026-04-27 19:26:27 [INFO] 
+ [[121343     62]
+ [  3904  10761]]
+2026-04-27 19:26:36 [INFO] [CNN] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 19:26:36 [INFO] Packaged outputs: /Volumes/JIAYI/ImageFocusDetection/logs/TR_sample_percentage_2026_0427_180944
+2026-04-27 19:26:41 [INFO] Collected 370 predict image folder(s) to: /Volumes/JIAYI/ImageFocusDetection/logs/TR_sample_percentage_2026_0427_180944/predict_images
+2026-04-27 19:26:43 [INFO] Generated plots: 14

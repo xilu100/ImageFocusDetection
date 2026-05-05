@@ -1,0 +1,80 @@
+2026-04-27 21:05:13 [INFO] experiment_cfg = {'training': {'patch_size': 32, 'sharp_threshold': 0.75, 'blur_threshold': 0.4, 'PCA_components': 0.995, 'sample_percentage': 100}, 'models': {'decision_tree': {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}, 'random_forest': {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}, 'svm': {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}, 'cnn': {'epochs': 30, 'batch_base': 128, 'seed': 42, 'learning_rate': 0.001, 'use_weighted_sampler': True, 'sampler_weight_power': 1.0, 'loss_weight_power': 1.0, 'build_lmdb_if_missing': True, 'assume_fixed_size': True}}}
+2026-04-27 21:05:13 [INFO] control_cfg = {'pipeline': {'preprocess': 0, 'train_evaluate': 1}, 'models': {'decision_tree': 0, 'random_forest': 0, 'svm': 0, 'cnn': 1}}
+2026-04-27 21:05:13 [INFO] 
+
+2026-04-27 21:05:13 [INFO] No sweep target found. Running once with current config.
+2026-04-27 21:05:13 [INFO] === Mode: Train + Evaluate ===
+2026-04-27 21:05:13 [INFO] === Run 1/1 ===
+2026-04-27 21:05:13 [INFO] Enabled models: cnn
+2026-04-27 21:05:13 [INFO] === Step 2: Training ===
+2026-04-27 21:05:24 [INFO] [CNN] Detected classes: [0, 1, 2], num_classes=3
+2026-04-27 21:05:24 [INFO] ==== Device & Training Configuration ====
+2026-04-27 21:05:24 [INFO] MPS Device detected
+2026-04-27 21:05:24 [INFO] Using device: mps, AMP enabled: False
+2026-04-27 21:05:24 [INFO] Batch size: 128, num_workers: 5
+2026-04-27 21:05:24 [INFO] ========================================
+2026-04-27 21:05:25 [INFO] [LMDB] Removed existing cache: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 21:05:25 [INFO] [LMDB] Removed existing lock: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb-lock
+2026-04-27 21:08:01 [INFO] [LMDB] Build done in 156.75s
+2026-04-27 21:08:01 [INFO] [CNN] Using LMDB dataset: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 21:08:01 [INFO] [CNN] Weighted sampler enabled (power=1.00) for minority recall.
+2026-04-27 21:08:01 [INFO] [CNN] Class counts: [320810, 59941, 257402]
+2026-04-27 21:08:01 [INFO] [CNN] Class weights: [0.663100004196167, 3.548799991607666, 0.8263999819755554]
+2026-04-27 21:08:27 [INFO] Epoch 1/30, Loss: 839.9953
+2026-04-27 21:08:50 [INFO] Epoch 2/30, Loss: 503.3094
+2026-04-27 21:09:13 [INFO] Epoch 3/30, Loss: 442.1075
+2026-04-27 21:09:36 [INFO] Epoch 4/30, Loss: 411.4300
+2026-04-27 21:09:58 [INFO] Epoch 5/30, Loss: 390.3488
+2026-04-27 21:10:21 [INFO] Epoch 6/30, Loss: 370.1965
+2026-04-27 21:10:44 [INFO] Epoch 7/30, Loss: 360.5951
+2026-04-27 21:11:07 [INFO] Epoch 8/30, Loss: 347.5649
+2026-04-27 21:11:30 [INFO] Epoch 9/30, Loss: 335.4124
+2026-04-27 21:11:53 [INFO] Epoch 10/30, Loss: 333.0988
+2026-04-27 21:12:15 [INFO] Epoch 11/30, Loss: 326.4327
+2026-04-27 21:12:38 [INFO] Epoch 12/30, Loss: 322.6076
+2026-04-27 21:13:01 [INFO] Epoch 13/30, Loss: 317.1328
+2026-04-27 21:13:24 [INFO] Epoch 14/30, Loss: 313.5808
+2026-04-27 21:13:47 [INFO] Epoch 15/30, Loss: 314.4694
+2026-04-27 21:14:10 [INFO] Epoch 16/30, Loss: 306.0144
+2026-04-27 21:14:33 [INFO] Epoch 17/30, Loss: 305.8393
+2026-04-27 21:14:55 [INFO] Epoch 18/30, Loss: 302.0820
+2026-04-27 21:15:18 [INFO] Epoch 19/30, Loss: 302.2058
+2026-04-27 21:15:41 [INFO] Epoch 20/30, Loss: 302.3013
+2026-04-27 21:16:04 [INFO] Epoch 21/30, Loss: 299.2120
+2026-04-27 21:16:27 [INFO] Epoch 22/30, Loss: 290.5531
+2026-04-27 21:16:50 [INFO] Epoch 23/30, Loss: 293.9024
+2026-04-27 21:17:12 [INFO] Epoch 24/30, Loss: 291.1222
+2026-04-27 21:17:35 [INFO] Epoch 25/30, Loss: 289.8952
+2026-04-27 21:17:58 [INFO] Epoch 26/30, Loss: 291.1580
+2026-04-27 21:18:21 [INFO] Epoch 27/30, Loss: 287.6552
+2026-04-27 21:18:44 [INFO] Epoch 28/30, Loss: 288.8480
+2026-04-27 21:19:07 [INFO] Epoch 29/30, Loss: 286.1955
+2026-04-27 21:19:29 [INFO] Epoch 30/30, Loss: 289.6884
+2026-04-27 21:19:29 [INFO] [CNN] Training time: 687.65 seconds
+2026-04-27 21:19:29 [INFO] 
+
+2026-04-27 21:19:29 [INFO] === Step 3: Evaluate ===
+2026-04-27 21:20:26 [INFO] [CNN] Multi-class prediction uses argmax.
+2026-04-27 21:20:38 [INFO] ========== CNN ==========
+2026-04-27 21:20:38 [INFO] Accuracy: 0.8725
+2026-04-27 21:20:38 [INFO] Classification Report:
+2026-04-27 21:20:38 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.84      1.00      0.91     65830
+           1       1.00      0.69      0.82     14665
+           2       0.90      0.77      0.83     55575
+
+    accuracy                           0.87    136070
+   macro avg       0.91      0.82      0.85    136070
+weighted avg       0.88      0.87      0.87    136070
+
+2026-04-27 21:20:38 [INFO] Confusion Matrix:
+2026-04-27 21:20:39 [INFO] 
+ [[65755     0    75]
+ [    2 10102  4561]
+ [12698     9 42868]]
+2026-04-27 21:20:50 [INFO] [CNN] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 21:20:50 [INFO] Packaged outputs: /Volumes/JIAYI/ImageFocusDetection/logs/NM_2026_0427_210513
+2026-04-27 21:20:51 [INFO] Collected 74 predict image folder(s) to: /Volumes/JIAYI/ImageFocusDetection/logs/NM_2026_0427_210513/predict_images
+2026-04-27 21:20:51 [INFO] Generated plots: 4

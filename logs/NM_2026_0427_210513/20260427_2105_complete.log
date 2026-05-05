@@ -1,0 +1,372 @@
+2026-04-27 21:05:13 [INFO] No sweep target found. Running once with current config.
+2026-04-27 21:05:13 [INFO] === Mode: Train + Evaluate ===
+2026-04-27 21:05:13 [INFO] === Run 1/1 ===
+2026-04-27 21:05:13 [INFO] Enabled models: cnn
+2026-04-27 21:05:13 [INFO] === Step 2: Training ===
+2026-04-27 21:05:13 [INFO] Deleted existing merged CSV: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/merged_samples_labels.csv
+2026-04-27 21:05:13 [INFO] Removed 162 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample6_labels/sample6.csv
+2026-04-27 21:05:13 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample69_labels/sample69.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample144_labels/sample144.csv
+2026-04-27 21:05:13 [INFO] Removed 28 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample14_labels/sample14.csv
+2026-04-27 21:05:13 [INFO] Removed 99 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample65_labels/sample65.csv
+2026-04-27 21:05:13 [INFO] Removed 11 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample148_labels/sample148.csv
+2026-04-27 21:05:13 [INFO] Removed 30 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample282_labels/sample282.csv
+2026-04-27 21:05:13 [INFO] Removed 68 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample30_labels/sample30.csv
+2026-04-27 21:05:13 [INFO] Removed 6 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample111_labels/sample111.csv
+2026-04-27 21:05:13 [INFO] Removed 74 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample172_labels/sample172.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample22_labels/sample22.csv
+2026-04-27 21:05:13 [INFO] Removed 26 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample212_labels/sample212.csv
+2026-04-27 21:05:13 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample300_labels/sample300.csv
+2026-04-27 21:05:13 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample263_labels/sample263.csv
+2026-04-27 21:05:13 [INFO] Removed 63 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample236_labels/sample236.csv
+2026-04-27 21:05:13 [INFO] Removed 167 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample193_labels/sample193.csv
+2026-04-27 21:05:13 [INFO] Removed 124 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample224_labels/sample224.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample347_labels/sample347.csv
+2026-04-27 21:05:13 [INFO] Removed 6 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample202_labels/sample202.csv
+2026-04-27 21:05:13 [INFO] Removed 5 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample302_labels/sample302.csv
+2026-04-27 21:05:13 [INFO] Removed 44 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample273_labels/sample273.csv
+2026-04-27 21:05:13 [INFO] Removed 6 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample310_labels/sample310.csv
+2026-04-27 21:05:13 [INFO] Removed 182 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample210_labels/sample210.csv
+2026-04-27 21:05:13 [INFO] Removed 22 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample345_labels/sample345.csv
+2026-04-27 21:05:13 [INFO] Removed 25 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample238_labels/sample238.csv
+2026-04-27 21:05:13 [INFO] Removed 31 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample191_labels/sample191.csv
+2026-04-27 21:05:13 [INFO] Removed 9 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample226_labels/sample226.csv
+2026-04-27 21:05:13 [INFO] Removed 11 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample257_labels/sample257.csv
+2026-04-27 21:05:13 [INFO] Removed 226 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample249_labels/sample249.csv
+2026-04-27 21:05:13 [INFO] Removed 47 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample183_labels/sample183.csv
+2026-04-27 21:05:13 [INFO] Removed 66 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample79_labels/sample79.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample8_labels/sample8.csv
+2026-04-27 21:05:13 [INFO] Removed 64 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample129_labels/sample129.csv
+2026-04-27 21:05:13 [INFO] Removed 100 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample280_labels/sample280.csv
+2026-04-27 21:05:13 [INFO] Removed 8 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample158_labels/sample158.csv
+2026-04-27 21:05:13 [INFO] Removed 3 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample20_labels/sample20.csv
+2026-04-27 21:05:13 [INFO] Removed 101 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample162_labels/sample162.csv
+2026-04-27 21:05:13 [INFO] Removed 118 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample32_labels/sample32.csv
+2026-04-27 21:05:13 [INFO] Removed 15 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample253_labels/sample253.csv
+2026-04-27 21:05:13 [INFO] Removed 425 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample230_labels/sample230.csv
+2026-04-27 21:05:13 [INFO] Removed 193 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample241_labels/sample241.csv
+2026-04-27 21:05:13 [INFO] Removed 95 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample222_labels/sample222.csv
+2026-04-27 21:05:13 [INFO] Removed 27 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample277_labels/sample277.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample314_labels/sample314.csv
+2026-04-27 21:05:13 [INFO] Removed 148 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample269_labels/sample269.csv
+2026-04-27 21:05:13 [INFO] Removed 180 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample218_labels/sample218.csv
+2026-04-27 21:05:13 [INFO] Removed 23 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample318_labels/sample318.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample265_labels/sample265.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample166_labels/sample166.csv
+2026-04-27 21:05:13 [INFO] Removed 14 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample105_labels/sample105.csv
+2026-04-27 21:05:13 [INFO] Removed 17 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample28_labels/sample28.csv
+2026-04-27 21:05:13 [INFO] Removed 42 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample178_labels/sample178.csv
+2026-04-27 21:05:13 [INFO] Removed 47 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample55_labels/sample55.csv
+2026-04-27 21:05:13 [INFO] Removed 5 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample109_labels/sample109.csv
+2026-04-27 21:05:13 [INFO] Removed 144 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample59_labels/sample59.csv
+2026-04-27 21:05:13 [INFO] Removed 292 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample288_labels/sample288.csv
+2026-04-27 21:05:13 [INFO] Removed 4 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample296_labels/sample296.csv
+2026-04-27 21:05:13 [INFO] Removed 65 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample71_labels/sample71.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample150_labels/sample150.csv
+2026-04-27 21:05:13 [INFO] Removed 20 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample284_labels/sample284.csv
+2026-04-27 21:05:13 [INFO] Removed 145 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample63_labels/sample63.csv
+2026-04-27 21:05:13 [INFO] Removed 13 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample176_labels/sample176.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample107_labels/sample107.csv
+2026-04-27 21:05:13 [INFO] Removed 9 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample34_labels/sample34.csv
+2026-04-27 21:05:13 [INFO] Removed 133 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample164_labels/sample164.csv
+2026-04-27 21:05:13 [INFO] Removed 8 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample286_labels/sample286.csv
+2026-04-27 21:05:13 [INFO] Removed 5 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample61_labels/sample61.csv
+2026-04-27 21:05:13 [INFO] Removed 18 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample152_labels/sample152.csv
+2026-04-27 21:05:13 [INFO] Removed 75 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample294_labels/sample294.csv
+2026-04-27 21:05:13 [INFO] Removed 3 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample73_labels/sample73.csv
+2026-04-27 21:05:13 [INFO] Removed 37 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample2_labels/sample2.csv
+2026-04-27 21:05:13 [INFO] Removed 8 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample140_labels/sample140.csv
+2026-04-27 21:05:13 [INFO] Removed 85 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample197_labels/sample197.csv
+2026-04-27 21:05:13 [INFO] Removed 219 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample320_labels/sample320.csv
+2026-04-27 21:05:13 [INFO] Removed 4 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample220_labels/sample220.csv
+2026-04-27 21:05:13 [INFO] Removed 24 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample189_labels/sample189.csv
+2026-04-27 21:05:13 [INFO] Removed 27 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample343_labels/sample343.csv
+2026-04-27 21:05:13 [INFO] Removed 50 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample243_labels/sample243.csv
+2026-04-27 21:05:13 [INFO] Removed 37 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample232_labels/sample232.csv
+2026-04-27 21:05:13 [INFO] Removed 6 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample332_labels/sample332.csv
+2026-04-27 21:05:13 [INFO] Removed 19 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample185_labels/sample185.csv
+2026-04-27 21:05:13 [INFO] Removed 59 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample204_labels/sample204.csv
+2026-04-27 21:05:13 [INFO] Removed 7 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample304_labels/sample304.csv
+2026-04-27 21:05:13 [INFO] Removed 5 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample80_labels/sample80.csv
+2026-04-27 21:05:13 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample308_labels/sample308.csv
+2026-04-27 21:05:13 [INFO] Removed 6 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample208_labels/sample208.csv
+2026-04-27 21:05:13 [INFO] Removed 186 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample275_labels/sample275.csv
+2026-04-27 21:05:13 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample329_labels/sample329.csv
+2026-04-27 21:05:13 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample229_labels/sample229.csv
+2026-04-27 21:05:13 [INFO] Removed 15 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample254_labels/sample254.csv
+2026-04-27 21:05:13 [INFO] Removed 18 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample237_labels/sample237.csv
+2026-04-27 21:05:13 [INFO] Removed 3 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample192_labels/sample192.csv
+2026-04-27 21:05:13 [INFO] Removed 247 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample325_labels/sample325.csv
+2026-04-27 21:05:13 [INFO] Removed 24 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample258_labels/sample258.csv
+2026-04-27 21:05:13 [INFO] Removed 30 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample270_labels/sample270.csv
+2026-04-27 21:05:13 [INFO] Removed 12 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample213_labels/sample213.csv
+2026-04-27 21:05:13 [INFO] Removed 266 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample313_labels/sample313.csv
+2026-04-27 21:05:13 [INFO] Removed 7 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample89_labels/sample89.csv
+2026-04-27 21:05:13 [INFO] Removed 7 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample85_labels/sample85.csv
+2026-04-27 21:05:13 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample262_labels/sample262.csv
+2026-04-27 21:05:13 [INFO] Removed 6 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample161_labels/sample161.csv
+2026-04-27 21:05:13 [INFO] Removed 18 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample102_labels/sample102.csv
+2026-04-27 21:05:13 [INFO] Removed 114 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample173_labels/sample173.csv
+2026-04-27 21:05:13 [INFO] Removed 88 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample110_labels/sample110.csv
+2026-04-27 21:05:13 [INFO] Removed 12 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample15_labels/sample15.csv
+2026-04-27 21:05:13 [INFO] Removed 3 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample68_labels/sample68.csv
+2026-04-27 21:05:13 [INFO] Removed 4 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample291_labels/sample291.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample7_labels/sample7.csv
+2026-04-27 21:05:13 [INFO] Removed 37 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample283_labels/sample283.csv
+2026-04-27 21:05:13 [INFO] Removed 31 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample21_labels/sample21.csv
+2026-04-27 21:05:13 [INFO] Removed 3 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample100_labels/sample100.csv
+2026-04-27 21:05:13 [INFO] Removed 36 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample50_labels/sample50.csv
+2026-04-27 21:05:13 [INFO] Removed 8 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample163_labels/sample163.csv
+2026-04-27 21:05:13 [INFO] Removed 8 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample281_labels/sample281.csv
+2026-04-27 21:05:13 [INFO] Removed 97 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample66_labels/sample66.csv
+2026-04-27 21:05:13 [INFO] Removed 527 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample128_labels/sample128.csv
+2026-04-27 21:05:13 [INFO] Removed 140 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample155_labels/sample155.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample9_labels/sample9.csv
+2026-04-27 21:05:13 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample293_labels/sample293.csv
+2026-04-27 21:05:13 [INFO] Removed 91 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample74_labels/sample74.csv
+2026-04-27 21:05:13 [INFO] Removed 12 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample159_labels/sample159.csv
+2026-04-27 21:05:13 [INFO] Removed 5 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample227_labels/sample227.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample239_labels/sample239.csv
+2026-04-27 21:05:13 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample339_labels/sample339.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample244_labels/sample244.csv
+2026-04-27 21:05:13 [INFO] Removed 233 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample344_labels/sample344.csv
+2026-04-27 21:05:13 [INFO] Removed 5 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample335_labels/sample335.csv
+2026-04-27 21:05:13 [INFO] Removed 85 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample348_labels/sample348.csv
+2026-04-27 21:05:13 [INFO] Removed 15 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample87_labels/sample87.csv
+2026-04-27 21:05:13 [INFO] Removed 15 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample95_labels/sample95.csv
+2026-04-27 21:05:13 [INFO] Removed 46 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample272_labels/sample272.csv
+2026-04-27 21:05:13 [INFO] Removed 366 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample1_labels/sample1.csv
+2026-04-27 21:05:13 [INFO] Removed 33 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample297_labels/sample297.csv
+2026-04-27 21:05:13 [INFO] Removed 7 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample143_labels/sample143.csv
+2026-04-27 21:05:13 [INFO] Removed 6 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample289_labels/sample289.csv
+2026-04-27 21:05:13 [INFO] Removed 56 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample13_labels/sample13.csv
+2026-04-27 21:05:13 [INFO] Removed 12 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample132_labels/sample132.csv
+2026-04-27 21:05:13 [INFO] Removed 160 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample285_labels/sample285.csv
+2026-04-27 21:05:13 [INFO] Removed 36 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample104_labels/sample104.csv
+2026-04-27 21:05:13 [INFO] Removed 19 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample29_labels/sample29.csv
+2026-04-27 21:05:13 [INFO] Removed 3 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample37_labels/sample37.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample116_labels/sample116.csv
+2026-04-27 21:05:13 [INFO] Removed 92 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample175_labels/sample175.csv
+2026-04-27 21:05:13 [INFO] Removed 13 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample108_labels/sample108.csv
+2026-04-27 21:05:13 [INFO] Removed 54 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample268_labels/sample268.csv
+2026-04-27 21:05:13 [INFO] Removed 14 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample215_labels/sample215.csv
+2026-04-27 21:05:13 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample315_labels/sample315.csv
+2026-04-27 21:05:13 [INFO] Removed 46 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample276_labels/sample276.csv
+2026-04-27 21:05:13 [INFO] Removed 7 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample307_labels/sample307.csv
+2026-04-27 21:05:13 [INFO] Removed 4 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample264_labels/sample264.csv
+2026-04-27 21:05:13 [INFO] Removed 183 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample319_labels/sample319.csv
+2026-04-27 21:05:13 [INFO] Removed 186 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample219_labels/sample219.csv
+2026-04-27 21:05:13 [INFO] Removed 391 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample231_labels/sample231.csv
+2026-04-27 21:05:13 [INFO] Removed 366 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample252_labels/sample252.csv
+2026-04-27 21:05:13 [INFO] Removed 312 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample198_labels/sample198.csv
+2026-04-27 21:05:13 [INFO] Removed 82 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample223_labels/sample223.csv
+2026-04-27 21:05:13 [INFO] Removed 93 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample194_labels/sample194.csv
+2026-04-27 21:05:13 [INFO] Removed 39 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample323_labels/sample323.csv
+2026-04-27 21:05:13 [INFO] Removed 30 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample240_labels/sample240.csv
+2026-04-27 21:05:13 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample340_labels/sample340.csv
+2026-04-27 21:05:13 [INFO] Removed 7 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample81_labels/sample81.csv
+2026-04-27 21:05:13 [INFO] Removed 33 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample278_labels/sample278.csv
+2026-04-27 21:05:13 [INFO] Removed 8 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample305_labels/sample305.csv
+2026-04-27 21:05:13 [INFO] Removed 4 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample274_labels/sample274.csv
+2026-04-27 21:05:13 [INFO] Removed 27 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample209_labels/sample209.csv
+2026-04-27 21:05:13 [INFO] Removed 5 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample309_labels/sample309.csv
+2026-04-27 21:05:13 [INFO] Removed 212 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample217_labels/sample217.csv
+2026-04-27 21:05:13 [INFO] Removed 54 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample242_labels/sample242.csv
+2026-04-27 21:05:13 [INFO] Removed 153 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample342_labels/sample342.csv
+2026-04-27 21:05:13 [INFO] Removed 16 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample188_labels/sample188.csv
+2026-04-27 21:05:13 [INFO] Removed 136 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample221_labels/sample221.csv
+2026-04-27 21:05:13 [INFO] Removed 27 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample196_labels/sample196.csv
+2026-04-27 21:05:13 [INFO] Removed 20 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample350_labels/sample350.csv
+2026-04-27 21:05:13 [INFO] Removed 5 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample333_labels/sample333.csv
+2026-04-27 21:05:13 [INFO] Removed 143 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample233_labels/sample233.csv
+2026-04-27 21:05:13 [INFO] Removed 7 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample299_labels/sample299.csv
+2026-04-27 21:05:13 [INFO] Removed 7 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample287_labels/sample287.csv
+2026-04-27 21:05:13 [INFO] Removed 154 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample72_labels/sample72.csv
+2026-04-27 21:05:13 [INFO] Removed 3 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample3_labels/sample3.csv
+2026-04-27 21:05:13 [INFO] Removed 12 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample295_labels/sample295.csv
+2026-04-27 21:05:13 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample177_labels/sample177.csv
+2026-04-27 21:05:13 [INFO] Removed 56 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample169_labels/sample169.csv
+2026-04-27 21:05:13 [INFO] Removed 170 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample114_labels/sample114.csv
+2026-04-27 21:05:13 [INFO] Removed 9 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample165_labels/sample165.csv
+2026-04-27 21:05:13 [INFO] Removed 16 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample118_labels/sample118.csv
+2026-04-27 21:05:13 [INFO] Removed 9 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample35_labels/sample35.csv
+2026-04-27 21:05:13 [INFO] Removed 13 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/sample106_labels/sample106.csv
+2026-04-27 21:05:15 [INFO] Merged CSV saved: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/merged_samples_labels.csv
+2026-04-27 21:05:24 [INFO] Deleted existing model folder: /Volumes/JIAYI/ImageFocusDetection/src/training/model_save
+2026-04-27 21:05:24 [INFO] [CNN] Detected classes: [0, 1, 2], num_classes=3
+2026-04-27 21:05:24 [INFO] ==== Device & Training Configuration ====
+2026-04-27 21:05:24 [INFO] MPS Device detected
+2026-04-27 21:05:24 [INFO] Using device: mps, AMP enabled: False
+2026-04-27 21:05:24 [INFO] Batch size: 128, num_workers: 5
+2026-04-27 21:05:24 [INFO] ========================================
+2026-04-27 21:05:25 [INFO] [LMDB] Removed existing cache: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 21:05:25 [INFO] [LMDB] Removed existing lock: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb-lock
+2026-04-27 21:05:25 [INFO] [LMDB] Building cache: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 21:05:27 [INFO] [LMDB] Processed 10000/638153
+2026-04-27 21:05:30 [INFO] [LMDB] Processed 20000/638153
+2026-04-27 21:05:32 [INFO] [LMDB] Processed 30000/638153
+2026-04-27 21:05:35 [INFO] [LMDB] Processed 40000/638153
+2026-04-27 21:05:37 [INFO] [LMDB] Processed 50000/638153
+2026-04-27 21:05:40 [INFO] [LMDB] Processed 60000/638153
+2026-04-27 21:05:43 [INFO] [LMDB] Processed 70000/638153
+2026-04-27 21:05:45 [INFO] [LMDB] Processed 80000/638153
+2026-04-27 21:05:47 [INFO] [LMDB] Processed 90000/638153
+2026-04-27 21:05:49 [INFO] [LMDB] Processed 100000/638153
+2026-04-27 21:05:51 [INFO] [LMDB] Processed 110000/638153
+2026-04-27 21:05:54 [INFO] [LMDB] Processed 120000/638153
+2026-04-27 21:05:56 [INFO] [LMDB] Processed 130000/638153
+2026-04-27 21:05:59 [INFO] [LMDB] Processed 140000/638153
+2026-04-27 21:06:02 [INFO] [LMDB] Processed 150000/638153
+2026-04-27 21:06:04 [INFO] [LMDB] Processed 160000/638153
+2026-04-27 21:06:06 [INFO] [LMDB] Processed 170000/638153
+2026-04-27 21:06:09 [INFO] [LMDB] Processed 180000/638153
+2026-04-27 21:06:12 [INFO] [LMDB] Processed 190000/638153
+2026-04-27 21:06:14 [INFO] [LMDB] Processed 200000/638153
+2026-04-27 21:06:17 [INFO] [LMDB] Processed 210000/638153
+2026-04-27 21:06:19 [INFO] [LMDB] Processed 220000/638153
+2026-04-27 21:06:22 [INFO] [LMDB] Processed 230000/638153
+2026-04-27 21:06:24 [INFO] [LMDB] Processed 240000/638153
+2026-04-27 21:06:26 [INFO] [LMDB] Processed 250000/638153
+2026-04-27 21:06:29 [INFO] [LMDB] Processed 260000/638153
+2026-04-27 21:06:31 [INFO] [LMDB] Processed 270000/638153
+2026-04-27 21:06:33 [INFO] [LMDB] Processed 280000/638153
+2026-04-27 21:06:36 [INFO] [LMDB] Processed 290000/638153
+2026-04-27 21:06:38 [INFO] [LMDB] Processed 300000/638153
+2026-04-27 21:06:41 [INFO] [LMDB] Processed 310000/638153
+2026-04-27 21:06:43 [INFO] [LMDB] Processed 320000/638153
+2026-04-27 21:06:46 [INFO] [LMDB] Processed 330000/638153
+2026-04-27 21:06:48 [INFO] [LMDB] Processed 340000/638153
+2026-04-27 21:06:51 [INFO] [LMDB] Processed 350000/638153
+2026-04-27 21:06:53 [INFO] [LMDB] Processed 360000/638153
+2026-04-27 21:06:56 [INFO] [LMDB] Processed 370000/638153
+2026-04-27 21:06:59 [INFO] [LMDB] Processed 380000/638153
+2026-04-27 21:07:01 [INFO] [LMDB] Processed 390000/638153
+2026-04-27 21:07:04 [INFO] [LMDB] Processed 400000/638153
+2026-04-27 21:07:06 [INFO] [LMDB] Processed 410000/638153
+2026-04-27 21:07:08 [INFO] [LMDB] Processed 420000/638153
+2026-04-27 21:07:10 [INFO] [LMDB] Processed 430000/638153
+2026-04-27 21:07:13 [INFO] [LMDB] Processed 440000/638153
+2026-04-27 21:07:15 [INFO] [LMDB] Processed 450000/638153
+2026-04-27 21:07:18 [INFO] [LMDB] Processed 460000/638153
+2026-04-27 21:07:20 [INFO] [LMDB] Processed 470000/638153
+2026-04-27 21:07:23 [INFO] [LMDB] Processed 480000/638153
+2026-04-27 21:07:25 [INFO] [LMDB] Processed 490000/638153
+2026-04-27 21:07:28 [INFO] [LMDB] Processed 500000/638153
+2026-04-27 21:07:30 [INFO] [LMDB] Processed 510000/638153
+2026-04-27 21:07:33 [INFO] [LMDB] Processed 520000/638153
+2026-04-27 21:07:35 [INFO] [LMDB] Processed 530000/638153
+2026-04-27 21:07:38 [INFO] [LMDB] Processed 540000/638153
+2026-04-27 21:07:40 [INFO] [LMDB] Processed 550000/638153
+2026-04-27 21:07:43 [INFO] [LMDB] Processed 560000/638153
+2026-04-27 21:07:45 [INFO] [LMDB] Processed 570000/638153
+2026-04-27 21:07:47 [INFO] [LMDB] Processed 580000/638153
+2026-04-27 21:07:49 [INFO] [LMDB] Processed 590000/638153
+2026-04-27 21:07:52 [INFO] [LMDB] Processed 600000/638153
+2026-04-27 21:07:54 [INFO] [LMDB] Processed 610000/638153
+2026-04-27 21:07:57 [INFO] [LMDB] Processed 620000/638153
+2026-04-27 21:07:59 [INFO] [LMDB] Processed 630000/638153
+2026-04-27 21:08:01 [INFO] [LMDB] Build done in 156.75s
+2026-04-27 21:08:01 [INFO] [CNN] Using LMDB dataset: /Volumes/JIAYI/ImageFocusDetection/data/samples_labels/patches_ps32.lmdb
+2026-04-27 21:08:01 [INFO] [CNN] Weighted sampler enabled (power=1.00) for minority recall.
+2026-04-27 21:08:01 [INFO] [CNN] Class counts: [320810, 59941, 257402]
+2026-04-27 21:08:01 [INFO] [CNN] Class weights: [0.663100004196167, 3.548799991607666, 0.8263999819755554]
+2026-04-27 21:08:02 [INFO] [CNN] Start training ...
+2026-04-27 21:08:27 [INFO] Epoch 1/30, Loss: 839.9953
+2026-04-27 21:08:50 [INFO] Epoch 2/30, Loss: 503.3094
+2026-04-27 21:09:13 [INFO] Epoch 3/30, Loss: 442.1075
+2026-04-27 21:09:36 [INFO] Epoch 4/30, Loss: 411.4300
+2026-04-27 21:09:58 [INFO] Epoch 5/30, Loss: 390.3488
+2026-04-27 21:10:21 [INFO] Epoch 6/30, Loss: 370.1965
+2026-04-27 21:10:44 [INFO] Epoch 7/30, Loss: 360.5951
+2026-04-27 21:11:07 [INFO] Epoch 8/30, Loss: 347.5649
+2026-04-27 21:11:30 [INFO] Epoch 9/30, Loss: 335.4124
+2026-04-27 21:11:53 [INFO] Epoch 10/30, Loss: 333.0988
+2026-04-27 21:12:15 [INFO] Epoch 11/30, Loss: 326.4327
+2026-04-27 21:12:38 [INFO] Epoch 12/30, Loss: 322.6076
+2026-04-27 21:13:01 [INFO] Epoch 13/30, Loss: 317.1328
+2026-04-27 21:13:24 [INFO] Epoch 14/30, Loss: 313.5808
+2026-04-27 21:13:47 [INFO] Epoch 15/30, Loss: 314.4694
+2026-04-27 21:14:10 [INFO] Epoch 16/30, Loss: 306.0144
+2026-04-27 21:14:33 [INFO] Epoch 17/30, Loss: 305.8393
+2026-04-27 21:14:55 [INFO] Epoch 18/30, Loss: 302.0820
+2026-04-27 21:15:18 [INFO] Epoch 19/30, Loss: 302.2058
+2026-04-27 21:15:41 [INFO] Epoch 20/30, Loss: 302.3013
+2026-04-27 21:16:04 [INFO] Epoch 21/30, Loss: 299.2120
+2026-04-27 21:16:27 [INFO] Epoch 22/30, Loss: 290.5531
+2026-04-27 21:16:50 [INFO] Epoch 23/30, Loss: 293.9024
+2026-04-27 21:17:12 [INFO] Epoch 24/30, Loss: 291.1222
+2026-04-27 21:17:35 [INFO] Epoch 25/30, Loss: 289.8952
+2026-04-27 21:17:58 [INFO] Epoch 26/30, Loss: 291.1580
+2026-04-27 21:18:21 [INFO] Epoch 27/30, Loss: 287.6552
+2026-04-27 21:18:44 [INFO] Epoch 28/30, Loss: 288.8480
+2026-04-27 21:19:07 [INFO] Epoch 29/30, Loss: 286.1955
+2026-04-27 21:19:29 [INFO] Epoch 30/30, Loss: 289.6884
+2026-04-27 21:19:29 [INFO] [CNN] Training time: 687.65 seconds
+2026-04-27 21:19:29 [INFO] Selected models saved to: /Volumes/JIAYI/ImageFocusDetection/src/training/model_save
+2026-04-27 21:19:29 [INFO] Model artifacts directory: /Volumes/JIAYI/ImageFocusDetection/src/training/model_save
+2026-04-27 21:19:29 [INFO] Artifact: cnn_model.pth | modified_at=2026-04-27 21:19:29
+2026-04-27 21:19:29 [INFO] === Step 3: Evaluate ===
+2026-04-27 21:19:29 [INFO] Deleted existing merged CSV: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/merged_valid_samples_labels.csv
+2026-04-27 21:19:29 [INFO] Removed 80 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample50_labels/valid_sample50.csv
+2026-04-27 21:19:29 [INFO] Removed 12 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample21_labels/valid_sample21.csv
+2026-04-27 21:19:54 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample74_labels/valid_sample74.csv
+2026-04-27 21:19:55 [INFO] Removed 6 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample23_labels/valid_sample23.csv
+2026-04-27 21:19:55 [INFO] Removed 27 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample40_labels/valid_sample40.csv
+2026-04-27 21:19:55 [INFO] Removed 103 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample31_labels/valid_sample31.csv
+2026-04-27 21:19:55 [INFO] Removed 11 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample52_labels/valid_sample52.csv
+2026-04-27 21:19:55 [INFO] Removed 104 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample64_labels/valid_sample64.csv
+2026-04-27 21:19:55 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample68_labels/valid_sample68.csv
+2026-04-27 21:19:55 [INFO] Removed 20 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample15_labels/valid_sample15.csv
+2026-04-27 21:19:55 [INFO] Removed 51 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample11_labels/valid_sample11.csv
+2026-04-27 21:19:55 [INFO] Removed 31 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample3_labels/valid_sample3.csv
+2026-04-27 21:19:55 [INFO] Removed 36 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample56_labels/valid_sample56.csv
+2026-04-27 21:19:55 [INFO] Removed 262 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample44_labels/valid_sample44.csv
+2026-04-27 21:19:55 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample62_labels/valid_sample62.csv
+2026-04-27 21:19:55 [INFO] Removed 3 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample70_labels/valid_sample70.csv
+2026-04-27 21:19:55 [INFO] Removed 5 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample1_labels/valid_sample1.csv
+2026-04-27 21:19:55 [INFO] Removed 26 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample46_labels/valid_sample46.csv
+2026-04-27 21:19:55 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample25_labels/valid_sample25.csv
+2026-04-27 21:19:55 [INFO] Removed 3 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample29_labels/valid_sample29.csv
+2026-04-27 21:19:55 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample54_labels/valid_sample54.csv
+2026-04-27 21:19:55 [INFO] Removed 5 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample4_labels/valid_sample4.csv
+2026-04-27 21:19:55 [INFO] Removed 10 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample43_labels/valid_sample43.csv
+2026-04-27 21:19:55 [INFO] Removed 103 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample18_labels/valid_sample18.csv
+2026-04-27 21:19:55 [INFO] Removed 11 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample65_labels/valid_sample65.csv
+2026-04-27 21:19:55 [INFO] Removed 6 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample41_labels/valid_sample41.csv
+2026-04-27 21:19:55 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample49_labels/valid_sample49.csv
+2026-04-27 21:19:55 [INFO] Removed 81 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample45_labels/valid_sample45.csv
+2026-04-27 21:19:55 [INFO] Removed 1 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample2_labels/valid_sample2.csv
+2026-04-27 21:19:55 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample55_labels/valid_sample55.csv
+2026-04-27 21:19:55 [INFO] Removed 2 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample28_labels/valid_sample28.csv
+2026-04-27 21:19:55 [INFO] Removed 156 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample12_labels/valid_sample12.csv
+2026-04-27 21:19:55 [INFO] Removed 34 rows with label=-1 from: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/valid_sample71_labels/valid_sample71.csv
+2026-04-27 21:19:55 [INFO] Merged CSV saved: /Volumes/JIAYI/ImageFocusDetection/data/valid_samples_labels/merged_valid_samples_labels.csv
+2026-04-27 21:20:26 [INFO] [CNN] Multi-class prediction uses argmax.
+2026-04-27 21:20:38 [INFO] ========== CNN ==========
+2026-04-27 21:20:38 [INFO] Accuracy: 0.8725
+2026-04-27 21:20:38 [INFO] Classification Report:
+
+2026-04-27 21:20:38 [INFO]                precision    recall  f1-score   support
+
+2026-04-27 21:20:38 [INFO]            0       0.84      1.00      0.91     65830
+2026-04-27 21:20:38 [INFO]            1       1.00      0.69      0.82     14665
+2026-04-27 21:20:38 [INFO]            2       0.90      0.77      0.83     55575
+
+2026-04-27 21:20:38 [INFO]     accuracy                           0.87    136070
+2026-04-27 21:20:38 [INFO]    macro avg       0.91      0.82      0.85    136070
+2026-04-27 21:20:38 [INFO] weighted avg       0.88      0.87      0.87    136070
+
+2026-04-27 21:20:38 [INFO] Confusion Matrix:
+
+2026-04-27 21:20:39 [INFO]  [[65755     0    75]
+2026-04-27 21:20:39 [INFO]  [    2 10102  4561]
+2026-04-27 21:20:39 [INFO]  [12698     9 42868]]
+2026-04-27 21:20:50 [INFO] [CNN] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 21:20:50 [INFO] Packaged outputs: /Volumes/JIAYI/ImageFocusDetection/logs/NM_2026_0427_210513
+2026-04-27 21:20:51 [INFO] Collected 74 predict image folder(s) to: /Volumes/JIAYI/ImageFocusDetection/logs/NM_2026_0427_210513/predict_images
+2026-04-27 21:20:51 [INFO] Generated 4 plot(s)
+2026-04-27 21:20:51 [INFO] /Volumes/JIAYI/ImageFocusDetection/logs/NM_2026_0427_210513/plots/CNN_patch_size_Time.png
+2026-04-27 21:20:51 [INFO] /Volumes/JIAYI/ImageFocusDetection/logs/NM_2026_0427_210513/plots/CNN_patch_size_Evaluate.png
+2026-04-27 21:20:51 [INFO] /Volumes/JIAYI/ImageFocusDetection/logs/NM_2026_0427_210513/plots/CNN_patch_size_Loss_AllRuns.png
+2026-04-27 21:20:51 [INFO] /Volumes/JIAYI/ImageFocusDetection/logs/NM_2026_0427_210513/plots/CNN_patch_size_Loss_32.png
+2026-04-27 21:20:51 [INFO] Generated plots: 4

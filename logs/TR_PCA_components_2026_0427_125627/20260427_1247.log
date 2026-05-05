@@ -1,0 +1,391 @@
+2026-04-27 12:47:36 [INFO] experiment_cfg = {'training': {'patch_size': 32, 'sharp_threshold': 0.75, 'blur_threshold': 0.4, 'PCA_components': [0.95, 0.99, 0.995, 0.999], 'sample_percentage': 100}, 'models': {'decision_tree': {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}, 'random_forest': {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}, 'svm': {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}, 'cnn': {'epochs': 10, 'batch_base': 128, 'seed': 42, 'learning_rate': 0.001, 'use_weighted_sampler': 'auto', 'sampler_weight_power': 1.0, 'loss_weight_power': 1.0, 'build_lmdb_if_missing': True, 'assume_fixed_size': True}}}
+2026-04-27 12:47:36 [INFO] control_cfg = {'pipeline': {'preprocess': 1, 'train_evaluate': 1}, 'models': {'decision_tree': 1, 'random_forest': 1, 'svm': 1, 'cnn': 0}}
+2026-04-27 12:47:36 [INFO] 
+
+2026-04-27 12:47:36 [INFO] Sweep target: training.PCA_components -> [0.95, 0.99, 0.995, 0.999]
+2026-04-27 12:47:36 [INFO] === Step 1: Preprocessing (Run Once) ===
+2026-04-27 12:56:27 [INFO] Preprocessing total time: 531.30s
+2026-04-27 12:56:27 [INFO] === Mode: Train + Evaluate ===
+2026-04-27 12:56:27 [INFO] === Run 1/4 | training.PCA_components=0.95 ===
+2026-04-27 12:56:27 [INFO] Evaluate output tag: TR_PCA_components_0_95
+2026-04-27 12:56:27 [INFO] Enabled models: decision_tree, random_forest, svm
+2026-04-27 12:56:27 [INFO] === Step 2: Training ===
+2026-04-27 12:56:39 [INFO] [Decision Tree] Detected classes: [0, 1, 2]
+2026-04-27 12:56:39 [INFO] [Decision Tree] Using 5 CPU cores for image loading.
+2026-04-27 12:57:02 [INFO] [Decision Tree] Image loading done, time: 23.09s
+2026-04-27 12:57:02 [INFO] [Decision Tree] X shape before PCA: (638153, 1024)
+2026-04-27 12:57:30 [INFO] [Decision Tree] PCA preprocessing done, time: 28.23s
+2026-04-27 12:57:30 [INFO] [Decision Tree] X shape after PCA: (638153, 6)
+2026-04-27 12:57:30 [INFO] final_model_params = {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}
+2026-04-27 12:57:36 [INFO] [Decision Tree] Training done, time: 5.53s
+2026-04-27 12:57:36 [INFO] 
+
+2026-04-27 12:57:36 [INFO] [Random Forest] Detected classes: [0, 1, 2]
+2026-04-27 12:57:36 [INFO] [Random Forest] Using 5 CPU cores for image loading.
+2026-04-27 12:57:57 [INFO] [Random Forest] Image loading done, time: 21.60s
+2026-04-27 12:57:57 [INFO] [Random Forest] X shape before PCA: (638153, 1024)
+2026-04-27 12:58:24 [INFO] [Random Forest] PCA preprocessing done, time: 27.10s
+2026-04-27 12:58:24 [INFO] [Random Forest] X shape after PCA: (638153, 6)
+2026-04-27 12:58:24 [INFO] final_model_params = {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}
+2026-04-27 12:58:50 [INFO] [Random Forest] Training done, time: 25.53s
+2026-04-27 12:58:50 [INFO] 
+
+2026-04-27 12:58:50 [INFO] [SVM] Detected classes: [0, 1, 2]
+2026-04-27 12:58:50 [INFO] [SVM] Using 5 CPU cores for image loading.
+2026-04-27 12:59:11 [INFO] [SVM] Image loading done, time: 21.15s
+2026-04-27 12:59:11 [INFO] [SVM] X shape before PCA: (638153, 1024)
+2026-04-27 12:59:38 [INFO] [SVM] PCA preprocessing done, time: 26.82s
+2026-04-27 12:59:38 [INFO] [SVM] X shape after PCA: (638153, 6)
+2026-04-27 12:59:38 [INFO] final_model_params = {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}
+2026-04-27 13:05:32 [INFO] [SVM] Training done, time: 353.66s
+2026-04-27 13:05:32 [INFO] 
+
+2026-04-27 13:05:32 [INFO] === Step 3: Evaluate ===
+2026-04-27 13:05:51 [INFO] ========== Decision Tree ==========
+2026-04-27 13:05:51 [INFO] Accuracy: 0.6509
+2026-04-27 13:05:51 [INFO] Classification Report:
+2026-04-27 13:05:51 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.81      0.87      0.84     65830
+           1       0.26      0.60      0.36     14665
+           2       0.72      0.40      0.51     55575
+
+    accuracy                           0.65    136070
+   macro avg       0.60      0.62      0.57    136070
+weighted avg       0.71      0.65      0.66    136070
+
+2026-04-27 13:05:51 [INFO] Confusion Matrix:
+2026-04-27 13:05:51 [INFO] 
+ [[57567  3914  4349]
+ [ 1700  8774  4191]
+ [12156 21196 22223]]
+2026-04-27 13:06:03 [INFO] [Decision Tree] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:06:03 [INFO] ========== Random Forest ==========
+2026-04-27 13:06:03 [INFO] Accuracy: 0.7012
+2026-04-27 13:06:03 [INFO] Classification Report:
+2026-04-27 13:06:03 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.81      0.89      0.85     65830
+           1       0.32      0.49      0.38     14665
+           2       0.72      0.54      0.62     55575
+
+    accuracy                           0.70    136070
+   macro avg       0.62      0.64      0.62    136070
+weighted avg       0.72      0.70      0.70    136070
+
+2026-04-27 13:06:03 [INFO] Confusion Matrix:
+2026-04-27 13:06:03 [INFO] 
+ [[58407  1889  5534]
+ [ 1689  7182  5794]
+ [12161 13593 29821]]
+2026-04-27 13:06:15 [INFO] [Random Forest] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:06:15 [INFO] ========== SVM ==========
+2026-04-27 13:06:15 [INFO] Accuracy: 0.7345
+2026-04-27 13:06:15 [INFO] Classification Report:
+2026-04-27 13:06:15 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.78      0.92      0.84     65830
+           1       0.41      0.21      0.28     14665
+           2       0.71      0.66      0.68     55575
+
+    accuracy                           0.73    136070
+   macro avg       0.63      0.59      0.60    136070
+weighted avg       0.71      0.73      0.72    136070
+
+2026-04-27 13:06:15 [INFO] Confusion Matrix:
+2026-04-27 13:06:15 [INFO] 
+ [[60278     4  5548]
+ [ 2375  3091  9199]
+ [14487  4507 36581]]
+2026-04-27 13:06:26 [INFO] [SVM] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:06:26 [INFO] === Run 2/4 | training.PCA_components=0.99 ===
+2026-04-27 13:06:26 [INFO] Evaluate output tag: TR_PCA_components_0_99
+2026-04-27 13:06:26 [INFO] Enabled models: decision_tree, random_forest, svm
+2026-04-27 13:06:26 [INFO] === Step 2: Training ===
+2026-04-27 13:06:38 [INFO] [Decision Tree] Detected classes: [0, 1, 2]
+2026-04-27 13:06:38 [INFO] [Decision Tree] Using 5 CPU cores for image loading.
+2026-04-27 13:07:02 [INFO] [Decision Tree] Image loading done, time: 23.36s
+2026-04-27 13:07:02 [INFO] [Decision Tree] X shape before PCA: (638153, 1024)
+2026-04-27 13:07:30 [INFO] [Decision Tree] PCA preprocessing done, time: 28.13s
+2026-04-27 13:07:30 [INFO] [Decision Tree] X shape after PCA: (638153, 50)
+2026-04-27 13:07:30 [INFO] final_model_params = {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}
+2026-04-27 13:08:15 [INFO] [Decision Tree] Training done, time: 45.43s
+2026-04-27 13:08:15 [INFO] 
+
+2026-04-27 13:08:15 [INFO] [Random Forest] Detected classes: [0, 1, 2]
+2026-04-27 13:08:15 [INFO] [Random Forest] Using 5 CPU cores for image loading.
+2026-04-27 13:08:36 [INFO] [Random Forest] Image loading done, time: 21.25s
+2026-04-27 13:08:36 [INFO] [Random Forest] X shape before PCA: (638153, 1024)
+2026-04-27 13:09:04 [INFO] [Random Forest] PCA preprocessing done, time: 27.73s
+2026-04-27 13:09:04 [INFO] [Random Forest] X shape after PCA: (638153, 50)
+2026-04-27 13:09:04 [INFO] final_model_params = {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}
+2026-04-27 13:10:27 [INFO] [Random Forest] Training done, time: 82.96s
+2026-04-27 13:10:27 [INFO] 
+
+2026-04-27 13:10:27 [INFO] [SVM] Detected classes: [0, 1, 2]
+2026-04-27 13:10:27 [INFO] [SVM] Using 5 CPU cores for image loading.
+2026-04-27 13:10:49 [INFO] [SVM] Image loading done, time: 21.20s
+2026-04-27 13:10:49 [INFO] [SVM] X shape before PCA: (638153, 1024)
+2026-04-27 13:11:16 [INFO] [SVM] PCA preprocessing done, time: 27.02s
+2026-04-27 13:11:16 [INFO] [SVM] X shape after PCA: (638153, 50)
+2026-04-27 13:11:16 [INFO] final_model_params = {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}
+2026-04-27 13:13:11 [INFO] [SVM] Training done, time: 115.49s
+2026-04-27 13:13:11 [INFO] 
+
+2026-04-27 13:13:11 [INFO] === Step 3: Evaluate ===
+2026-04-27 13:13:30 [INFO] ========== Decision Tree ==========
+2026-04-27 13:13:30 [INFO] Accuracy: 0.8302
+2026-04-27 13:13:30 [INFO] Classification Report:
+2026-04-27 13:13:30 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.93      0.90      0.92     65830
+           1       0.55      0.81      0.65     14665
+           2       0.82      0.75      0.78     55575
+
+    accuracy                           0.83    136070
+   macro avg       0.77      0.82      0.78    136070
+weighted avg       0.85      0.83      0.83    136070
+
+2026-04-27 13:13:30 [INFO] Confusion Matrix:
+2026-04-27 13:13:30 [INFO] 
+ [[59499    28  6303]
+ [   34 11842  2789]
+ [ 4224  9732 41619]]
+2026-04-27 13:13:42 [INFO] [Decision Tree] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:13:43 [INFO] ========== Random Forest ==========
+2026-04-27 13:13:43 [INFO] Accuracy: 0.8874
+2026-04-27 13:13:43 [INFO] Classification Report:
+2026-04-27 13:13:43 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.97      0.92      0.94     65830
+           1       0.69      0.82      0.75     14665
+           2       0.86      0.87      0.86     55575
+
+    accuracy                           0.89    136070
+   macro avg       0.84      0.87      0.85    136070
+weighted avg       0.89      0.89      0.89    136070
+
+2026-04-27 13:13:43 [INFO] Confusion Matrix:
+2026-04-27 13:13:43 [INFO] 
+ [[60280     0  5550]
+ [    2 12077  2586]
+ [ 1662  5528 48385]]
+2026-04-27 13:13:54 [INFO] [Random Forest] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:13:55 [INFO] ========== SVM ==========
+2026-04-27 13:13:55 [INFO] Accuracy: 0.8822
+2026-04-27 13:13:55 [INFO] Classification Report:
+2026-04-27 13:13:55 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.93      0.97      0.95     65830
+           1       0.64      0.74      0.69     14665
+           2       0.89      0.81      0.85     55575
+
+    accuracy                           0.88    136070
+   macro avg       0.82      0.84      0.83    136070
+weighted avg       0.89      0.88      0.88    136070
+
+2026-04-27 13:13:55 [INFO] Confusion Matrix:
+2026-04-27 13:13:55 [INFO] 
+ [[64064     7  1759]
+ [   66 10882  3717]
+ [ 4427  6054 45094]]
+2026-04-27 13:14:06 [INFO] [SVM] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:14:06 [INFO] === Run 3/4 | training.PCA_components=0.995 ===
+2026-04-27 13:14:06 [INFO] Evaluate output tag: TR_PCA_components_0_995
+2026-04-27 13:14:06 [INFO] Enabled models: decision_tree, random_forest, svm
+2026-04-27 13:14:06 [INFO] === Step 2: Training ===
+2026-04-27 13:14:18 [INFO] [Decision Tree] Detected classes: [0, 1, 2]
+2026-04-27 13:14:18 [INFO] [Decision Tree] Using 5 CPU cores for image loading.
+2026-04-27 13:14:41 [INFO] [Decision Tree] Image loading done, time: 22.55s
+2026-04-27 13:14:41 [INFO] [Decision Tree] X shape before PCA: (638153, 1024)
+2026-04-27 13:15:09 [INFO] [Decision Tree] PCA preprocessing done, time: 28.60s
+2026-04-27 13:15:09 [INFO] [Decision Tree] X shape after PCA: (638153, 108)
+2026-04-27 13:15:09 [INFO] final_model_params = {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}
+2026-04-27 13:16:48 [INFO] [Decision Tree] Training done, time: 99.17s
+2026-04-27 13:16:48 [INFO] 
+
+2026-04-27 13:16:48 [INFO] [Random Forest] Detected classes: [0, 1, 2]
+2026-04-27 13:16:48 [INFO] [Random Forest] Using 5 CPU cores for image loading.
+2026-04-27 13:17:10 [INFO] [Random Forest] Image loading done, time: 21.57s
+2026-04-27 13:17:10 [INFO] [Random Forest] X shape before PCA: (638153, 1024)
+2026-04-27 13:17:39 [INFO] [Random Forest] PCA preprocessing done, time: 28.56s
+2026-04-27 13:17:39 [INFO] [Random Forest] X shape after PCA: (638153, 108)
+2026-04-27 13:17:39 [INFO] final_model_params = {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}
+2026-04-27 13:19:35 [INFO] [Random Forest] Training done, time: 116.74s
+2026-04-27 13:19:35 [INFO] 
+
+2026-04-27 13:19:35 [INFO] [SVM] Detected classes: [0, 1, 2]
+2026-04-27 13:19:35 [INFO] [SVM] Using 5 CPU cores for image loading.
+2026-04-27 13:19:56 [INFO] [SVM] Image loading done, time: 21.12s
+2026-04-27 13:19:56 [INFO] [SVM] X shape before PCA: (638153, 1024)
+2026-04-27 13:20:25 [INFO] [SVM] PCA preprocessing done, time: 28.49s
+2026-04-27 13:20:25 [INFO] [SVM] X shape after PCA: (638153, 108)
+2026-04-27 13:20:25 [INFO] final_model_params = {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}
+2026-04-27 13:21:58 [INFO] [SVM] Training done, time: 93.24s
+2026-04-27 13:21:58 [INFO] 
+
+2026-04-27 13:21:58 [INFO] === Step 3: Evaluate ===
+2026-04-27 13:22:17 [INFO] ========== Decision Tree ==========
+2026-04-27 13:22:17 [INFO] Accuracy: 0.8577
+2026-04-27 13:22:17 [INFO] Classification Report:
+2026-04-27 13:22:17 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.93      0.92      0.92     65830
+           1       0.65      0.83      0.73     14665
+           2       0.85      0.80      0.82     55575
+
+    accuracy                           0.86    136070
+   macro avg       0.81      0.85      0.82    136070
+weighted avg       0.86      0.86      0.86    136070
+
+2026-04-27 13:22:17 [INFO] Confusion Matrix:
+2026-04-27 13:22:17 [INFO] 
+ [[60309     8  5513]
+ [   18 12218  2429]
+ [ 4727  6663 44185]]
+2026-04-27 13:22:29 [INFO] [Decision Tree] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:22:30 [INFO] ========== Random Forest ==========
+2026-04-27 13:22:30 [INFO] Accuracy: 0.9051
+2026-04-27 13:22:30 [INFO] Classification Report:
+2026-04-27 13:22:30 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.97      0.91      0.94     65830
+           1       0.75      0.91      0.83     14665
+           2       0.88      0.89      0.88     55575
+
+    accuracy                           0.91    136070
+   macro avg       0.87      0.91      0.88    136070
+weighted avg       0.91      0.91      0.91    136070
+
+2026-04-27 13:22:30 [INFO] Confusion Matrix:
+2026-04-27 13:22:30 [INFO] 
+ [[60151     0  5679]
+ [    0 13355  1310]
+ [ 1590  4334 49651]]
+2026-04-27 13:22:41 [INFO] [Random Forest] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:22:42 [INFO] ========== SVM ==========
+2026-04-27 13:22:42 [INFO] Accuracy: 0.9198
+2026-04-27 13:22:42 [INFO] Classification Report:
+2026-04-27 13:22:42 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.95      0.98      0.96     65830
+           1       0.76      0.86      0.81     14665
+           2       0.93      0.87      0.90     55575
+
+    accuracy                           0.92    136070
+   macro avg       0.88      0.90      0.89    136070
+weighted avg       0.92      0.92      0.92    136070
+
+2026-04-27 13:22:42 [INFO] Confusion Matrix:
+2026-04-27 13:22:42 [INFO] 
+ [[64323     0  1507]
+ [    0 12615  2050]
+ [ 3380  3979 48216]]
+2026-04-27 13:22:53 [INFO] [SVM] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:22:53 [INFO] === Run 4/4 | training.PCA_components=0.999 ===
+2026-04-27 13:22:53 [INFO] Evaluate output tag: TR_PCA_components_0_999
+2026-04-27 13:22:53 [INFO] Enabled models: decision_tree, random_forest, svm
+2026-04-27 13:22:53 [INFO] === Step 2: Training ===
+2026-04-27 13:23:05 [INFO] [Decision Tree] Detected classes: [0, 1, 2]
+2026-04-27 13:23:05 [INFO] [Decision Tree] Using 5 CPU cores for image loading.
+2026-04-27 13:23:29 [INFO] [Decision Tree] Image loading done, time: 23.39s
+2026-04-27 13:23:29 [INFO] [Decision Tree] X shape before PCA: (638153, 1024)
+2026-04-27 13:23:57 [INFO] [Decision Tree] PCA preprocessing done, time: 28.32s
+2026-04-27 13:23:57 [INFO] [Decision Tree] X shape after PCA: (638153, 383)
+2026-04-27 13:23:57 [INFO] final_model_params = {'max_depth': 16, 'min_samples_split': 50, 'min_samples_leaf': 20, 'class_weight': 'balanced', 'random_state': 42}
+2026-04-27 13:29:46 [INFO] [Decision Tree] Training done, time: 349.45s
+2026-04-27 13:29:46 [INFO] 
+
+2026-04-27 13:29:46 [INFO] [Random Forest] Detected classes: [0, 1, 2]
+2026-04-27 13:29:46 [INFO] [Random Forest] Using 5 CPU cores for image loading.
+2026-04-27 13:30:23 [INFO] [Random Forest] Image loading done, time: 36.87s
+2026-04-27 13:30:23 [INFO] [Random Forest] X shape before PCA: (638153, 1024)
+2026-04-27 13:30:50 [INFO] [Random Forest] PCA preprocessing done, time: 27.06s
+2026-04-27 13:30:50 [INFO] [Random Forest] X shape after PCA: (638153, 383)
+2026-04-27 13:30:50 [INFO] final_model_params = {'n_estimators': 100, 'max_depth': 16, 'random_state': 42, 'class_weight': 'balanced_subsample', 'n_jobs': -1}
+2026-04-27 13:34:33 [INFO] [Random Forest] Training done, time: 223.02s
+2026-04-27 13:34:33 [INFO] 
+
+2026-04-27 13:34:33 [INFO] [SVM] Detected classes: [0, 1, 2]
+2026-04-27 13:34:33 [INFO] [SVM] Using 5 CPU cores for image loading.
+2026-04-27 13:35:09 [INFO] [SVM] Image loading done, time: 35.45s
+2026-04-27 13:35:09 [INFO] [SVM] X shape before PCA: (638153, 1024)
+2026-04-27 13:35:34 [INFO] [SVM] PCA preprocessing done, time: 25.54s
+2026-04-27 13:35:34 [INFO] [SVM] X shape after PCA: (638153, 383)
+2026-04-27 13:35:34 [INFO] final_model_params = {'nystroem_components': 300, 'nystroem_kernel': 'rbf', 'nystroem_gamma': None, 'random_state': 42, 'svc_c': 1.0, 'class_weight': 'balanced', 'max_iter': 5000}
+2026-04-27 13:36:57 [INFO] [SVM] Training done, time: 83.07s
+2026-04-27 13:36:57 [INFO] 
+
+2026-04-27 13:36:57 [INFO] === Step 3: Evaluate ===
+2026-04-27 13:37:29 [INFO] ========== Decision Tree ==========
+2026-04-27 13:37:29 [INFO] Accuracy: 0.8734
+2026-04-27 13:37:29 [INFO] Classification Report:
+2026-04-27 13:37:29 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.93      0.92      0.92     65830
+           1       0.71      0.86      0.78     14665
+           2       0.86      0.83      0.84     55575
+
+    accuracy                           0.87    136070
+   macro avg       0.83      0.87      0.85    136070
+weighted avg       0.88      0.87      0.87    136070
+
+2026-04-27 13:37:29 [INFO] Confusion Matrix:
+2026-04-27 13:37:29 [INFO] 
+ [[60346     3  5481]
+ [   12 12543  2110]
+ [ 4522  5092 45961]]
+2026-04-27 13:37:40 [INFO] [Decision Tree] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:37:41 [INFO] ========== Random Forest ==========
+2026-04-27 13:37:41 [INFO] Accuracy: 0.9042
+2026-04-27 13:37:41 [INFO] Classification Report:
+2026-04-27 13:37:41 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.96      0.89      0.93     65830
+           1       0.84      0.94      0.88     14665
+           2       0.86      0.91      0.89     55575
+
+    accuracy                           0.90    136070
+   macro avg       0.89      0.91      0.90    136070
+weighted avg       0.91      0.90      0.90    136070
+
+2026-04-27 13:37:41 [INFO] Confusion Matrix:
+2026-04-27 13:37:41 [INFO] 
+ [[58691     0  7139]
+ [    0 13733   932]
+ [ 2281  2680 50614]]
+2026-04-27 13:37:53 [INFO] [Random Forest] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:37:54 [INFO] ========== SVM ==========
+2026-04-27 13:37:54 [INFO] Accuracy: 0.8865
+2026-04-27 13:37:54 [INFO] Classification Report:
+2026-04-27 13:37:54 [INFO] 
+               precision    recall  f1-score   support
+
+           0       0.85      0.97      0.91     65830
+           1       0.88      0.97      0.92     14665
+           2       0.95      0.77      0.85     55575
+
+    accuracy                           0.89    136070
+   macro avg       0.89      0.90      0.89    136070
+weighted avg       0.89      0.89      0.88    136070
+
+2026-04-27 13:37:54 [INFO] Confusion Matrix:
+2026-04-27 13:37:54 [INFO] 
+ [[63897     0  1933]
+ [    0 14171   494]
+ [11047  1968 42560]]
+2026-04-27 13:38:05 [INFO] [SVM] Evaluate overlays saved under: /Volumes/JIAYI/ImageFocusDetection/logs/_evaluate_cache
+2026-04-27 13:38:05 [INFO] Packaged outputs: /Volumes/JIAYI/ImageFocusDetection/logs/TR_PCA_components_2026_0427_125627
+2026-04-27 13:38:19 [INFO] Collected 296 predict image folder(s) to: /Volumes/JIAYI/ImageFocusDetection/logs/TR_PCA_components_2026_0427_125627/predict_images
+2026-04-27 13:38:19 [INFO] Generated plots: 6

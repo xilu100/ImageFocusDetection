@@ -662,7 +662,7 @@ Fig.~\ref{fig:sample-size-2c-eva}.
         \label{fig:cnn-eva-2c}
     \end{subfigure}
 
-    \caption{Changes of evaluation metrics of the four models under different training ratios in the binary task}
+    \caption{Trends of sharp-class precision, recall, F1-score, and macro F1 of the four models under different training ratios in the binary task}
     \label{fig:sample-size-2c-eva}
 \end{figure}
 
@@ -811,7 +811,7 @@ in the three-class task are shown in Fig.~\ref{fig:sample-size-3c-eva}.
         \label{fig:cnn-eva-3c}
     \end{subfigure}
 
-    \caption{Changes of evaluation metrics of the four models under different training ratios in the three-class task}
+    \caption{Trends of sharp-class precision, recall, F1-score, and macro F1 of the four models under different training ratios in the three-class task}
     \label{fig:sample-size-3c-eva}
 \end{figure}
 
@@ -968,40 +968,65 @@ local boundaries, region continuity, and a small number of fragmented patches,
 the main focus regions they recover are overall consistent with the original
 labels.
 
+\definecolor{vizSharp}{RGB}{255,0,0}
+\definecolor{vizSharpBorder}{RGB}{0,255,0}
+\definecolor{vizMid}{RGB}{0,0,255}
+\definecolor{vizTextureless}{RGB}{0,180,0}
+
 \begin{figure}[!htbp]
     \centering
+    \makebox[\textwidth][l]{%
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
+        \vspace{0pt}
         \includegraphics[width=\textwidth]{images/valid1_2C}
         \caption{Original auto label}
     \end{subfigure}
-    \hfill
+    \hspace{0.035\textwidth}
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
+        \vspace{0pt}
         \includegraphics[width=\textwidth]{images/valid1_CNN_2C}
         \caption{CNN}
     \end{subfigure}
-    \hfill
+    \hspace{0.035\textwidth}
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
+        \vspace{0pt}
         \includegraphics[width=\textwidth]{images/valid_DT_2C}
         \caption{Decision Tree}
-    \end{subfigure}
+    \end{subfigure}}
 
     \vspace{0.6em}
 
+    \makebox[\textwidth][l]{%
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
+        \vspace{0pt}
         \includegraphics[width=\textwidth]{images/valid1_RF_2C}
         \caption{Random Forest}
     \end{subfigure}
-    \hfill
+    \hspace{0.035\textwidth}
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
+        \vspace{0pt}
         \includegraphics[width=\textwidth]{images/valid1_SVM_2C}
         \caption{SVM}
     \end{subfigure}
-    \caption{Visualization of manually verified original automatic labels and model predictions under the binary setting}
+    \hspace{0.035\textwidth}
+    \begin{subfigure}[t]{0.31\textwidth}
+        \centering
+        \vspace{0pt}
+        \vspace{0.08\textwidth}
+        {\small
+        \begin{tabular}{@{}ll@{}}
+            \tikz[baseline=-0.6ex]\draw[fill=vizSharp, draw=vizSharpBorder, line width=0.8pt] (0,0) rectangle (0.32,0.32); & Sharp \\[0.4em]
+            \tikz[baseline=-0.6ex]\draw[fill=white, draw=black!35, line width=0.8pt] (0,0) rectangle (0.32,0.32); & Blur \\[0.4em]
+            \tikz[baseline=-0.6ex]\draw[fill=vizTextureless, draw=black!35, line width=0.8pt] (0,0) rectangle (0.32,0.32); & Textureless
+        \end{tabular}}
+    \end{subfigure}}
+
+    \caption{Visualization of manually verified original automatic labels and model predictions under the binary setting. Colors denote Sharp, Blur, and Textureless.}
     \label{fig:valid-2c-compare}
 \end{figure}
 
@@ -1017,20 +1042,24 @@ is supported jointly by quantitative comparison and manual visual verification.
 
 \begin{figure}[!htbp]
     \centering
+
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
+        \vspace{0pt}
         \includegraphics[width=\textwidth]{images/valid1_3C}
         \caption{Original auto label}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
+        \vspace{0pt}
         \includegraphics[width=\textwidth]{images/valid1_CNN_3C}
         \caption{CNN}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
+        \vspace{0pt}
         \includegraphics[width=\textwidth]{images/valid1_DT_3C}
         \caption{Decision Tree}
     \end{subfigure}
@@ -1039,15 +1068,32 @@ is supported jointly by quantitative comparison and manual visual verification.
 
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
+        \vspace{0pt}
         \includegraphics[width=\textwidth]{images/valid1_RF_3C}
         \caption{Random Forest}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.31\textwidth}
         \centering
+        \vspace{0pt}
         \includegraphics[width=\textwidth]{images/valid1_SVM_3C}
         \caption{SVM}
     \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.31\textwidth}
+        \centering
+        \vspace{0pt}
+        \vspace{0.08\textwidth}
+        {\small
+        \begin{tabular}{@{}ll@{}}
+            \tikz[baseline=-0.6ex]\draw[fill=vizSharp, draw=vizSharpBorder, line width=0.8pt] (0,0) rectangle (0.32,0.32); & Sharp \\[0.35em]
+            \tikz[baseline=-0.6ex]\draw[fill=vizMid, draw=black!35, line width=0.8pt] (0,0) rectangle (0.32,0.32); & Mid-band \\[0.35em]
+            \tikz[baseline=-0.6ex]\draw[fill=white, draw=black!35, line width=0.8pt] (0,0) rectangle (0.32,0.32); & Blur \\[0.35em]
+            \tikz[baseline=-0.6ex]\draw[fill=vizTextureless, draw=black!35, line width=0.8pt] (0,0) rectangle (0.32,0.32); & Textureless
+        \end{tabular}}
+        %\caption{Color legend}
+    \end{subfigure}
+
     \caption{Visualization of manually verified original automatic labels and model predictions under the three-class setting}
     \label{fig:valid-3c-compare}
 \end{figure}
