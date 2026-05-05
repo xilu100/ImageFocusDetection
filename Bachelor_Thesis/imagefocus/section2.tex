@@ -24,7 +24,6 @@ regions. For the patch-level classification task studied in this thesis, how to
 effectively describe the difference between clear and blurred regions
 \cite{pertuz2013analysis,5739529} is the theoretical basis for subsequent
 feature design and model learning.
-
 \subsubsection{Imaging Degradation Model}
 \par From the perspective of the imaging degradation model, a blurred image can
 usually be expressed as the convolution of a clear image and a point spread
@@ -35,19 +34,25 @@ function, plus a noise term \cite{lam2000iterative}, namely
 \end{equation}
 \par where $f(x,y)$ denotes the ideal clear image, $g(x,y)$ denotes the
 observed image, $h(x,y)$ denotes the blur kernel or point spread function,
-$n(x,y)$ denotes noise, and the symbol $*$ represents convolution. In the
-frequency domain, the above equation can be further written as
+$n(x,y)$ denotes noise, and the symbol $*$ represents convolution. Let
+$F(u,v)$, $G(u,v)$, $H(u,v)$, and $N(u,v)$ denote the two-dimensional Fourier
+transforms of $f(x,y)$, $g(x,y)$, $h(x,y)$, and $n(x,y)$, respectively. By the
+convolution theorem, convolution in the spatial domain becomes pointwise
+multiplication in the frequency domain. Therefore, Eq.~\eqref{eq:blur-model}
+can be written in the frequency domain as
 \begin{equation}
     G(u,v)=F(u,v)H(u,v)+N(u,v)
     \label{eq:blur-model-frequency}
 \end{equation}
-\par This shows that the blur process essentially suppresses the high-frequency
+\par Equation~\eqref{eq:blur-model-frequency} is mathematically equivalent to
+Eq.~\eqref{eq:blur-model}; the difference is only that the same degradation
+process is expressed in the frequency domain rather than in the spatial
+domain. This shows that the blur process essentially suppresses the high-frequency
 components of an image. As a result, details such as edges and textures are
 weakened by defocus or motion, which also provides the theoretical basis for
 the construction of subsequent sharpness features \cite{lam2000iterative}.
 
 \subsection{Patch-Based Image Representation}
-\subsubsection{Rationale for Patch-Based Modeling}
 \par In image analysis tasks, using the whole image directly as input can retain
 global context, but it is not suitable for describing spatial changes in local
 focus states. In contrast, dividing the image into multiple local patches of
@@ -62,15 +67,9 @@ information, allowing the model to focus more directly on local visual features
 related to focus state. Second, fixed-size patches make it convenient to
 extract statistical features in a unified way or to construct the input of
 neural networks, thus reducing the complexity of model design and training
-procedures \cite{Hou_2016_CVPR,dosovitskiy2020image}. In this thesis, the image is divided into a non-overlapping grid,
-and each patch is not only the basic unit for feature extraction, but also the
-basic unit for label generation, model training, and result projection.
-Therefore, patch-based representation is not only a data
-organization strategy, but also the core modeling foundation of the research
-method in this thesis \cite{Hou_2016_CVPR}.
+procedures \cite{Hou_2016_CVPR,dosovitskiy2020image}.
 
-\subsubsection{Mathematical Formulation of Patch Grids}
-\par Let the input image be denoted by $I\in\mathbb{R}^{H\times W}$, and let
+\par Let the grayscale input image be denoted by $I\in\mathbb{R}^{H\times W}$, and let
 the patch side length be $p$. When the image size is divisible by $p$, it can
 be divided into
 \begin{equation}
@@ -89,11 +88,10 @@ be divided into
     \label{eq:patch-set}
 \end{equation}
 \par This representation transforms the original image analysis task into a
-patch-by-patch modeling problem over the local patch set $\mathcal{P}$, thus
-providing a unified data form for patch-level feature extraction and
-classification. The above derivation assumes that the input size is compatible
-with the patch size. If the original image size is not divisible by $p$,
-corresponding adjustment is required in advance.
+patch-by-patch modeling problem over the local patch set $\mathcal{P}$. The
+above derivation assumes that the input size is compatible with the patch size.
+If the original image size is not divisible by $p$, appropriate adjustment is
+required in advance.
 
 \subsection{Patch Representations and Automatic Labeling}
 \subsubsection{Two Types of Patch Representation}
@@ -104,29 +102,27 @@ directly describe the sharpness level of local regions by using edge, gradient,
 and frequency-domain statistics. The second category is raw representation
 based on pixel values, that is, unfolding the grayscale patch matrix into a
 vector and then letting the classifier or dimensionality reduction method model
-it automatically \cite{murphy2022pml}. The former has strong interpretability
-and is suitable for constructing automatic labels or explicit scoring rules,
-while the latter preserves more complete local intensity distribution
-information and is more suitable as a general input representation for
-supervised learning models \cite{5739529,1284395,murphy2022pml}.
-
-\par For the task in this thesis, Laplacian, Sobel, and frequency-domain
-high-frequency energy are mainly used to measure the absolute sharpness of a
-patch and generate supervisory labels, while traditional machine learning
-models and CNNs learn class boundaries on unified patch inputs. Therefore, the
-theoretical focus of this part is not to mix the two kinds of representation,
-but to explain that interpretable sharpness features can be used to establish
-the basis for label generation, and raw pixel representation can also be used
-for models to learn discriminative patterns automatically. These two
-representations correspond to the two stages of ``automatic labeling'' and
-``supervised classification'' in the method of this thesis.
+it automatically \cite{murphy2022pml,goodfellow2016deep}. The former has
+strong interpretability and is suitable for explicit sharpness scoring, while
+the latter preserves more complete local intensity distribution information and
+is therefore a more natural input form for supervised classifiers and CNN-based
+patch models \cite{murphy2022pml,goodfellow2016deep,Hou_2016_CVPR}. In this
+thesis, hand-crafted focus measures such as Laplacian, Sobel, and
+frequency-based statistics are also used to construct sharpness scores and
+derive supervisory labels. Therefore, the labeling stage is closer to
+rule-based automatic labeling than to model-bootstrapped pseudo-labeling
+\cite{lee2013pseudo,5739529,1284395}. These labels then provide supervision for
+subsequent classifiers, which learn the final clear/blur decision boundary from
+patch data rather than relying only on fixed heuristic thresholds
+\cite{murphy2022pml,goodfellow2016deep,yi2016lbp,Hou_2016_CVPR}.
 
 \subsubsection{Focus Measures in Spatial and Frequency Domains}
 \par Laplacian features reflect second-order grayscale variation and are
 sensitive to edge and detail changes, so they are often used to measure local
 sharpness \cite{pertuz2013analysis}. Sobel features describe the gradient strength in the horizontal and
 vertical directions through first-order derivative approximation and can
-represent local edge saliency well \cite{pertuz2013analysis}. FFT features analyze image signals from the
+represent local edge saliency well \cite{pertuz2013analysis}. Fast Fourier
+Transform (FFT) features analyze image signals from the
 frequency-domain perspective and use the proportion or energy of high-frequency
 components as an important indicator of sharpness \cite{yap2004image},
 because clear regions usually preserve more high-frequency details
@@ -164,7 +160,7 @@ two directions:
     \label{eq:sobel-score-basic}
 \end{equation}
 \par In the frequency domain, the two-dimensional discrete Fourier transform can
-be expressed as below and is typically computed efficiently by FFT algorithms
+be written as follows and is typically computed efficiently by FFT algorithms
 \cite{cooley1965algorithm}:
 \begin{equation}
     \hat{P}(u,v)=\sum_{x=0}^{m-1}\sum_{y=0}^{n-1}
@@ -187,11 +183,11 @@ subsequent sharpness analysis can be obtained as
     \left[s_{\mathrm{lap}}(P),\; s_{\mathrm{sob}}(P),\; s_{\mathrm{fft}}(P)\right]^\top
     \label{eq:feature-vector-basic}
 \end{equation}
+
 \subsubsection{Pixel-Level Vector Representation}
 \par Complementary to the above statistical features is the direct use of raw
-patch pixels to construct the input for supervised learning. Let a grayscale
-patch be denoted by $P\in\mathbb{R}^{p\times p}$, then its vectorized
-representation can be written as
+patch pixels to construct the input for supervised learning. The vectorized
+representation of a $p\times p$ patch can be written as
 \begin{equation}
     \mathbf{z}(P)=\operatorname{vec}(P)\in\mathbb{R}^{p^2}
     \label{eq:pixel-vector-basic}
@@ -205,34 +201,11 @@ then we obtain
 \par This representation does not explicitly specify which edge or frequency
 statistics are most important. Instead, it preserves the complete local
 distribution of all pixels within the patch, and the subsequent classifier or
-convolutional network learns effective discriminative features by itself. When
-the patch size is large, the dimension of the raw pixel vector becomes $p^2$.
-Therefore, dimensionality reduction methods \cite{murphy2022pml} are often
-combined in practical modeling to control the complexity of the feature space.
-
-\subsubsection{From Focus Scores to Automatic Labels}
-\par A further distinction should be made here. The process of generating
-supervisory signals from the above sharpness indicators is more appropriately
-called ``automatic labeling'' rather than strict ``pseudo-labeling''.
-Pseudo-labeling usually refers to first using an existing model to predict
-unlabeled samples and then using the predictions as new training labels
-\cite{lee2013pseudo}. In contrast, automatic labeling directly generates labels
-from the original data according to manually designed and interpretable rules.
-For patch-level focus analysis, Laplacian, Sobel, and frequency-domain features
-can be used not only to describe local sharpness, but also as the basis for
-constructing supervisory labels. Therefore, the source of such labels is closer
-to rule-based automatic labeling \cite{5739529,1284395} than to model-bootstrapped
-pseudo-labeling.
-
-\par From a more general perspective, automatic labeling usually requires a
-mapping process from continuous scores to discrete labels. That is, a patch is
-first assigned some form of sharpness score according to local features, and
-then divided into several discrete categories according to pre-defined rules.
-When some local regions simultaneously lack sufficient texture, edge, or
-intensity variation, their sharpness is often difficult to determine stably
-from local observation alone. In such cases, they are usually regarded as
-low-confidence samples \cite{sohn2020fixmatch} and are ignored or filtered out
-before subsequent training.
+convolutional network learns effective discriminative features by itself. The
+dimensionality of the raw pixel vector is $p^2$, which grows quadratically
+with the patch size $p$. Therefore, dimensionality reduction methods
+\cite{murphy2022pml} are often combined in practical modeling to control the
+complexity of the feature space.
 
 \subsection{Classical Machine Learning Methods}
 \subsubsection{General Characteristics of Classical Models}
@@ -245,30 +218,26 @@ model structure, lower training cost, and often better controllability in
 small-sample scenarios \cite{cortes1995support,breiman2001random}.
 
 \par The typical classical classifiers involved in this thesis include support
-vector machines, decision trees, and random forests. Support vector machines
-maximize the class margin by finding an optimal separating hyperplane
-\cite{cortes1995support} and they have strong discriminative ability in
-small- and medium-scale datasets as well as high-dimensional feature spaces
-\cite{cortes1995support}.
-Decision trees build tree-structured decision rules by recursively partitioning
-the feature space \cite{breiman2017classification} and they are highly
-interpretable. Random forests improve model stability and generalization by
-ensembling multiple decision trees, and they usually resist overfitting better
-than a single tree \cite{breiman2001random}. Since the dimension of vectorized patches grows with
-$p^2$, classical models often need to combine procedures such as feature
-standardization, kernel approximation, or principal component analysis, so as
-to reduce training complexity while preserving the main information.
+vector machines, decision trees, and random forests.
 
-\subsubsection{Support Vector Machine, Tree Models and PCA}
-\par For a binary classification problem based on the feature vector
-$\mathbf{x}\in\mathbb{R}^d$, the linear decision function of a support vector
-machine \cite{cortes1995support} is usually written as
+\subsubsection{Support Vector Machines, Decision Trees, Random Forests, and PCA}
+\paragraph{Support Vector Machines.} A support vector machine (SVM) is a
+supervised classifier that constructs a decision boundary by maximizing the
+margin between classes \cite{cortes1995support}. For a binary classification
+problem based on the feature vector $\mathbf{x}\in\mathbb{R}^d$, its linear
+decision function is usually written as
 \begin{equation}
     f(\mathbf{x})=\mathbf{w}^\top\mathbf{x}+b
     \label{eq:svm-decision-basic}
 \end{equation}
-\par Its core optimization objective is to maximize the classification margin,
-and the corresponding soft-margin form can be written as
+\par Here, $\mathbf{w}$ and $b$ define the separating hyperplane. SVMs are
+particularly suitable for small- and medium-scale datasets and for feature
+spaces of relatively high dimensionality, because their optimization objective
+focuses directly on the discriminative boundary rather than on modeling the
+full data distribution \cite{cortes1995support,scholkopf2002learning}. In the
+soft-margin setting, the classifier allows a limited number of margin
+violations in order to improve robustness to non-separable data. The
+corresponding optimization problem can be written as
 \begin{equation}
     \min_{\mathbf{w},b,\boldsymbol{\xi}}
     \frac{1}{2}\|\mathbf{w}\|_2^2+C\sum_{i=1}^{n}\xi_i
@@ -280,40 +249,127 @@ and the corresponding soft-margin form can be written as
     \xi_i\ge 0
     \label{eq:svm-constraint-basic}
 \end{equation}
-\par Decision trees \cite{breiman2017classification} usually split data by
-selecting the feature that brings the largest improvement in purity. Taking
-information gain as an example, we have
+\par In this formulation, $\xi_i$ is a slack variable that quantifies the
+degree to which the $i$-th sample violates the margin constraint, and the
+parameter $C$ controls the trade-off between margin maximization and training
+error, while $n$ denotes the number of training samples. A larger $C$
+emphasizes fitting the training data more strictly,
+whereas a smaller $C$ imposes stronger regularization, that is, a stronger
+preference for a simpler decision boundary, and permits a wider
+margin. The samples lying closest to the separating boundary are called support
+vectors, and they largely determine the final classifier
+\cite{cortes1995support,scholkopf2002learning}. For the patch classification
+task studied in this thesis, SVM provides a theoretically well-founded baseline
+for learning a clear/blur decision boundary from either handcrafted features or
+dimension-reduced pixel representations.
+
+\par Beyond the linear case, support vector machines can also describe
+nonlinear class boundaries through kernel methods, which use kernel functions
+to measure similarity between samples in an implicitly transformed feature
+space. However, standard kernel SVM usually needs to process a large kernel
+matrix explicitly or implicitly,
+and its training and storage cost increases significantly as the number of
+samples grows. To alleviate this problem, kernel approximation methods are
+often used to transform the originally expensive kernel computation into a
+finite-dimensional feature mapping. Among them, the Nystr\"{o}m method is a
+typical low-rank kernel approximation strategy. In essence, it selects a
+subset of representative samples and uses them to approximate the original
+large kernel matrix, that is, the matrix of pairwise kernel similarities,
+by a lower-rank matrix. The resulting approximation makes
+it possible to construct an explicit feature mapping $\phi(\mathbf{x})$ such
+that the kernel function satisfies
+\begin{equation}
+    k(\mathbf{x},\mathbf{x}')\approx \phi(\mathbf{x})^\top\phi(\mathbf{x}')
+    \label{eq:nystrom-basic}
+\end{equation}
+\par Here, $\phi(\mathbf{x})$ denotes the explicit feature mapping induced by
+the approximation. In this way, a nonlinear classification problem that
+originally relied on the kernel trick can be approximately transformed into a
+linear classification problem in an explicit feature space, which reduces computational complexity
+while retaining certain nonlinear expressive ability. For the task of this
+thesis, this idea provides the theoretical basis for the subsequent use of SVM
+based on Nystr\"{o}m kernel approximation
+\cite{williams2001using,scholkopf2002learning}.
+
+\paragraph{Decision Trees.} A decision tree is a supervised learning model
+that performs classification by recursively partitioning the feature space into
+a sequence of decision regions \cite{breiman2017classification}. Each internal
+node corresponds to a feature test, each branch corresponds to a possible
+outcome of that test, and each leaf node gives the predicted class. A common
+splitting strategy is to select the feature that yields the largest reduction
+in node impurity. Using entropy as the impurity measure, the corresponding
+information gain can be written as
 \begin{equation}
     \operatorname{Gain}(D,a)=H(D)-\sum_{v=1}^{V}\frac{|D^{(v)}|}{|D|}H(D^{(v)})
     \label{eq:info-gain-basic}
 \end{equation}
 \par where $H(D)$ denotes the information entropy of the sample set $D$, and
 $D^{(v)}$ denotes the subset obtained according to the $v$-th value of feature
-$a$. Random forests then make predictions by ensembling multiple decision
-trees, and their output can be expressed as
+$a$. Here, $V$ denotes the number of branches induced by feature $a$, and
+entropy measures the class uncertainty of a node: higher entropy indicates
+that samples from different classes are more mixed, whereas lower entropy
+indicates a purer node. Thus, node impurity describes how mixed the class
+labels are within a node. This recursive splitting process allows decision
+trees to model nonlinear
+decision boundaries and feature interactions without requiring explicit feature
+transformation. However, a single tree is often sensitive to local data
+variation and may overfit the training set, that is, fit training samples too
+closely while generalizing poorly to unseen data, if it grows too deep
+\cite{breiman2017classification}. In the context of this thesis, decision trees
+provide an interpretable baseline for analyzing how handcrafted sharpness
+features or reduced patch representations are separated into clear and blurred
+categories.
+
+\paragraph{Random Forests.} A random forest is an ensemble learning method that
+combines multiple decision trees in order to improve predictive stability and
+generalization \cite{breiman2001random}. It typically uses bootstrap sampling
+and random feature selection, meaning that each split considers only a random
+subset of the available features, so that each tree is trained on a different
+view of the data. Its output can be expressed as
 \begin{equation}
     \hat{y}=\operatorname{mode}\left\{T_1(\mathbf{x}),T_2(\mathbf{x}),\ldots,T_K(\mathbf{x})\right\}
     \label{eq:random-forest-basic}
 \end{equation}
 \par where $T_k(\mathbf{x})$ denotes the prediction result of the $k$-th
-decision tree, and $\operatorname{mode}$ denotes majority voting.
+decision tree, $K$ denotes the number of trees in the forest, and
+$\operatorname{mode}$ denotes majority voting. Because the
+final decision aggregates multiple weakly correlated trees, random forests
+usually achieve better robustness than a single decision tree, especially when
+the data distribution is noisy or contains diverse local patterns
+\cite{breiman2001random}. For the patch-level focus classification task, this
+mechanism is useful because it can reduce the variance of a single tree and
+provide a more stable prediction
+under local texture variation and feature noise.
 
-\par When the input is a high-dimensional pixel vector, principal component
-analysis is also commonly used to map the original features into a low-
-dimensional subspace. Let the sample vector be
-$\tilde{\mathbf{z}}\in\mathbb{R}^{d}$, then the dimensionality-reduced
-representation of principal component analysis (PCA)
-\cite{perry2025inference,zheng2021application} can be written as
+\paragraph{Principal Component Analysis and Preprocessing.} Since the
+dimensionality of vectorized patches is $p^2$ and therefore grows quadratically
+with the patch size $p$, classical models often need to combine procedures such
+as feature standardization, kernel approximation, or principal component
+analysis to reduce training complexity while preserving the main information.
+When the input is a high-dimensional pixel vector, principal component analysis
+is also commonly used to map the original features into a low-dimensional
+subspace. Let the sample vector be $\mathbf{x}\in\mathbb{R}^{d}$, then
+the dimensionality-reduced representation of principal component analysis
+(PCA) \cite{perry2025inference,zheng2021application} can be written as
 \begin{equation}
-    \mathbf{r}=W^\top(\tilde{\mathbf{z}}-\boldsymbol{\mu}),\qquad
+    \mathbf{r}=W^\top(\mathbf{x}-\boldsymbol{\mu}),\qquad
     W\in\mathbb{R}^{d\times k},\; k<d
     \label{eq:pca-basic}
 \end{equation}
 \par where $\boldsymbol{\mu}$ denotes the mean of the training samples, and $W$
-is composed of the first $k$ principal component directions. The role of PCA is
-to compress redundant dimensions, reduce the influence of noise, and provide a
-more compact representation for subsequent classifiers, as commonly motivated
-in PCA-based dimensionality reduction \cite{perry2025inference,zheng2021application}.
+is composed of the first $k$ principal component directions, that is, the
+directions along which the data variance is largest. Here, $k$ denotes
+the target dimension after projection. In essence, PCA projects the original
+data onto orthogonal directions with the largest variance, so that redundant
+correlations among pixel dimensions can be
+compressed into a smaller number of informative components. The role of PCA is
+therefore to compress redundant dimensions, reduce the influence of noise, and
+provide a more compact representation for subsequent classifiers, as commonly
+motivated in PCA-based dimensionality reduction
+\cite{perry2025inference,zheng2021application}. In this thesis, PCA serves as
+a practical dimensionality-reduction step when vectorized pixel patches are
+used as model input, so that the main variation structure can be retained while
+the complexity of subsequent classification is reduced.
 
 \par In classical machine learning pipelines, in addition to dimensionality
 reduction, input features are often standardized so that different dimensions
@@ -331,59 +387,87 @@ the training stability of subsequent linear classifiers and kernel methods. For
 models such as support vector machines that are sensitive to feature scale,
 standardization \cite{hsu2003practical} is usually an important preprocessing
 step to ensure that information from different dimensions can be used in a
-relatively balanced way.
-
-\par In addition to linear SVM, support vector machines can also describe
-nonlinear class boundaries through kernel functions. However, standard kernel
-SVM usually needs to process a large kernel matrix explicitly or implicitly,
-and its training and storage cost increases significantly as the number of
-samples grows. To alleviate this problem, kernel approximation methods are
-often used to transform the originally expensive kernel computation into a
-finite-dimensional feature mapping. Among them, the Nystr\"{o}m method is a
-typical low-rank kernel approximation strategy. Its basic idea is to use some
-representative samples to approximate the kernel matrix and then construct an
-explicit mapping $\phi(\mathbf{x})$ such that the kernel function satisfies
-\begin{equation}
-    k(\mathbf{x},\mathbf{x}')\approx \phi(\mathbf{x})^\top\phi(\mathbf{x}')
-    \label{eq:nystrom-basic}
-\end{equation}
-\par In this way, a nonlinear classification problem that originally relied on
-the kernel trick can be approximately transformed into a linear discrimination
-problem in an explicit feature space, which reduces computational complexity
-while retaining certain nonlinear expressive ability. For the task of this
-thesis, this idea provides the theoretical basis for the subsequent use of SVM
-based on Nystr\"{o}m kernel approximation \cite{williams2001using,scholkopf2002learning}.
+more balanced way.
 
 \subsection{Convolutional Neural Networks for Image Analysis}
 \subsubsection{Advantages of CNNs for Patch Analysis}
 \par Convolutional neural networks (CNNs)
-\cite{lecun2002gradient,krizhevsky2012imagenet} are among the most important
-deep learning models in current image analysis. Their core advantage is that
-they can automatically learn multi-level feature representations directly from
-raw pixels, without relying completely on hand-crafted features. Through
-mechanisms such as convolution, nonlinear activation, and pooling, CNNs can
-gradually extract hierarchical information ranging from local edges to higher-
-level semantic structures, and they have therefore been widely applied in tasks
-such as classification, detection, and segmentation.
+\cite{lecun2002gradient,krizhevsky2012imagenet} are a class of neural networks
+specifically designed for grid-structured data such as images. Their core
+advantage is that they can automatically learn multi-level feature
+representations directly from raw pixels, without relying completely on
+hand-crafted features. Through mechanisms such as convolution, nonlinear
+activation, and pooling, CNNs can gradually extract hierarchical information
+ranging from local edges to higher-level semantic structures, and they have
+therefore been widely applied in tasks such as classification, detection, and
+segmentation. Here, pooling summarizes local responses and reduces spatial
+resolution while retaining salient information.
 
-\par For image focus detection, the potential advantage of CNNs is that they can
+\par For image focus detection, a key advantage of CNNs is that they can
 automatically learn discriminative patterns related to sharpness, such as
 complex combinations among edge strength, texture structure, and local
 contrast. Especially under the patch-based setting, CNNs can directly take
 local image patches as input and avoid the information loss that may arise in
-manual feature selection \cite{lecun2002gradient,krizhevsky2012imagenet}. However, deep models usually require more training
-data to perform stably \cite{goodfellow2016deep,shorten2019survey}. When the sample size is limited, complex networks are
-prone to overfitting \cite{goodfellow2016deep}. Therefore, in small-sample research, using a lightweight
+manual feature selection \cite{lecun2002gradient,krizhevsky2012imagenet}.
+However, deep models usually require more training data to perform stably
+\cite{goodfellow2016deep,shorten2019survey}. When the sample size is limited,
+complex networks are prone to overfitting \cite{goodfellow2016deep}.
+Therefore, in small-sample research, using a lightweight
 CNN \cite{howard2017mobilenets} with fewer parameters and a shallower structure
 is a reasonable choice to balance model representation ability and training
 feasibility under limited-data conditions \cite{goodfellow2016deep,shorten2019survey}.
 
 \subsubsection{Basic Operations of CNNs}
-\par In mathematical form, the basic operation of a convolutional layer can be
-expressed as
+\par Artificial neural networks are learning models inspired by the way
+biological neurons are abstractly connected in layered structures. In a neural
+network, each layer receives an input, applies a weighted linear combination
+followed by a nonlinear activation, and passes the result to the next layer
+\cite{goodfellow2016deep,lecun2002gradient}. By stacking multiple such layers,
+the model can gradually transform raw input data into more discriminative
+representations for classification or regression tasks.
+
+\par From the perspective of supervised learning, the main advantage of neural
+networks is that they can jointly learn both feature representation and
+decision rules directly from data. Instead of manually specifying all relevant
+features in advance, the network adjusts its parameters by minimizing a loss
+function on training samples, so that useful patterns can be extracted
+automatically \cite{goodfellow2016deep}. This property is especially important
+in image analysis, where discriminative information is often distributed across
+many local structures and is difficult to describe completely by fixed
+hand-crafted rules.
+
+\par A standard feedforward neural network is usually organized as an input
+layer, one or more hidden layers, and an output layer. Each hidden layer
+performs a nonlinear transformation on the previous representation, so that the
+network can model complex relationships between the input and the target
+\cite{goodfellow2016deep}. During training, the parameters of all layers are
+updated through gradient-based optimization in order to reduce the prediction
+error on the training set. As a result, the network gradually learns internal
+representations that are useful for the final task.
+
+\par When neural networks are applied to image data, however, a fully connected
+architecture is often inefficient because the number of parameters grows
+rapidly with the input size and local spatial structure is not explicitly
+exploited. Convolutional neural networks address this issue by introducing
+local receptive fields and weight sharing, so that the same kernel can be
+applied across different spatial positions \cite{lecun2002gradient}. This
+design greatly reduces the parameter count and makes CNNs more suitable for
+learning local patterns such as edges, textures, and shape-related structures
+from image patches.
+
+\par If the input patch is denoted by $P\in\mathbb{R}^{p\times p}$, then the
+input tensor of the CNN can be written as
+\begin{equation}
+    X(P)\in\mathbb{R}^{1\times p\times p}
+    \label{eq:cnn-input-basic}
+\end{equation}
+\par Here, $X(P)$ denotes the tensor form of patch $P$ in channel-first format,
+that is, a single-channel dimension is added on the basis of the grayscale
+image. In mathematical form, the basic operation of a convolutional layer can
+then be expressed as
 \begin{equation}
     z_{i,j}^{(k)}=
-    \sum_{c=1}^{C}\sum_{m}\sum_{n}
+    \sum_{c=1}^{C_{\mathrm{in}}}\sum_{m}\sum_{n}
     w_{m,n}^{(k,c)}x_{i+m,j+n}^{(c)}+b^{(k)}
     \label{eq:cnn-conv-basic}
 \end{equation}
@@ -391,35 +475,61 @@ expressed as
     a_{i,j}^{(k)}=\sigma\!\left(z_{i,j}^{(k)}\right)
     \label{eq:cnn-activation-basic}
 \end{equation}
-\par where $x^{(c)}$ denotes the $c$-th input channel, $w^{(k,c)}$ denotes the
-weight of the $k$-th convolution kernel on the $c$-th channel, $b^{(k)}$
-denotes the bias term, and $\sigma(\cdot)$ denotes the nonlinear activation
-function. After several layers of convolution and pooling, the network finally
+\par Here, $z_{i,j}^{(k)}$ denotes the pre-activation response at spatial
+position $(i,j)$ of the $k$-th output feature map, and $a_{i,j}^{(k)}$ denotes
+the corresponding activated output. In addition, $x^{(c)}$ denotes the $c$-th
+input channel, $w^{(k,c)}$ denotes the weight of the $k$-th convolution kernel
+on the $c$-th channel, and $b^{(k)}$ denotes the bias term. Here, a
+convolution kernel is a small learnable filter that slides across the input to
+extract local patterns, $\sigma(\cdot)$ denotes the nonlinear activation
+function, and $C_{\mathrm{in}}$ denotes the number of input channels. After
+several layers of convolution and pooling, the network finally
 outputs class probabilities through softmax:
 \begin{equation}
     \hat{p}_c=
-    \frac{\exp(o_c)}{\sum_{t=1}^{C}\exp(o_t)}
+    \frac{\exp(o_c)}{\sum_{t=1}^{M}\exp(o_t)}
     \label{eq:softmax-basic}
 \end{equation}
 \par The corresponding classification loss usually takes the form of
 cross-entropy:
 \begin{equation}
     \mathcal{L}=
-    -\sum_{c=1}^{C} y_c\log \hat{p}_c
+    -\sum_{c=1}^{M} y_c\log \hat{p}_c
     \label{eq:cross-entropy-basic}
 \end{equation}
-\par where $o_c$ denotes the output score of the model for class $c$, and $y_c$
-denotes the one-hot encoding of the true label. If the input patch is denoted
-by $P\in\mathbb{R}^{p\times p}$, then the input tensor of the CNN can be
-written as
-\begin{equation}
-    X(P)\in\mathbb{R}^{1\times p\times p}
-    \label{eq:cnn-input-basic}
-\end{equation}
-\par that is, a single-channel dimension is added on the basis of the grayscale
-image. By minimizing the loss function, the CNN can learn feature
+\par where $\hat{p}_c$ denotes the predicted probability of class $c$, $o_c$
+denotes the pre-softmax output score of the model for class $c$, $y_c$
+denotes the one-hot encoding of the true label, and $\mathcal{L}$ denotes the
+cross-entropy loss. Here, $M$ denotes the number of classes.
+
+\par By minimizing the loss function, the CNN can learn feature
 representations suitable for focus state discrimination in an end-to-end
 manner.
+
+\par At inference time, the final class label is usually obtained by selecting
+the class with the largest output score. This decision rule can be written as
+\begin{equation}
+    \hat{y}=\arg\max_{c\in\{0,\dots,M-1\}} o_c
+    \label{eq:argmax-basic}
+\end{equation}
+\par For binary classification, the decision can also be made by comparing the
+predicted probability of one class with a threshold. Let the clear class be
+class $1$, let $\hat{p}_1$ denote its predicted probability, and let $\tau$
+denote the decision threshold. Then
+\begin{equation}
+    \hat{y}=
+    \begin{cases}
+        1, & \hat{p}_1\ge \tau, \\
+        0, & \hat{p}_1<\tau,
+    \end{cases}
+    \label{eq:binary-threshold-basic}
+\end{equation}
+\par This threshold-based form makes it possible to adjust the trade-off
+between the precision and recall of the clear class, rather than relying only
+on a fixed maximum-score decision rule \cite{davis2006relationship}. Such a
+mechanism is especially useful when the class distribution is imbalanced and
+the research focus is more concerned with the detection ability of clear
+regions.
 
 \subsection{Learning under Limited Data Conditions}
 \subsubsection{Challenges of Limited Data}
@@ -428,7 +538,10 @@ especially when the cost of local annotation is high \cite{shu2018small}. When t
 training data are insufficient, the model often finds it difficult to learn
 stable class boundaries and tends to overfit accidental patterns in the
 training samples, thereby reducing its generalization ability on new samples.
-This problem exists for both classical methods and deep learning methods, but
+In this context, a validation set refers to a held-out subset that is not used
+to update model parameters, but is used to monitor generalization performance
+and support model selection during training. This problem exists for both
+classical methods and deep learning methods, but
 its form is different. Classical methods are more easily limited by feature
 representation ability, while deep models are more easily limited by the
 mismatch between parameter scale and data demand \cite{goodfellow2016deep}.
@@ -436,11 +549,12 @@ mismatch between parameter scale and data demand \cite{goodfellow2016deep}.
 \par To alleviate the influence of limited data, common strategies in research
 include data augmentation, class reweighting, model lightweighting, and
 controlling experimental variables \cite{shorten2019survey,he2009learning,howard2017mobilenets}.
-Data augmentation expands the training
-distribution by applying perturbations to the original samples and helps the
-model obtain stronger robustness \cite{shorten2019survey}. Class reweighting can alleviate the class
-imbalance problem \cite{he2009learning}. Model lightweighting reduces the risk of overfitting by
-decreasing the number of parameters \cite{howard2017mobilenets}. For this thesis, the low-sample condition
+Data augmentation expands the training distribution by applying perturbations
+to the original samples and helps the model obtain stronger robustness
+\cite{shorten2019survey}. Class reweighting can alleviate the class imbalance
+problem \cite{he2009learning}. Model lightweighting reduces the risk of
+overfitting by decreasing the number of parameters
+\cite{howard2017mobilenets}. For this thesis, the low-sample condition
 is not only an experimental limitation, but also the core premise for
 comparing the applicability of different methods. Therefore, understanding the
 learning characteristics under limited data conditions is a necessary
@@ -458,8 +572,7 @@ minority-class samples are seen more frequently during training. Both methods
 aim to alleviate the bias caused by class imbalance, but their mechanisms are
 not the same \cite{Cui_2019_CVPR,buda2018systematic}. Reweighting mainly acts
 at the loss level, while resampling acts at the data sampling distribution
-level. Therefore, the two methods may also have different effects on the
-balance between precision and recall.
+level.
 
 \subsubsection{Risk Minimization and Weighted Learning}
 \par From the perspective of statistical learning, model training can usually be
@@ -472,19 +585,26 @@ viewed as an empirical risk minimization problem \cite{murphy2022pml}:
 \end{equation}
 \par where $N$ denotes the number of training samples, $\ell(\cdot)$ denotes
 the loss function, $\Omega(\theta)$ denotes the regularization term, and
-$\lambda$ is the regularization coefficient. When $N$ is small, the empirical
-risk becomes less representative of the overall distribution, and the model is
-more likely to memorize accidental noise in the training samples, which leads
-to low training error but high generalization error. To alleviate the influence
-of class imbalance, weighted loss is also often introduced in practical
+$\lambda$ is the regularization coefficient. Here, $\theta$ denotes the set of
+trainable model parameters, $f(\mathbf{x}_i;\theta)$ denotes the model output
+for the $i$-th sample, and empirical risk minimization means minimizing the
+average loss measured on the training set. The regularization term
+$\Omega(\theta)$ is added to penalize overly complex models. When $N$ is
+small, the empirical risk becomes less representative of the overall
+distribution, and the model is more likely to memorize accidental noise in the
+training samples, which leads to low training error but high generalization
+error. To alleviate the influence of class imbalance, weighted loss is also
+often introduced in practical
 training:
 \begin{equation}
     \mathcal{L}_{w}=
-    -\sum_{c=1}^{C}\alpha_c\,y_c\log \hat{p}_c
+    -\sum_{c=1}^{M}\alpha_c\,y_c\log \hat{p}_c
     \label{eq:weighted-loss-basic}
 \end{equation}
-\par where $\alpha_c$ denotes the weight of class $c$. The above form indicates
-that under limited data conditions, controlling model complexity, introducing
+\par where $\mathcal{L}_{w}$ denotes the weighted loss, $\alpha_c$ denotes the
+weight assigned to class $c$, and $M$ denotes the number of classes. The above
+form indicates that under limited data conditions, controlling model
+complexity, introducing
 regularization constraints, and performing class balancing
 \cite{goodfellow2016deep,Cui_2019_CVPR} are important theoretical means to
 improve model stability.
@@ -567,47 +687,6 @@ for analyzing the difficulty difference between binary and three-class tasks.
 For example, in a three-class task, the model may more often misclassify the
 intermediate state as clear or blurred, rather than directly causing large-
 scale confusion between clear and blurred.
-
-\par From the prediction mechanism, a multi-class model usually takes the class
-with the largest output score as the final result, namely
-\begin{equation}
-    \hat{y}=\arg\max_{c\in\{0,\dots,C-1\}} o_c
-    \label{eq:argmax-basic}
-\end{equation}
-\par where $o_c$ denotes the output score of the model for class $c$. For a
-binary classification task, the decision can also be made based on the
-posterior probability threshold of one class. Let the clear class be class $1$,
-its predicted probability be $\hat{p}_1$, and the threshold be $\tau$. Then
-we have
-\begin{equation}
-    \hat{y}=
-    \begin{cases}
-        1, & \hat{p}_1\ge \tau, \\
-        0, & \hat{p}_1<\tau,
-    \end{cases}
-    \label{eq:binary-threshold-basic}
-\end{equation}
-\par This form shows that binary classification output does not have to rely
-only on the fixed maximum-probability decision rule. Instead, it can trade off
-between the precision and recall of the clear class by adjusting the threshold
-\cite{davis2006relationship}. This is especially important when the class
-distribution is imbalanced and the research focus is more concerned with the
-detection ability of clear regions.
-
-\subsubsection{Projection-Based Visualization of Predictions}
-\par In addition to numerical metrics, patch-level tasks often project the
-prediction results back to the original image space for visualization. The
-basic idea is to fill each local predicted label back into its corresponding
-region according to the patch grid position in the original image
-\cite{Long_2015_CVPR,Zhou_2016_CVPR}, and then restore it to the original image
-size through nearest-neighbor interpolation, finally generating the overlay
-display result. Although this process does not change the classification result
-itself, it can present the spatial prediction distribution of the model in a
-more intuitive way, thus helping analyze focus boundaries, local misclassified
-regions, and prediction differences among different methods. Based on the above
-theoretical foundation, the next section will further explain how this thesis
-organizes patch-level prediction, metric calculation, and result visualization
-on a unified validation set.
 
 \subsubsection{Performance-Cost Tradeoff}
 \par For image patch classification tasks, the quality of a model is usually not
