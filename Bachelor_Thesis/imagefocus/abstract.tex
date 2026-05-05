@@ -5,8 +5,7 @@
 clear or blurred, and it is important for image quality analysis, autofocus
 assistance, and subsequent vision tasks. This thesis studies patch-based image
 focus detection under limited data conditions and builds a unified experimental
-pipeline covering image preprocessing, grayscale conversion, $32\times32$ patch
-division, automatic labeling, model training, and prediction evaluation. To
+pipeline covering image preprocessing, automatic labeling, model training, and prediction evaluation. To
 reduce the cost of manual patch-level annotation, this thesis designs a
 rule-based automatic labeling method by combining three kinds of sharpness
 features, namely Laplacian, Sobel, and fast Fourier transform (FFT), and
@@ -34,4 +33,5 @@ findings, this thesis argues that for patch-level focus detection tasks with
 relatively clear local boundaries and limited samples, deep learning is not the
 only approach that should be considered first. When the performance gap is
 limited, traditional methods can still achieve a good balance between
-recognition performance and computational efficiency.
+recognition performance and computational efficiency. The source code and
+experimental pipeline are available on GitHub\footnote{\url{https://github.com/xilu100/ImageFocusDetection}}.
