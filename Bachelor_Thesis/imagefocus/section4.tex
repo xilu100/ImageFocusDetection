@@ -88,6 +88,17 @@ binary focus maps were also found to be visually consistent with human judgment.
 Based on this calibration process, the subsequent experiments in this thesis use
 $T_b=0.40$ and $T_s=0.75$ for the three-class task, and $T=0.75$ for the binary
 task.
+\par Although the threshold-based automatic labeling strategy provides an
+interpretable and relatively consistent way to generate supervisory signals,
+the approach still has several limitations. The thresholds are manually selected
+and may remain sensitive to dataset-specific image characteristics and local
+texture variations. In addition, fixed threshold rules may not fully capture
+all complex focus transitions or ambiguous boundary regions. Therefore, the
+automatic annotation procedure in this thesis is mainly intended to provide a
+practical and repeatable label generation strategy rather than serving as a
+final classification method by itself. The subsequent machine learning models
+are still necessary to learn more robust decision boundaries from the patch
+data and improve generalization performance across different image conditions.
 
 \subsubsection{PCA Parameter Selection}
 \par The feature dimension of a flattened original patch is $1,024$. If it is
