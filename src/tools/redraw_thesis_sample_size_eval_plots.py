@@ -17,35 +17,43 @@ plt.rcParams["ps.fonttype"] = 42
 PLOT_SPECS = [
     {
         "csv_path": "logs/TR_sample_percentage_2026_0427_180944/Decision_Tree_sample_percentage.csv",
-        "output_name": "DT_EVA_2C.png",
+        "task": "2C",
+        "model_prefix": "DT",
     },
     {
         "csv_path": "logs/TR_sample_percentage_2026_0427_180944/Random_Forest_sample_percentage.csv",
-        "output_name": "RF_EVA_2C.png",
+        "task": "2C",
+        "model_prefix": "RF",
     },
     {
         "csv_path": "logs/TR_sample_percentage_2026_0427_180944/SVM_sample_percentage.csv",
-        "output_name": "SVM_EVA_2C.png",
+        "task": "2C",
+        "model_prefix": "SVM",
     },
     {
         "csv_path": "logs/TR_sample_percentage_2026_0427_180944/CNN_sample_percentage.csv",
-        "output_name": "CNN_EVA_2C.png",
+        "task": "2C",
+        "model_prefix": "CNN",
     },
     {
         "csv_path": "logs/TR_sample_percentage_2026_0427_193743/Decision_Tree_sample_percentage.csv",
-        "output_name": "DT_EVA_3C.png",
+        "task": "3C",
+        "model_prefix": "DT",
     },
     {
         "csv_path": "logs/TR_sample_percentage_2026_0427_193743/Random_Forest_sample_percentage.csv",
-        "output_name": "RF_EVA_3C.png",
+        "task": "3C",
+        "model_prefix": "RF",
     },
     {
         "csv_path": "logs/TR_sample_percentage_2026_0427_193743/SVM_sample_percentage.csv",
-        "output_name": "SVM_EVA_3C.png",
+        "task": "3C",
+        "model_prefix": "SVM",
     },
     {
         "csv_path": "logs/TR_sample_percentage_2026_0427_193743/CNN_sample_percentage.csv",
-        "output_name": "CNN_EVA_3C.png",
+        "task": "3C",
+        "model_prefix": "CNN",
     },
 ]
 
@@ -56,30 +64,33 @@ CLASS_LABELS = {
     2: "Intermediate",
 }
 
+PLOT_CLASS_LABELS = {
+    0: "Blur",
+    1: "Sharp",
+    2: "Interm.",
+}
+
 CLASS_COLORS = {
     0: "#1f77b4",
     1: "#d62728",
     2: "#ff7f0e",
 }
 
-CLASS1_METRIC_STYLES = {
-    "precision": {"marker": "o", "linestyle": "-", "color": "#2ca02c"},
-    "recall": {"marker": "s", "linestyle": "--", "color": "#17becf"},
-    "f1": {"marker": "D", "linestyle": "-.", "color": "#d62728"},
+METRIC_STYLES = {
+    "precision": {"marker": "o", "linestyle": "-", "suffix": "Precision"},
+    "recall": {"marker": "s", "linestyle": "--", "suffix": "Recall"},
+    "f1": {"marker": "D", "linestyle": "-.", "suffix": "F1"},
 }
 
-F1_CLASS_STYLES = {
-    0: {"color": "#1f77b4", "marker": "o", "linestyle": "-"},
-    1: {"color": "#d62728", "marker": "D", "linestyle": "-."},
-    2: {"color": "#ff7f0e", "marker": "^", "linestyle": "--"},
+OTHER_CLASS_LINESTYLES = {
+    0: {"precision": "#1f77b4", "recall": "#4c97d9", "f1": "#0f4c81"},
+    2: {"precision": "#ff7f0e", "recall": "#f4a340", "f1": "#c55a00"},
 }
 
 
-def build_series_specs(df: pd.DataFrame) -> list[dict[str, str]]:
-    series_specs: list[dict[str, str]] = []
-
+def get_class_ids(df: pd.DataFrame) -> list[int]:
     class_col_pattern = re.compile(r"^class(\d+)_(precision|recall|f1)$")
-    class_ids = sorted(
+    return sorted(
         {
             int(match.group(1))
             for col in df.columns
@@ -88,38 +99,20 @@ def build_series_specs(df: pd.DataFrame) -> list[dict[str, str]]:
         }
     )
 
+
+def build_sharp_specs(df: pd.DataFrame) -> list[dict[str, str]]:
+    series_specs: list[dict[str, str]] = []
+
     for metric_name in ("precision", "recall", "f1"):
         column = f"class1_{metric_name}"
         if column not in df.columns:
             continue
-        style = CLASS1_METRIC_STYLES[metric_name]
-        metric_label = {"precision": "Precision", "recall": "Recall", "f1": "F1"}[metric_name]
+        style = METRIC_STYLES[metric_name]
         series_specs.append(
             {
                 "column": column,
-                "label": f"Sharp {metric_label}",
-                "color": style["color"],
-                "marker": style["marker"],
-                "linestyle": style["linestyle"],
-            }
-        )
-
-    for class_id in class_ids:
-        column = f"class{class_id}_f1"
-        if column not in df.columns:
-            continue
-        if class_id == 1:
-            continue
-        class_label = CLASS_LABELS.get(class_id, f"Class {class_id}")
-        style = F1_CLASS_STYLES.get(
-            class_id,
-            {"color": CLASS_COLORS.get(class_id, "#7f7f7f"), "marker": "o", "linestyle": "-"},
-        )
-        series_specs.append(
-            {
-                "column": column,
-                "label": f"{class_label} F1",
-                "color": style["color"],
+                "label": f"Sharp {style['suffix']}",
+                "color": CLASS_COLORS[1],
                 "marker": style["marker"],
                 "linestyle": style["linestyle"],
             }
@@ -139,10 +132,57 @@ def build_series_specs(df: pd.DataFrame) -> list[dict[str, str]]:
     return series_specs
 
 
-def plot_eval_curve(csv_path: Path, output_path: Path) -> None:
+def build_other_specs(df: pd.DataFrame) -> list[dict[str, str]]:
+    series_specs: list[dict[str, str]] = []
+
+    for class_id in get_class_ids(df):
+        if class_id == 1:
+            continue
+        class_label = PLOT_CLASS_LABELS.get(class_id, f"Class {class_id}")
+        color_map = OTHER_CLASS_LINESTYLES.get(class_id, {})
+        for metric_name in ("precision", "recall", "f1"):
+            column = f"class{class_id}_{metric_name}"
+            if column not in df.columns:
+                continue
+            style = METRIC_STYLES[metric_name]
+            series_specs.append(
+                {
+                    "column": column,
+                    "label": f"{class_label} {style['suffix']}",
+                    "color": color_map.get(metric_name, CLASS_COLORS.get(class_id, "#7f7f7f")),
+                    "marker": style["marker"],
+                    "linestyle": style["linestyle"],
+                }
+            )
+
+    return series_specs
+
+
+def compute_y_limits(plotted_y_vals: list[np.ndarray]) -> tuple[float, float]:
+    all_y_vals = np.concatenate([vals for vals in plotted_y_vals if vals.size > 0])
+    y_data_min = float(np.min(all_y_vals))
+    y_data_max = float(np.max(all_y_vals))
+    y_margin = max(0.015, (y_data_max - y_data_min) * 0.18)
+    y_min = max(0.0, y_data_min - y_margin)
+    y_max = min(1.05, y_data_max + y_margin)
+
+    if y_data_max >= 0.985:
+        y_max = max(y_max, 1.02)
+    if y_max - y_min < 0.12:
+        y_center = (y_min + y_max) / 2
+        half_span = 0.06
+        y_min = max(0.0, y_center - half_span)
+        y_max = min(1.05, y_center + half_span)
+
+    return y_min, y_max
+
+
+def plot_eval_curve(csv_path: Path, output_path: Path, mode: str) -> None:
     df = pd.read_csv(csv_path).sort_values("sample_percentage")
     x_vals = df["sample_percentage"].astype(float).to_numpy()
-    series_specs = build_series_specs(df)
+    series_specs = build_sharp_specs(df) if mode == "sharp" else build_other_specs(df)
+    if not series_specs:
+        return
 
     fig, ax = plt.subplots(figsize=(11.8, 7.6))
     plotted_y_vals: list[np.ndarray] = []
@@ -156,26 +196,13 @@ def plot_eval_curve(csv_path: Path, output_path: Path) -> None:
             color=spec["color"],
             marker=spec["marker"],
             linestyle=spec["linestyle"],
-            linewidth=2.6,
-            markersize=9.6,
+            linewidth=2.55,
+            markersize=9.0,
             markeredgewidth=0.5,
             label=spec["label"],
         )
 
-    all_y_vals = np.concatenate([vals for vals in plotted_y_vals if vals.size > 0])
-    y_data_min = float(np.min(all_y_vals))
-    y_data_max = float(np.max(all_y_vals))
-    y_margin = max(0.015, (y_data_max - y_data_min) * 0.18)
-    y_min = max(0.0, y_data_min - y_margin)
-    y_max = y_data_max + y_margin
-    if y_data_max >= 0.985:
-        y_max = max(y_max, 1.02)
-    y_max = min(1.05, y_max)
-    if y_max - y_min < 0.12:
-        y_center = (y_min + y_max) / 2
-        half_span = 0.06
-        y_min = max(0.0, y_center - half_span)
-        y_max = min(1.05, y_center + half_span)
+    y_min, y_max = compute_y_limits(plotted_y_vals)
 
     ax.set_xlim(18, 113)
     ax.set_ylim(y_min, y_max)
@@ -193,18 +220,19 @@ def plot_eval_curve(csv_path: Path, output_path: Path) -> None:
     ax.grid(axis="x", alpha=0.12)
 
     handles, labels = ax.get_legend_handles_labels()
+    ncol = 2 if len(labels) <= 4 else 3
     fig.legend(
         handles,
         labels,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.985),
-        ncol=3,
+        ncol=ncol,
         frameon=False,
         prop={"weight": "semibold", "family": "DejaVu Sans", "size": 22},
-        columnspacing=1.6,
-        handlelength=2.3,
-        handletextpad=0.7,
-        labelspacing=0.75,
+        columnspacing=1.35,
+        handlelength=2.2,
+        handletextpad=0.65,
+        labelspacing=0.7,
         borderaxespad=0.5,
     )
 
@@ -219,9 +247,11 @@ def main() -> None:
     output_dir = root_dir / "Bachelor_Thesis" / "imagefocus" / "images"
     for spec in PLOT_SPECS:
         csv_path = root_dir / spec["csv_path"]
-        output_path = output_dir / spec["output_name"]
-        plot_eval_curve(csv_path, output_path)
-        print(f"Saved: {output_path}")
+        for mode in ("sharp", "other"):
+            output_name = f"{spec['model_prefix']}_EVA_{spec['task']}_{mode.upper()}.png"
+            output_path = output_dir / output_name
+            plot_eval_curve(csv_path, output_path, mode=mode)
+            print(f"Saved: {output_path}")
 
 
 if __name__ == "__main__":

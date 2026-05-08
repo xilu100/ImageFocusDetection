@@ -359,7 +359,7 @@ samples.
     \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[!htbp]
     \centering
     \begin{subfigure}{0.47\textwidth}
         \centering
@@ -473,7 +473,7 @@ $100\%$ training samples.
     \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[!htbp]
     \centering
     \begin{subfigure}{0.47\textwidth}
         \centering
@@ -590,46 +590,7 @@ blur class accounts for about $50.27\%$ and the intermediate-state class for
 about $40.34\%$. This means that the three-class task not only has the
 minority-class detection problem, but also needs to establish a stable boundary
 between two large non-sharp-related classes, and is therefore more difficult
-than the binary setting. The evaluation curves of the four models under
-different training ratios in the binary task are shown in
-Fig.~\ref{fig:sample-size-2c-eva}.
-
-\begin{figure}[htbp]
-    \centering
-
-    \begin{subfigure}{0.47\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/DT_EVA_2C}
-        \caption{Decision Tree}
-        \label{fig:dt-eva-2c}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.47\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/RF_EVA_2C}
-        \caption{Random Forest}
-        \label{fig:rf-eva-2c}
-    \end{subfigure}
-
-    \vspace{0.6em}
-
-    \begin{subfigure}{0.47\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/SVM_EVA_2C}
-        \caption{SVM}
-        \label{fig:svm-eva-2c}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.47\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/CNN_EVA_2C}
-        \caption{CNN}
-        \label{fig:cnn-eva-2c}
-    \end{subfigure}
-
-    \caption{Trends of sharp-class precision, recall, F1-score, and macro F1 of the four models under different training ratios in the binary task}
-    \label{fig:sample-size-2c-eva}
-\end{figure}
+than the binary setting.
 
 \subsubsection{Binary Setting}
 \par In the binary task, whether classical machine learning models or deep
@@ -651,7 +612,7 @@ of each model under different training ratios in the binary task, together with
 the best sharp-class F1-score at each ratio, so as to observe the main trend of
 different models as data scale changes.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \caption{Changes of sharp-class F1-score under different training ratios in the binary task}
     \label{tab:sample-binary-summary}
@@ -675,7 +636,8 @@ forest performs strongly under small and medium sample ratios, but its
 sharp-class F1-score gradually declines as recall increases and precision drops.
 The SVM remains the most stable across all ratios, whereas the CNN shows the
 largest overall improvement and becomes the best model on sharp-class F1 when
-the training ratio reaches $60\%$ and above.
+the training ratio reaches $60\%$ and above, as shown in
+Fig.~\ref{fig:sample-size-2c-eva-sharp}.
 
 \par At the same time, these performance gains must be considered together with
 recall and computational cost. Although the CNN achieves the highest F1-score at
@@ -685,13 +647,112 @@ also increases for all models as sample size grows, but the SVM remains the
 lowest-cost method, while the CNN is the most expensive. Therefore, in the
 binary setting, the CNN is more suitable when overall F1 is prioritized, whereas
 the SVM is a more practical choice when high recall and efficiency are both
-important.
+important. The SVM is also relatively stable in macro F1 across different
+sample ratios, which is consistent with its overall stability in the binary
+task.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/DT_EVA_2C_SHARP}
+        \caption{Decision Tree}
+        \label{fig:dt-eva-2c-sharp}
+    \end{subfigure}
+    \hspace{0.01\textwidth}
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/RF_EVA_2C_SHARP}
+        \caption{Random Forest}
+        \label{fig:rf-eva-2c-sharp}
+    \end{subfigure}
+
+    \vspace{0.6em}
+
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/SVM_EVA_2C_SHARP}
+        \caption{SVM}
+        \label{fig:svm-eva-2c-sharp}
+    \end{subfigure}
+    \hspace{0.01\textwidth}
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/CNN_EVA_2C_SHARP}
+        \caption{CNN}
+        \label{fig:cnn-eva-2c-sharp}
+    \end{subfigure}
+
+    \caption{Trends of sharp-class precision, recall, F1-score, and macro F1 of the four models under different training ratios in the binary task}
+    \label{fig:sample-size-2c-eva-sharp}
+\end{figure}
+
+\par The blur-class curves in Fig.~\ref{fig:sample-size-2c-eva-other} provide
+an important complementary view. Across all four models, blur-class precision,
+recall, and F1-score remain at a high level and vary only slightly as the sample
+ratio increases, which indicates that the negative class in the binary task is
+already easy to model under the current feature representation. The decision
+tree keeps the blur-class F1-score around $0.95\sim0.96$, while SVM and CNN
+remain around $0.96\sim0.98$ and are almost unchanged over the whole sample-size
+range. This stability shows that enlarging the training set mainly does not
+change the model's ability to recognize blur patches.
+
+\par More importantly, the blur-class trends help explain the sharp-class
+trade-off. For random forest, as the sample ratio increases, blur-class recall
+gradually decreases from $0.97$ to $0.94$, while blur-class precision stays near
+$0.99$. At the same time, the sharp-class recall rises from $0.84$ to $0.96$,
+but the sharp-class precision drops from $0.79$ to $0.66$. This indicates that
+the model increasingly predicts more patches as sharp, thereby recovering more
+true sharp samples but also sacrificing part of the blur-class recall. By
+contrast, the CNN keeps blur-class recall at nearly $1.00$ and blur-class
+F1-score near $0.98$, which is consistent with its very high sharp-class
+precision and relatively lower sharp-class recall. In other words, the CNN
+maintains high blur-class stability through a more conservative decision boundary,
+whereas random forest obtains higher sharp-class recall partly by allowing more
+blur patches to cross into the sharp side.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/DT_EVA_2C_OTHER}
+        \caption{Decision Tree}
+        \label{fig:dt-eva-2c-other}
+    \end{subfigure}
+    \hspace{0.01\textwidth}
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/RF_EVA_2C_OTHER}
+        \caption{Random Forest}
+        \label{fig:rf-eva-2c-other}
+    \end{subfigure}
+
+    \vspace{0.6em}
+
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/SVM_EVA_2C_OTHER}
+        \caption{SVM}
+        \label{fig:svm-eva-2c-other}
+    \end{subfigure}
+    \hspace{0.01\textwidth}
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/CNN_EVA_2C_OTHER}
+        \caption{CNN}
+        \label{fig:cnn-eva-2c-other}
+    \end{subfigure}
+
+    \caption{Trends of blur-class precision, recall, and F1-score of the four models under different training ratios in the binary task}
+    \label{fig:sample-size-2c-eva-other}
+\end{figure}
 
 \subsubsection{Three-Class Setting}
 \par The change of the sharp-class F1-score under different training ratios in
 the three-class task is shown in Table~\ref{tab:sample-triclass-summary}.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \caption{Changes of sharp-class F1-score under different training ratios in the three-class task}
     \label{tab:sample-triclass-summary}
@@ -709,65 +770,133 @@ the three-class task is shown in Table~\ref{tab:sample-triclass-summary}.
     \end{tabular}
 \end{table}
 
-\par The evaluation curves of the four models under different training ratios in
-the three-class task are shown in Fig.~\ref{fig:sample-size-3c-eva}.
-
-\begin{figure}[htbp]
-    \centering
-
-    \begin{subfigure}{0.47\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/DT_EVA_3C}
-        \caption{Decision Tree}
-        \label{fig:dt-eva-3c}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.47\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/RF_EVA_3C}
-        \caption{Random Forest}
-        \label{fig:rf-eva-3c}
-    \end{subfigure}
-
-    \vspace{0.6em}
-
-    \begin{subfigure}{0.47\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/SVM_EVA_3C}
-        \caption{SVM}
-        \label{fig:svm-eva-3c}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.47\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{images/CNN_EVA_3C}
-        \caption{CNN}
-        \label{fig:cnn-eva-3c}
-    \end{subfigure}
-
-    \caption{Trends of sharp-class precision, recall, F1-score, and macro F1 of the four models under different training ratios in the three-class task}
-    \label{fig:sample-size-3c-eva}
-\end{figure}
-
-\par The overall trend in the three-class task is consistent with that in the
-binary task, namely that the gain brought by increasing sample size is still
-relatively limited. Most models do not show a large jump in the interval from
-$20\%$ to $100\%$, but instead show slow improvement, stable plateau behavior,
-or slight fluctuation. This further indicates that for the current three-class
-setting, the performance bottleneck comes more from the complexity of the class
-boundaries themselves, especially the similarity between the sharp class and the
-intermediate-state class, rather than only from insufficient training data. At
-the same time, training time continues to increase as the sample ratio grows,
-which means that sample expansion in the three-class task leads to higher time
-cost while performance improvement remains limited.
+\par In the three-class task, the gain brought by increasing sample size is
+still relatively limited. Most models do not show a large jump in the interval
+from $20\%$ to $100\%$, but instead show slow improvement, stable plateau
+behavior, or slight fluctuation. This further indicates that for the current
+three-class setting, the performance bottleneck comes more from the complexity
+of the class boundaries themselves, especially the similarity between the sharp
+class and the intermediate-state class, rather than only from insufficient
+training data. At the same time, training time continues to increase as the
+sample ratio grows, which means that sample expansion in the three-class task
+leads to higher time cost while performance improvement remains limited.
 
 \par The detailed trends show clear differences among models. The decision tree
 improves only slightly, random forest reaches a high level early and then
 remains stable, and the SVM maintains the strongest overall stability across
-different sample ratios. By contrast, the CNN shows a continuous decline in
+different sample ratios. By contrast, the CNN shows an overall decline in
 sharp-class F1-score, indicating that in the three-class setting, more data do
 not automatically improve its sharp-class recognition, but instead make its
-decision boundary more conservative around the intermediate-state class.
+decision boundary more conservative around the intermediate-state class, as
+shown in Fig.~\ref{fig:sample-size-3c-eva-sharp}.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/DT_EVA_3C_SHARP}
+        \caption{Decision Tree}
+        \label{fig:dt-eva-3c-sharp}
+    \end{subfigure}
+    \hspace{0.01\textwidth}
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/RF_EVA_3C_SHARP}
+        \caption{Random Forest}
+        \label{fig:rf-eva-3c-sharp}
+    \end{subfigure}
+
+    \vspace{0.6em}
+
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/SVM_EVA_3C_SHARP}
+        \caption{SVM}
+        \label{fig:svm-eva-3c-sharp}
+    \end{subfigure}
+    \hspace{0.01\textwidth}
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/CNN_EVA_3C_SHARP}
+        \caption{CNN}
+        \label{fig:cnn-eva-3c-sharp}
+    \end{subfigure}
+
+    \caption{Trends of sharp-class precision, recall, F1-score, and macro F1 of the four models under different training ratios in the three-class task}
+    \label{fig:sample-size-3c-eva-sharp}
+\end{figure}
+
+\par The additional class-wise curves in
+Fig.~\ref{fig:sample-size-3c-eva-other} clarify where this difficulty comes
+from. The blur class is the most stable category for almost all models. Its
+F1-score stays around $0.92$ for the
+decision tree, around $0.94$ for random forest, around $0.96$ for SVM, and
+increases from $0.89$ to $0.92$ for CNN. This means that even in the three-class
+setting, separating blur patches from the other two classes is not the main
+bottleneck. Increasing the sample ratio also brings only marginal change to the
+blur-class metrics, which again suggests that the blur boundary is already well
+captured at relatively small sample sizes.
+
+\par By comparison, the intermediate-state class shows more informative
+differences among models. Random forest and SVM maintain a high and stable
+intermediate-class F1-score near $0.88\sim0.90$, indicating that they can keep
+a relatively consistent boundary between the sharp and non-sharp transition
+regions even when the sample ratio changes. The decision tree remains slightly
+lower, around $0.81\sim0.82$, but is still fairly stable. The CNN shows a
+different trend: while its intermediate-class recall rises from $0.70$ to
+$0.80$ and its intermediate-class F1-score increases from $0.79$ to $0.84$, its
+sharp-class recall drops from $0.70$ to $0.60$ and its sharp-class F1-score
+falls from $0.82$ to $0.75$. This opposite movement indicates that additional
+training data mainly push the CNN to absorb more borderline sharp patches into
+the intermediate-state class rather than improving discrimination of the sharp
+class itself.
+
+\par Therefore, the other-class analysis confirms that the main challenge in the
+three-class task is not a general performance decline across all categories, but a specific
+allocation problem between the sharp and intermediate-state classes. Random
+forest performs best because it keeps both a high sharp-class F1-score and a
+high intermediate-class F1-score at the same time, whereas the SVM provides the
+most stable class balance across all three categories. The CNN, in contrast,
+does not collapse on the blur class or the intermediate class; instead, it
+becomes progressively more conservative in assigning patches to the sharp class
+as the sample ratio increases.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/DT_EVA_3C_OTHER}
+        \caption{Decision Tree}
+        \label{fig:dt-eva-3c-other}
+    \end{subfigure}
+    \hspace{0.01\textwidth}
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/RF_EVA_3C_OTHER}
+        \caption{Random Forest}
+        \label{fig:rf-eva-3c-other}
+    \end{subfigure}
+
+    \vspace{0.6em}
+
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/SVM_EVA_3C_OTHER}
+        \caption{SVM}
+        \label{fig:svm-eva-3c-other}
+    \end{subfigure}
+    \hspace{0.01\textwidth}
+    \begin{subfigure}{0.485\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/CNN_EVA_3C_OTHER}
+        \caption{CNN}
+        \label{fig:cnn-eva-3c-other}
+    \end{subfigure}
+
+    \caption{Trends of blur-class and intermediate-class precision, recall, and F1-score of the four models under different training ratios in the three-class task. ``Interm.'' denotes the intermediate-state class}
+    \label{fig:sample-size-3c-eva-other}
+\end{figure}
 
 \par In terms of overall findings, random forest remains the strongest model on
 sharp-class F1, whereas the SVM provides the most stable balance between
@@ -776,7 +905,8 @@ sample size grows, and the growth is generally steeper than in the binary task,
 especially for the CNN. Therefore, under the three-class setting, enlarging the
 training set alone is not sufficient to bring substantial gain; model behavior
 is still dominated more strongly by class-boundary complexity and the trade-off
-between sharp-class detection and overall class balance.
+between sharp-class detection and overall class balance, which is also
+reflected by the slight fluctuation of macro F1 across sample ratios.
 
 \subsection{Supplementary Analyses}
 \par In addition to the main experiments, this thesis further investigates the
