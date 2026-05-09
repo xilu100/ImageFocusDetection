@@ -12,7 +12,7 @@ field or the shift of the focal plane, while motion blur is mainly caused by
 relative displacement during exposure. Although their generation mechanisms are
 different, both may lead to local edge diffusion, texture weakening, and loss of
 high-frequency components
-\cite{pertuz2013analysis,yi2016lbp,fergus2006removing}.
+\cite{yi2016lbp,fergus2006removing}.
 
 \par From the perspective of image features, clear regions usually have more
 obvious grayscale variation, stronger local gradients, and richer texture
@@ -108,17 +108,16 @@ and is suitable for explicit sharpness scoring, while the latter preserves more
 complete local intensity distribution information and is therefore a more
 natural input form for supervised classifiers and CNN-based patch models
 \cite[pp.~419--496]{murphy2022pml};
-\cite[pp.~164--223,~326--366]{goodfellow2016deep}; \cite{Hou_2016_CVPR}. In this
+\cite{Hou_2016_CVPR}. In this
 thesis, hand-crafted focus measures such as Laplacian, Sobel, and
 frequency-based statistics are also used to construct sharpness scores and
 derive supervisory labels. Therefore, the labeling stage is closer to rule-based
 automatic labeling than to model-bootstrapped pseudo-labeling
-\cite{lee2013pseudo,5739529,1284395}. These labels then provide supervision for
+\cite{lee2013pseudo,5739529}. These labels then provide supervision for
 subsequent classifiers, which learn the final clear/blur decision boundary from
 patch data rather than relying only on fixed heuristic thresholds
 \cite[pp.~321--618]{murphy2022pml};
-\cite[pp.~164--223,~326--366]{goodfellow2016deep};
-\cite{yi2016lbp,Hou_2016_CVPR}.
+\cite{Hou_2016_CVPR}.
 
 \subsubsection{Focus Measures in Spatial and Frequency Domains}
 \par Laplacian features reflect second-order grayscale variation and are
@@ -416,8 +415,8 @@ the sample size is limited, complex networks are prone to overfitting
 \cite[pp.~108--123,~224--270]{goodfellow2016deep}. Therefore, in small-sample
 research, using a lightweight CNN with fewer parameters and a shallower
 structure is a reasonable choice to balance model representation ability and
-training feasibility under limited-data conditions \cite{howard2017mobilenets};
-\cite[pp.~224--270]{goodfellow2016deep}; \cite{shorten2019survey}.
+training feasibility under limited-data conditions
+\cite{howard2017mobilenets,shorten2019survey}.
 
 \subsubsection{Basic Operations of CNNs}
 \par Artificial neural networks are learning models inspired by the way
@@ -549,7 +548,7 @@ more easily limited by the mismatch between parameter scale and data demand
 \par To alleviate the influence of limited data, common strategies in research
 include data augmentation, class reweighting, model lightweighting, and
 controlling experimental variables
-\cite{shorten2019survey,he2009learning,howard2017mobilenets}. Data augmentation
+\cite{shorten2019survey,he2009learning}. Data augmentation
 expands the training distribution by applying perturbations to the original
 samples and helps the model obtain stronger robustness \cite{shorten2019survey}.
 Class reweighting can alleviate the class imbalance problem
