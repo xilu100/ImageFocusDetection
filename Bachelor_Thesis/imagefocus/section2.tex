@@ -371,6 +371,17 @@ thesis, PCA serves as a practical dimensionality-reduction step when vectorized
 pixel patches are used as model input, so that the main variation structure can
 be retained while the complexity of subsequent classification is reduced.
 
+\par In this thesis, the PCA dimension is controlled by a cumulative explained
+variance retention ratio. If $\lambda_i$ denotes the variance explained by the
+$i$-th principal component, sorted in descending order, the retained variance
+ratio of the first $k$ components can be written as
+\begin{equation}
+    \rho(k)=\frac{\sum_{i=1}^{k}\lambda_i}{\sum_{i=1}^{d}\lambda_i}
+    \label{eq:pca-retention-ratio}
+\end{equation}
+\par A larger $\rho(k)$ keeps more information from the original patch vector
+but also results in a higher-dimensional representation.
+
 \par In classical machine learning pipelines, in addition to dimensionality
 reduction, input features are often standardized so that different dimensions
 have similar numerical scales. If one feature dimension is denoted by $x_j$, its
