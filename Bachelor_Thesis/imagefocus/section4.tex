@@ -1,17 +1,17 @@
 \section{Experiments and Evaluation}
 \subsection{Experimental Setup}
 \par All experiments in this section are built on the unified pipeline described
-in Section 3. \par In terms of data scale, the experiments in this thesis use a
-total of $350$ original images, among which the validation set contains $75$
-images and the remaining images are used for training. Since the original
-resolutions are different, each image usually generates about $2,000\sim3,000$
-patches, and therefore the final training and validation are performed on a
-large patch-level sample set. It should be noted that although the number of
-patches is much larger than the number of original images, these patches are not
-independently collected samples, but are obtained by splitting a limited number
-of original images. Therefore, when reporting patch-level experimental results,
-this thesis still keeps the number of original images as an explanation of the
-data scale.
+in Section 3. \par In terms of data scale, the experiments in this thesis use
+$350$ original images for training and another $75$ original images for
+validation. These two sets are kept separate throughout the experiments. Since
+the original resolutions are different, each image usually generates about
+$2,000\sim3,000$ patches, and therefore the final training and validation are
+performed on a large patch-level sample set. It should be noted that although
+the number of patches is much larger than the number of original images, these
+patches are not independently collected samples, but are obtained by splitting a
+limited number of original images. Therefore, when reporting patch-level
+experimental results, this thesis still keeps the number of original images as
+an explanation of the data scale.
 
 \subsection{Experimental Design}
 \par All experiments in this chapter follow the same preprocessing, labeling,

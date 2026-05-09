@@ -5,12 +5,13 @@
 clear or blurred, and it is important for image quality analysis, autofocus
 assistance, and subsequent vision tasks. This thesis studies patch-based image
 focus detection under limited data conditions and builds a unified experimental
-pipeline covering image preprocessing, automatic labeling, model training, and prediction evaluation. To
-reduce the cost of manual patch-level annotation, this thesis designs a
-rule-based automatic labeling method by combining three kinds of sharpness
-features, namely Laplacian, Sobel, and fast Fourier transform (FFT), and
-organizes both binary and three-class classification tasks based on these
-labels. Using a dataset constructed from $350$ original images, this thesis
+pipeline covering image preprocessing, automatic labeling, model training, and
+prediction evaluation. To reduce the cost of manual patch-level annotation,
+this thesis designs a rule-based automatic labeling method by combining three
+kinds of sharpness features, namely Laplacian, Sobel, and fast Fourier
+transform (FFT), and organizes both binary and three-class classification tasks
+based on these labels. Using a dataset constructed from $350$ original images,
+this thesis
 systematically compares the performance of decision trees, random forests,
 support vector machines based on Nystr\"{o}m kernel approximation, and a
 lightweight convolutional neural network (CNN) under the same data split and
@@ -18,20 +19,24 @@ unified evaluation metrics.
 
 \par The experimental results show that, under the current task setting and data
 organization of this thesis, increasing the training sample ratio from $20\%$ to
-$100\%$ brings only limited performance improvement, while the training time
-keeps increasing. This indicates that the marginal benefit of data expansion is
-limited within the scope of this study. Specifically, the lightweight CNN
-achieves the best overall result in the binary classification task, reaching an
-F1-score of $0.84$ for the clear class and a macro F1 of $0.91$ with $100\%$
-training samples. In the three-class classification task, the random forest
-obtains the highest F1-score of $0.83$ for the clear class, while the SVM
-maintains a relatively stable macro F1 of about $0.89$. Overall, traditional
-machine learning methods, especially random forest and SVM, are able to learn
-competitive decision boundaries under a unified grayscale patch representation
-and provide relatively stable results with lower training cost. Based on these
-findings, this thesis argues that for patch-level focus detection tasks with
-relatively clear local boundaries and limited samples, deep learning is not the
-only approach that should be considered first. When the performance gap is
-limited, traditional methods can still achieve a good balance between
-recognition performance and computational efficiency. The source code and
-experimental pipeline are available on GitHub\footnote{\url{https://github.com/xilu100/ImageFocusDetection}}.
+$100\%$ brings only limited metric improvement for most models, while training
+time increases steadily. Specifically, the lightweight CNN achieves the
+strongest overall result in the binary classification task, reaching an
+F1-score of $0.84$ for the sharp class and a macro F1 of $0.91$ with $100\%$
+training samples. In the three-class classification task, the SVM maintains the
+most stable macro-level performance with a macro F1 of about $0.89$, while the
+random forest obtains the highest sharp-class F1-score of $0.83$. The
+supplementary analysis further shows that weighted sampling does not improve
+the binary CNN result, but can improve sharp-class recall and F1-score in the
+three-class CNN. Manual visual verification is generally consistent with the
+quantitative comparison. Overall, traditional machine learning methods,
+especially random forest and SVM, are able to learn competitive decision
+boundaries under a unified grayscale patch representation and provide
+relatively stable results with lower training cost. Based on these findings,
+this thesis argues that for patch-level focus detection tasks with relatively
+clear local boundaries and limited samples, deep learning is not the only
+approach that should be considered first. When the performance gap is limited,
+traditional methods can still achieve a good balance between recognition
+performance and computational efficiency. The source code and experimental
+pipeline are available on
+GitHub\footnote{\url{https://github.com/xilu100/ImageFocusDetection}}.
