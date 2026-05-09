@@ -118,17 +118,6 @@ def build_sharp_specs(df: pd.DataFrame) -> list[dict[str, str]]:
             }
         )
 
-    if "macro_f1" in df.columns:
-        series_specs.append(
-            {
-                "column": "macro_f1",
-                "label": "Macro F1",
-                "color": "#9467bd",
-                "marker": "^",
-                "linestyle": ":",
-            }
-        )
-
     return series_specs
 
 

@@ -101,23 +101,24 @@ are still necessary to learn more robust decision boundaries from the patch
 data and improve generalization performance across different image conditions.
 
 \subsubsection{PCA Parameter Selection}
-\par The feature dimension of a flattened original patch is $1,024$. If it is
-directly fed into classical classifiers, the training cost becomes high and more
-redundant information may also be introduced
+
+\par The feature dimension of a flattened original patch is $1,024$. Directly
+using such high-dimensional features in classical classifiers increases the
+training cost and may introduce redundant information
 \cite{perry2025inference,zheng2021application}. Therefore, this thesis first
 determines the PCA parameter used in the subsequent experiments through
-comparative experiments. Specifically, under both the three-class and binary
-task settings, the same decision tree, random forest, and Nystr\"{o}m-SVM
-configurations are used to compare PCA retention ratios
-\(\in\{0.95,0.99,0.995,0.999\}\). The analysis in this section jointly considers
-precision, recall, F1-score, macro F1, and training time on the validation set,
-with particular attention to recall and F1-score of the sharp class.
+comparative experiments. Under both the three-class and binary task settings,
+identical decision tree, random forest, and Nystr\"{o}m-SVM configurations are
+used to compare PCA retention ratios
+\(\in\{0.95,0.99,0.995,0.999\}\). The evaluation considers accuracy, macro
+precision, macro recall, macro F1, and training time on the validation set in
+order to assess both classification performance and computational efficiency.
 
-\par\medskip \noindent\textbf{Three-Class Setting.} \par The experimental
-results for the three-class task are shown in Table~\ref{tab:pca-triclass-pca}.
-The table lists the sharp-class precision, recall, F1, macro F1, and training
-time of the three models under different PCA retention ratios, so as to compare
-the performance and cost of different parameter settings in a comprehensive way.
+\par\medskip \noindent\textbf{Three-Class Setting.}
+\par The experimental results for the three-class task are shown in
+Table~\ref{tab:pca-triclass-pca}. The table reports the overall and
+class-balanced performance of the three models under different PCA retention
+ratios.
 
 \begin{table}[htbp]
     \centering
@@ -125,43 +126,42 @@ the performance and cost of different parameter settings in a comprehensive way.
     \label{tab:pca-triclass-pca}
     \begin{tabular}{llccccc}
         \toprule
-        PCA & Model & Precision$_{\mathrm{focus}}$ & Recall$_{\mathrm{focus}}$ &
-        F1$_{\mathrm{focus}}$ & Macro F1 & Time (s) \\
+        PCA & Model & Accuracy & Macro Precision &
+        Macro Recall & Macro F1 & Time (s) \\
         \midrule
-        0.95  & Decision Tree & 0.26 & 0.60 & 0.36 & 0.57 & 5.53   \\
-        0.95  & Random Forest & 0.32 & 0.49 & 0.38 & 0.62 & 25.53  \\
-        0.95  & SVM           & 0.41 & 0.21 & 0.28 & 0.60 & 353.66 \\
-        0.99  & Decision Tree & 0.55 & 0.81 & 0.65 & 0.78 & 45.43  \\
-        0.99  & Random Forest & 0.69 & 0.82 & 0.75 & 0.85 & 82.96  \\
-        0.99  & SVM           & 0.64 & 0.74 & 0.69 & 0.83 & 115.49 \\
-        0.995 & Decision Tree & 0.65 & 0.83 & 0.73 & 0.82 & 99.17  \\
-        0.995 & Random Forest & 0.75 & 0.91 & 0.83 & 0.88 & 116.74 \\
-        0.995 & SVM           & 0.76 & 0.86 & 0.81 & 0.89 & 93.24  \\
-        0.999 & Decision Tree & 0.71 & 0.86 & 0.78 & 0.85 & 349.45 \\
-        0.999 & Random Forest & 0.84 & 0.94 & 0.88 & 0.90 & 223.02 \\
-        0.999 & SVM           & 0.88 & 0.97 & 0.92 & 0.89 & 83.07  \\
+        0.95  & Decision Tree & 0.65 & 0.60 & 0.62 & 0.57 & 5.53   \\
+        0.95  & Random Forest & 0.70 & 0.62 & 0.64 & 0.62 & 25.53  \\
+        0.95  & SVM           & 0.73 & 0.63 & 0.59 & 0.60 & 353.66 \\
+        0.99  & Decision Tree & 0.83 & 0.77 & 0.82 & 0.78 & 45.43  \\
+        0.99  & Random Forest & 0.89 & 0.84 & 0.87 & 0.85 & 82.96  \\
+        0.99  & SVM           & 0.88 & 0.82 & 0.84 & 0.83 & 115.49 \\
+        0.995 & Decision Tree & 0.86 & 0.81 & 0.85 & 0.82 & 99.17  \\
+        0.995 & Random Forest & 0.91 & 0.87 & 0.91 & 0.88 & 116.74 \\
+        0.995 & SVM           & 0.92 & 0.88 & 0.90 & 0.89 & 93.24  \\
+        0.999 & Decision Tree & 0.87 & 0.83 & 0.87 & 0.85 & 349.45 \\
+        0.999 & Random Forest & 0.90 & 0.89 & 0.91 & 0.90 & 223.02 \\
+        0.999 & SVM           & 0.89 & 0.89 & 0.90 & 0.89 & 83.07  \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-\par Under the three-class setting, when the PCA retention ratio is $0.95$, the
-overall performance of all three models is relatively weak, which indicates that
-excessive dimensionality reduction weakens local discriminative information
-related to focus state. As the retention ratio increases, the recall, F1-score,
-and macro F1 of each model all improve significantly. A comprehensive comparison
-shows that when the retention ratio is $0.995$, the three models already achieve
-a relatively good balance between sharp-class recognition ability and overall
-class balance, and the macro F1 of random forest and SVM reaches $0.88$ and
-$0.89$, respectively. By comparison, although $0.999$ further improves
-sharp-class recall and F1 in some models, its gain is not consistent across
-models, and the training time of decision tree and random forest increases
-significantly. Therefore, for the three-class task, a PCA retention ratio of
-$0.995$ shows a more stable balance between performance and computational cost.
+\par Under the three-class setting, all models show relatively weak performance
+at a PCA retention ratio of $0.95$, indicating that excessive dimensionality
+reduction removes discriminative information related to focus states. As the
+retention ratio increases, the overall and class-balanced performance improves
+consistently across all models. In particular, a retention ratio of $0.995$
+provides a strong balance between classification performance and computational
+cost. Although $0.999$ achieves slight improvements in some individual metrics,
+the gains are not consistent across models, while the training cost of decision
+tree and random forest increases substantially. Therefore, for the three-class
+task, $0.995$ represents a more stable trade-off between performance and
+efficiency.
 
-\par\medskip \noindent\textbf{Binary Setting.} \par The experimental results for
-the binary task are shown in Table~\ref{tab:pca-binary-pca}. Similar to the
-three-class case, the table gives the sharp-class precision, recall, F1, macro
-F1, and training time of the three models under different PCA retention ratios.
+\par\medskip \noindent\textbf{Binary Setting.}
+\par The experimental results for the binary task are shown in
+Table~\ref{tab:pca-binary-pca}. Similar to the three-class case, the table
+reports the accuracy, macro precision, macro recall, macro F1, and training
+time under different PCA retention ratios.
 
 \begin{table}[htbp]
     \centering
@@ -169,70 +169,61 @@ F1, and training time of the three models under different PCA retention ratios.
     \label{tab:pca-binary-pca}
     \begin{tabular}{llccccc}
         \toprule
-        PCA & Model & Precision$_{\mathrm{focus}}$ & Recall$_{\mathrm{focus}}$ &
-        F1$_{\mathrm{focus}}$ & Macro F1 & Time (s) \\
+        PCA & Model & Accuracy & Macro Precision &
+        Macro Recall & Macro F1 & Time (s) \\
         \midrule
-        0.95  & Decision Tree & 0.23 & 0.78 & 0.35 & 0.58 & 5.37   \\
-        0.95  & Random Forest & 0.27 & 0.73 & 0.40 & 0.62 & 26.34  \\
-        0.95  & SVM           & 0.25 & 0.76 & 0.37 & 0.60 & 122.06 \\
-        0.99  & Decision Tree & 0.48 & 0.88 & 0.62 & 0.78 & 47.49  \\
-        0.99  & Random Forest & 0.56 & 0.92 & 0.70 & 0.82 & 95.94  \\
-        0.99  & SVM           & 0.49 & 0.94 & 0.64 & 0.79 & 40.93  \\
-        0.995 & Decision Tree & 0.59 & 0.90 & 0.71 & 0.83 & 104.46 \\
-        0.995 & Random Forest & 0.66 & 0.96 & 0.78 & 0.87 & 129.81 \\
-        0.995 & SVM           & 0.60 & 0.97 & 0.74 & 0.85 & 18.42  \\
-        0.999 & Decision Tree & 0.65 & 0.89 & 0.75 & 0.86 & 371.16 \\
-        0.999 & Random Forest & 0.73 & 0.98 & 0.83 & 0.91 & 260.94 \\
-        0.999 & SVM           & 0.81 & 0.99 & 0.89 & 0.94 & 9.46   \\
+        0.95  & Decision Tree & 0.69 & 0.60 & 0.73 & 0.58 & 5.37   \\
+        0.95  & Random Forest & 0.76 & 0.61 & 0.75 & 0.62 & 26.34  \\
+        0.95  & SVM           & 0.73 & 0.60 & 0.74 & 0.60 & 122.06 \\
+        0.99  & Decision Tree & 0.88 & 0.73 & 0.88 & 0.78 & 47.49  \\
+        0.99  & Random Forest & 0.91 & 0.78 & 0.92 & 0.82 & 95.94  \\
+        0.99  & SVM           & 0.89 & 0.74 & 0.91 & 0.79 & 40.93  \\
+        0.995 & Decision Tree & 0.92 & 0.79 & 0.91 & 0.83 & 104.46 \\
+        0.995 & Random Forest & 0.94 & 0.83 & 0.95 & 0.87 & 129.81 \\
+        0.995 & SVM           & 0.93 & 0.80 & 0.95 & 0.85 & 18.42  \\
+        0.999 & Decision Tree & 0.94 & 0.82 & 0.92 & 0.86 & 371.16 \\
+        0.999 & Random Forest & 0.96 & 0.86 & 0.97 & 0.91 & 260.94 \\
+        0.999 & SVM           & 0.97 & 0.90 & 0.98 & 0.94 & 9.46   \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-\par Under the binary setting, as the PCA retention ratio increases, the recall
-and F1-score of each model on the sharp class continue to improve. Among them,
-when the retention ratio is $0.999$, the precision, recall, and F1-score of the
-SVM on the sharp class reach $0.81$, $0.99$, and $0.89$, respectively, and the
-macro F1 reaches $0.94$, which is the best result in this group. Random forest
-also shows relatively good sharp-class recall and F1-score under this setting.
-However, compared with $0.995$, the advantage of $0.999$ is mainly reflected in
-the binary task and does not show consistent improvement in the three-class
-task. At the same time, a higher PCA retention ratio also corresponds to greater
-training cost. For example, the training times of decision tree and random
-forest at $0.999$ are both much higher than those at $0.995$.
+\par Under the binary setting, the performance of all models improves steadily
+as the PCA retention ratio increases. Among the evaluated settings, $0.999$
+achieves the strongest overall performance, particularly for SVM and random
+forest. However, compared with $0.995$, the improvement is less consistent in
+the three-class task and is accompanied by higher computational cost,
+especially for decision tree and random forest models.
 
 \par By jointly considering the results of the three-class and binary tasks,
-this thesis finally selects a PCA retention ratio of $0.995$ as the unified PCA
-parameter for the subsequent experiments. The reason is that this setting
-maintains a relatively high level on recall, F1-score, and macro F1 in the
-three-class task, while also keeping good performance in the binary task. It
-should be noted that $0.999$ can indeed achieve higher results on the sharp-
-class recall, F1-score, and some macro F1 values in some models, especially in
-individual settings. However, this advantage does not appear consistently across
-the binary and three-class tasks or across different models. At the same time,
-compared with $0.999$, the overall training cost of $0.995$ is lower. Therefore,
-the parameter selection in this thesis is not based on local optimum from a
-single experiment, but places more emphasis on cross-task consistency, training
-cost, and reproducibility. Based on a comprehensive consideration of performance
-and computational cost, the PCA retention ratio $0.995$ is selected as the
-unified parameter for the subsequent experiments.
+this thesis selects a PCA retention ratio of $0.995$ for the subsequent
+experiments. Although a retention ratio of $0.999$ achieves slightly better
+results in several binary settings, the improvement is less consistent across
+different tasks and models and comes with increased training cost. In contrast,
+$0.995$ provides more stable overall performance while maintaining better
+computational efficiency. Therefore, the parameter selection is based not on
+the best result from a single experimental setting, but on the overall
+consistency, stability, and computational efficiency across tasks and models.
 
 \subsubsection{Epoch Parameter Selection}
-\par After determining the PCA parameter used by the classical models, this
-thesis further performs pre-experiments on the number of CNN training epochs to
-determine the unified epoch number used in the subsequent main experiments.
+
+\par After determining the PCA parameter for the classical models, this thesis
+further conducts pre-experiments on the number of CNN training epochs in order
+to determine a unified epoch setting for the subsequent main experiments.
 Specifically, under the three-class setting (sharp threshold $0.75$, blur
 threshold $0.4$) and the binary setting (both sharp and blur thresholds set to
-$0.75$), the influence of the training epochs \(\in\{10,20,30,50,60\}\) on
-validation performance and training time is compared. Since this thesis focuses
-on the detection ability of sharp regions, the analysis still mainly considers
-precision, recall, F1-score, and macro F1 of the sharp class (sharp, label $1$),
-together with training time and the decreasing trend of loss.
+$0.75$), the influence of training epochs
+\(\in\{10,20,30,50,60\}\) on validation performance and training time is
+evaluated. The analysis considers accuracy, macro precision, macro recall,
+macro F1, training time, and the convergence behaviour of the loss function to
+assess both classification performance and computational efficiency under
+different epoch settings.
 
-\par\medskip \noindent\textbf{Three-Class Setting.} \par The experimental
-results of different epoch numbers in the three-class task are shown in
-Table~\ref{tab:epoch-triclass-cnn}. The table lists the precision, recall, F1,
-macro F1, and training time of the sharp class, so as to observe the changes in
-performance and cost as the number of training epochs increases.
+\par\medskip \noindent\textbf{Three-Class Setting.}
+\par The experimental results for different epoch settings in the three-class
+task are shown in Table~\ref{tab:epoch-triclass-cnn}. The table reports the
+overall and class-balanced performance of the CNN model under different numbers
+of training epochs.
 
 \begin{table}[htbp]
     \centering
@@ -240,38 +231,34 @@ performance and cost as the number of training epochs increases.
     \label{tab:epoch-triclass-cnn}
     \begin{tabular}{cccccc}
         \toprule
-        Epoch & Precision$_{\mathrm{focus}}$ & Recall$_{\mathrm{focus}}$ &
-        F1$_{\mathrm{focus}}$ & Macro F1 & Time (s) \\
+        Epoch & Accuracy & Macro Precision &
+        Macro Recall & Macro F1 & Time (s) \\
         \midrule
-        10 & 1.00 & 0.65 & 0.79 & 0.81 & 245.25  \\
-        20 & 1.00 & 0.71 & 0.83 & 0.84 & 506.76  \\
-        30 & 1.00 & 0.60 & 0.75 & 0.83 & 758.34  \\
-        50 & 1.00 & 0.63 & 0.77 & 0.85 & 1,254.64 \\
-        60 & 1.00 & 0.69 & 0.81 & 0.86 & 1,504.51 \\
+        10 & 0.83 & 0.89 & 0.78 & 0.81 & 245.25  \\
+        20 & 0.85 & 0.90 & 0.81 & 0.84 & 506.76  \\
+        30 & 0.87 & 0.91 & 0.80 & 0.83 & 758.34  \\
+        50 & 0.88 & 0.91 & 0.82 & 0.85 & 1,254.64 \\
+        60 & 0.89 & 0.92 & 0.83 & 0.86 & 1,504.51 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-\par From the training process, the loss decreases most clearly within the first
-$20$ epochs, from $1,269.50$ to $521.27$. When the training continues to $30$
-epochs, it further decreases to $500.73$, which indicates that the model is
-still in a continuous convergence stage. After that, although the loss continues
-to decrease, fluctuations start to increase, and it only further drops to
-$478.99$ at $60$ epochs. In terms of validation results, at $20$ epochs the
-sharp-class recall and F1-score reach $0.71$ and $0.83$, respectively, which is
-a clear improvement over $10$ epochs. At $30$ epochs, although the sharp-class
-recall drops to $0.60$, the overall accuracy rises to $0.8709$, indicating that
-the overall discrimination ability of the model is still improving. By
-comparison, although $50$ and $60$ epochs bring a slight improvement in macro
-F1, the training time increases to $1,254.64$s and $1,504.51$s, respectively,
-and the computational cost grows significantly. Therefore, for the three-class
-task, $30$ epochs can still push the model to continue converging while keeping
-the training cost at a relatively acceptable level.
+\par Under the three-class setting, the loss decreases most rapidly during the
+first $20$ epochs, indicating that the model reaches its main convergence stage
+early in training. Additional epochs continue to reduce the loss, but the
+improvement becomes increasingly marginal after $30$ epochs. At the same time,
+the overall and class-balanced performance improves steadily from $10$ to
+$30$ epochs. Although $50$ and $60$ epochs provide slight additional
+improvements in some evaluation metrics, the increase in training time becomes
+substantial. Therefore, from the perspective of both convergence behaviour and
+computational efficiency, $30$ epochs provide a reasonable balance between
+performance and training cost in the three-class task.
 
-\par\medskip \noindent\textbf{Binary Setting.} \par The experimental results of
-different epoch numbers in the binary task are shown in
-Table~\ref{tab:epoch-binary-cnn}. Similar to the three-class task, the table
-gives the sharp-class precision, recall, F1, macro F1, and training time.
+\par\medskip \noindent\textbf{Binary Setting.}
+\par The experimental results for different epoch settings in the binary task
+are shown in Table~\ref{tab:epoch-binary-cnn}. Similar to the three-class task,
+the table reports the accuracy, macro precision, macro recall, macro F1, and
+training time under different numbers of training epochs.
 
 \begin{table}[htbp]
     \centering
@@ -279,82 +266,104 @@ gives the sharp-class precision, recall, F1, macro F1, and training time.
     \label{tab:epoch-binary-cnn}
     \begin{tabular}{cccccc}
         \toprule
-        Epoch & Precision$_{\mathrm{focus}}$ & Recall$_{\mathrm{focus}}$ &
-        F1$_{\mathrm{focus}}$ & Macro F1 & Time (s) \\
+        Epoch & Accuracy & Macro Precision &
+        Macro Recall & Macro F1 & Time (s) \\
         \midrule
-        10 & 1.00 & 0.68 & 0.81 & 0.89 & 235.81  \\
-        20 & 1.00 & 0.71 & 0.83 & 0.91 & 468.89  \\
-        30 & 0.99 & 0.73 & 0.84 & 0.91 & 686.42  \\
-        50 & 1.00 & 0.67 & 0.81 & 0.89 & 1,140.89 \\
-        60 & 1.00 & 0.72 & 0.84 & 0.91 & 1,366.49 \\
+        10 & 0.97 & 0.98 & 0.84 & 0.89 & 235.81  \\
+        20 & 0.97 & 0.98 & 0.86 & 0.91 & 468.89  \\
+        30 & 0.97 & 0.98 & 0.87 & 0.91 & 686.42  \\
+        50 & 0.96 & 0.98 & 0.84 & 0.89 & 1,140.89 \\
+        60 & 0.97 & 0.98 & 0.86 & 0.91 & 1,366.49 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-\par Under the binary setting, the loss is also concentrated in the first $20$
-epochs, rapidly decreasing from $553.42$ to $174.09$. At $30$ epochs, it further
-decreases to $162.95$, while when training continues to $60$ epochs, it only
-further decreases to $147.87$. From the validation results, $20$ epochs already
-raises the sharp-class F1-score to $0.83$ and the macro F1 to $0.91$. At $30$
-epochs, the recall further increases to $0.73$ and the F1-score further rises to
-$0.84$, which indicates that the model can still obtain some gain at this stage.
-By comparison, the recall and F1-score at $50$ epochs instead decline, while the
-results at $60$ epochs are close to those at $30$ epochs but require much longer
-training time. This shows that the marginal benefit of continuing to increase
-the number of training epochs is already weak.
+\par Under the binary setting, the loss also decreases primarily during the
+first $20$ epochs, while the reduction becomes noticeably smaller after
+$30$ epochs. In terms of validation performance, the overall metrics improve
+from $10$ to $30$ epochs and remain relatively stable afterwards. Increasing
+the number of epochs beyond $30$ does not lead to consistent improvements in
+overall performance, while the computational cost continues to grow
+significantly. In particular, the results at $50$ epochs show a slight decline
+in macro recall and macro F1 despite the substantially longer training time.
+This indicates that the marginal benefit of additional epochs becomes limited
+after the main convergence stage has been reached.
 
 \par By jointly considering the results of the three-class and binary tasks,
-this thesis finally selects $30$ epochs as the unified training epoch number for
-the subsequent CNN experiments. The selection criterion here is not only the
-local optimum of the sharp-class F1-score in a single task, but also considers
-cross-task consistency, sufficient convergence, and training cost. Compared with
-$20$ epochs, $30$ epochs can continue to push loss convergence without allowing
-training time to further worsen to the level of $50$ or $60$ epochs, and can
-also bring higher sharp-class recall and F1-score in the binary task. For the
-three-class task, although $20$ epochs is higher on sharp-class recall and
-F1-score, $30$ epochs reflects a more sufficient training process and is
-therefore more suitable as the unified parameter for the subsequent main
-experiments. Based on this consideration that unified parameters are preferred
-over local optimum of a single metric, this thesis sets $30$ training epochs as
-the unified parameter for the subsequent experiments.
+this thesis selects $30$ epochs as the unified training setting for the
+subsequent CNN experiments. Although $50$ and $60$ epochs achieve slightly
+better results in several metrics under the three-class setting, the
+improvements are relatively limited compared with the substantial increase in
+training time. In contrast, $30$ epochs provide stable convergence and strong
+overall performance across both tasks while maintaining substantially lower
+computational cost. Therefore, the epoch selection is based not on the best
+result from a single experimental setting, but on the overall consistency,
+stability, convergence behaviour, and computational efficiency across different
+tasks.
 
 \subsection{Main Experiments}
+
 \par After completing the pre-experiments for PCA and epochs, this thesis
 conducts the main experiments under a unified configuration. Specifically, the
-classical models all use a PCA retention ratio of $0.995$, the CNN is uniformly
-trained for $30$ epochs, and the patch size is fixed at $32\times 32$. At the
-same time, to observe the influence of data scale on model performance, a full
-scan over training sample ratios \(\{20,40,60,80,100\}\%\) is performed under
-both the binary setting (both sharp and blur thresholds are set to $0.75$) and
+classical models use a PCA retention ratio of $0.995$, the CNN is uniformly
+trained for $30$ epochs, and the patch size is fixed at $32\times 32$. To
+further investigate the influence of training scale on model performance, a
+full scan over training sample ratios \(\{20,40,60,80,100\}\%\) is conducted
+under both the binary setting (sharp and blur thresholds set to $0.75$) and
 the three-class setting (sharp threshold $0.75$, blur threshold $0.4$). The
-preprocessing time is $475.38$s for the binary experiment and $550.00$s for the
-three-class experiment, which indicates that the three-class label partition
-brings higher data preparation cost. The following analysis first compares the
-final results under $100\%$ training samples, and then combines the full log to
-analyze the behavior of different models as training scale changes.
+preprocessing time is $475.38$s for the binary task and $550.00$s for the
+three-class task, indicating that the introduction of the intermediate class
+increases data preparation complexity. The following analysis first compares
+the final results under $100\%$ training samples and then further examines the
+behaviour of different models as the training scale changes.
 
-\par\medskip \noindent\textbf{Binary Setting.} \par In the binary task, the
-validation set contains $121,405$ blur patches and $14,665$ sharp patches, and
-the class imbalance is obvious. Therefore, this thesis focuses on the precision,
-recall, and F1-score of the sharp class (sharp, label $1$), and uses macro F1 as
-an auxiliary indicator of overall class balance. Table~\ref{tab:main-binary-100}
-gives the main experimental results of the four models under $100\%$ training
-samples.
+\par\medskip \noindent\textbf{Binary Setting.}
+\par In the binary task, the validation set contains $121,405$ blur patches
+and $14,665$ sharp patches, resulting in a clear class imbalance. Therefore,
+the main comparison first evaluates the overall performance of the four models
+using accuracy, macro precision, macro recall, macro F1, and training time.
+Based on these overall metrics, a more detailed class-wise analysis is then
+conducted using per-class results and confusion matrices.
+Table~\ref{tab:main-binary-100} presents the overall experimental results under
+$100\%$ training samples.
+Although this overall comparison is based on all classes, the sharp class still
+deserves particular attention in the subsequent detailed analysis, because the
+practical objective of focus detection is to identify in-focus regions as
+accurately as possible.
 
 \begin{table}[htbp]
     \centering
     \caption{Main experimental results under $100\%$ training samples in the binary task}
     \label{tab:main-binary-100}
-    \begin{tabular}{lcccccc}
+    \begin{tabular}{lccccc}
         \toprule
-        Model & Accuracy & Precision$_{\mathrm{focus}}$ &
-        Recall$_{\mathrm{focus}}$ & F1$_{\mathrm{focus}}$ & Macro F1 & Time (s)
-        \\
+        Model & Accuracy & Macro Precision &
+        Macro Recall & Macro F1 & Time (s) \\
         \midrule
-        Decision Tree & 0.9223 & 0.59 & 0.90 & 0.71 & 0.83 & 103.48 \\
-        Random Forest & 0.9413 & 0.66 & 0.96 & 0.78 & 0.87 & 120.80 \\
-        SVM           & 0.9268 & 0.60 & 0.97 & 0.74 & 0.85 & 17.68  \\
-        CNN           & 0.9709 & 0.99 & 0.73 & 0.84 & 0.91 & 684.51 \\
+        Decision Tree & 0.9223 & 0.79 & 0.91 & 0.83 & 103.48 \\
+        Random Forest & 0.9413 & 0.83 & 0.95 & 0.87 & 120.80 \\
+        SVM           & 0.9268 & 0.80 & 0.95 & 0.85 & 17.68  \\
+        CNN           & 0.9709 & 0.98 & 0.87 & 0.91 & 684.51 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Per-class precision, recall, and F1-score of the four models under $100\%$ training samples in the binary task}
+    \label{tab:main-binary-perclass}
+    \begin{tabular}{llccc}
+        \toprule
+        Model & Class & Precision & Recall & F1 \\
+        \midrule
+        Decision Tree & Blur  & 0.99 & 0.93 & 0.96 \\
+        Decision Tree & Sharp & 0.59 & 0.90 & 0.71 \\
+        Random Forest & Blur  & 0.99 & 0.94 & 0.97 \\
+        Random Forest & Sharp & 0.66 & 0.96 & 0.78 \\
+        SVM           & Blur  & 1.00 & 0.92 & 0.96 \\
+        SVM           & Sharp & 0.60 & 0.97 & 0.74 \\
+        CNN           & Blur  & 0.97 & 1.00 & 0.98 \\
+        CNN           & Sharp & 0.99 & 0.73 & 0.84 \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -390,85 +399,102 @@ samples.
     \label{fig:cm-main-2c}
 \end{figure}
 
-\par From the final results, the CNN obtains the highest sharp-class F1-score
-($0.84$) and the highest macro F1 ($0.91$) in the binary task. Therefore, if the
-main criterion is the overall recognition quality of sharp regions, it is the
-best model under this setting. Its advantage mainly comes from extremely high
-precision ($0.99$), which indicates that the model is very conservative when
-judging sharp regions and almost never misclassifies blurred patches as sharp.
-At the same time, however, the recall is $0.73$, which means that some real
-sharp regions are still missed. By comparison, the sharp-class F1-score of the
-SVM is $0.74$, which is lower than that of the CNN, but its recall reaches
-$0.97$, the highest among the four models. This indicates that it is more
-inclined to ensure that sharp regions are not missed, although this strategy
-introduces more false positives, thus lowering precision and making it difficult
-for F1-score to increase further. Random forest provides a compromise between
-the two. Its sharp-class recall is $0.96$ and its F1-score is $0.78$. Its
-overall performance is clearly better than that of the decision tree, but it is
-still lower than that of the CNN. From the perspective of training time, this
-performance difference is accompanied by a large computational cost. Under
-$100\%$ samples, the CNN needs $684.51$s, while the SVM only requires $17.68$s,
-random forest requires $120.80$s, and decision tree requires $103.48$s. In other
-words, although the CNN is the best model on F1-score, its cost is about $39$
-times that of the SVM. Therefore, if later experimental iteration, parameter
-search, or deployment efficiency is considered, time cost must be evaluated
-together with the performance result.
+\par From the overall results, the CNN achieves the strongest overall
+performance in the binary task, reaching the highest accuracy, macro
+precision, and macro F1-score among the four models. This indicates that the
+CNN provides the most effective balance between overall classification
+performance and class-balanced evaluation metrics under the current setting.
+Random forest and SVM also show strong overall performance, particularly in
+macro recall, while the decision tree remains weaker on both overall and
+class-balanced metrics.
 
-\par Figure~\ref{fig:cm-main-2c} gives the confusion matrices of the four models
-in the main binary experiment under $100\%$ training samples
-\cite{schutze2008introduction}. Overall, the four models can all distinguish the
-blur class and the sharp class relatively well, but they show clear differences
-in the distribution of false positives and false negatives. The CNN has the
-fewest off-diagonal items, and in particular shows the smallest number of cases
-in which blur patches are misclassified as sharp. The SVM and random forest show
-stronger sharp-class detection ability, but this is accompanied by more cases
-where blur patches are misclassified as sharp. The decision tree shows
-relatively higher errors in both directions, and therefore performs worse
-overall than the other three models.
+\par However, the performance advantage of the CNN is accompanied by a
+substantially higher computational cost. Under $100\%$ training samples, the
+CNN requires $684.51$s of training time, whereas the SVM requires only
+$17.68$s. This reflects a clear trade-off between computational efficiency and
+marginal performance gain. Therefore, model selection should consider not only
+classification performance, but also training efficiency and potential
+deployment constraints.
 
-\par From the detailed structure of the confusion matrices, the advantage of the
-CNN mainly lies in its extremely small number of false positives: only $62$ blur
-patches are misclassified as sharp, while the numbers for decision tree, random
-forest, and SVM are $9,096$, $7,393$, and $9,508$, respectively. This shows that
-the CNN is very conservative when identifying sharp regions and can therefore
-achieve a sharp-class precision close to $1.00$. However, this conservative
-strategy also leads to many misses. It classifies $3,904$ real sharp patches as
-blur, which is clearly higher than random forest's $588$ and SVM's $452$, and
-this limits recall. In contrast, the confusion matrices of the SVM and random
-forest reflect another strategy: they improve sharp-class recall by
-significantly reducing false negatives, but the cost is more false positives, so
-precision decreases. The decision tree fails to achieve an effective balance
-between the two, which indicates that its ability to express class boundaries in
-the current task is relatively limited.
+\par At the class level, Table~\ref{tab:main-binary-perclass} shows that all
+four models recognize the blur class relatively reliably, with blur-class
+F1-scores remaining consistently high across models. The primary differences
+appear in the detection behaviour of the minority sharp class. The CNN achieves
+the highest precision and F1-score for the sharp class, but its recall remains
+lower than that of random forest and SVM, indicating a more conservative
+prediction strategy. In contrast, random forest and SVM achieve substantially
+higher recall for the sharp class, but this comes at the cost of lower
+precision, reflecting a more aggressive prediction behaviour. The decision tree
+shows weaker performance on both overall and class-level metrics.
 
-\par Therefore, in the binary task, if the goal is to obtain the highest overall
-sharp-class F1-score together with a relatively good macro F1, the CNN is the
-best choice. If the goal is to detect sharp regions as completely as possible
-while controlling training cost, the SVM is a more cost-effective option. If a
-balance between F1 and time is preferred, random forest is also an acceptable
-intermediate solution.
+\par Figure~\ref{fig:cm-main-2c} further illustrates the error distributions of
+the four models through the confusion matrices
+\cite{schutze2008introduction}. Overall, all models distinguish blur and sharp
+patches relatively well, but they differ substantially in the balance between
+false positives and false negatives. The CNN produces the smallest number of
+false positives, indicating that it predicts the sharp class only under high
+confidence. This conservative behaviour improves precision but also increases
+the number of missed sharp patches. In contrast, random forest and SVM reduce
+false negatives more effectively, leading to higher recall for the sharp class
+at the expense of more false positives. The decision tree exhibits larger
+errors in both directions, which explains its weaker overall performance.
 
-\par\medskip \noindent\textbf{Three-Class Setting.} \par In the three-class
-task, patches are divided into blur, sharp, and intermediate classes. The
-validation set contains $65,830$, $14,665$, and $55,575$ samples, respectively,
-and the sharp class (label $1$) is still the minority class.
-Table~\ref{tab:main-triclass-100} gives the main experimental results under
-$100\%$ training samples.
+\par Therefore, in the binary task, the CNN achieves the strongest overall
+performance, whereas the SVM provides the best computational efficiency and
+random forest offers a balanced trade-off between performance and training
+cost.
+
+\par\medskip \noindent\textbf{Three-Class Setting.}
+\par In the three-class task, patches are divided into blur, sharp, and
+intermediate classes. The validation set contains $65,830$, $14,665$, and
+$55,575$ samples, respectively, and the sharp class remains the minority
+class. Similar to the binary task, the main comparison first evaluates the
+overall performance of the four models using accuracy, macro precision, macro
+recall, macro F1, and training time, and then further investigates
+class-specific behaviour through per-class metrics and confusion matrices.
+Table~\ref{tab:main-triclass-100} presents the overall experimental results
+under $100\%$ training samples.
+At the same time, since the practical target of this thesis is still the
+detection of in-focus regions, the sharp class remains an especially important
+category in the subsequent class-wise interpretation.
 
 \begin{table}[htbp]
     \centering
     \caption{Main experimental results under $100\%$ training samples in the three-class task}
     \label{tab:main-triclass-100}
-    \begin{tabular}{lcccccc}
+    \begin{tabular}{lccccc}
         \toprule
-        Model & Accuracy & Precision$_{\mathrm{focus}}$ &
-        Recall$_{\mathrm{focus}}$ & F1$_{\mathrm{focus}}$ & Macro F1 & Time (s)
-        \\
+        Model & Accuracy & Macro Precision &
+        Macro Recall & Macro F1 & Time (s) \\
         \midrule
-        Decision Tree & 0.8577 & 0.65 & 0.83 & 0.73 & 0.82 & 98.61  \\
-        Random Forest & 0.9051 & 0.75 & 0.91 & 0.83 & 0.88 & 119.84 \\
-        SVM           & 0.9198 & 0.76 & 0.86 & 0.81 & 0.89 & 92.03  \\
-        CNN           & 0.8709 & 1.00 & 0.60 & 0.75 & 0.83 & 686.11 \\
+        Decision Tree & 0.8577 & 0.81 & 0.85 & 0.82 & 98.61  \\
+        Random Forest & 0.9051 & 0.87 & 0.91 & 0.88 & 119.84 \\
+        SVM           & 0.9198 & 0.88 & 0.90 & 0.89 & 92.03  \\
+        CNN           & 0.8709 & 0.91 & 0.80 & 0.83 & 686.11 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Per-class precision, recall, and F1-score of the four models under $100\%$ training samples in the three-class task}
+    \label{tab:main-triclass-perclass}
+    \begin{tabular}{llccc}
+        \toprule
+        Model & Class & Precision & Recall & F1 \\
+        \midrule
+        Decision Tree & Blur         & 0.93 & 0.92 & 0.92 \\
+        Decision Tree & Sharp        & 0.65 & 0.83 & 0.73 \\
+        Decision Tree & Intermediate & 0.85 & 0.80 & 0.82 \\
+        Random Forest & Blur         & 0.97 & 0.91 & 0.94 \\
+        Random Forest & Sharp        & 0.75 & 0.91 & 0.83 \\
+        Random Forest & Intermediate & 0.88 & 0.89 & 0.88 \\
+        SVM           & Blur         & 0.95 & 0.98 & 0.96 \\
+        SVM           & Sharp        & 0.76 & 0.86 & 0.81 \\
+        SVM           & Intermediate & 0.93 & 0.87 & 0.90 \\
+        CNN           & Blur         & 0.86 & 0.99 & 0.92 \\
+        CNN           & Sharp        & 1.00 & 0.60 & 0.75 \\
+        CNN           & Intermediate & 0.87 & 0.80 & 0.84 \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -504,67 +530,63 @@ $100\%$ training samples.
     \label{fig:cm-main-3c}
 \end{figure}
 
-\par Compared with the binary task, the learning difficulty of the three-class
-task is clearly higher. The best sharp-class F1-score in the three-class task is
-$0.83$ from random forest, while the CNN can reach $0.84$ in the binary task.
-More importantly, the macro F1 of all models in the three-class setting is lower
-overall than in the binary setting. At the same time, the recall of the CNN on
-the sharp class in the three-class task is only $0.60$, which is significantly
-lower than its $0.73$ in the binary task. This indicates that after the
-intermediate-state class is separated as an independent category, the model
-needs not only to distinguish the sharp class from the non-sharp class, but also
-to deal with transition samples with more ambiguous boundaries, and the task
-complexity increases clearly.
+\par Compared with the binary task, the three-class task is substantially more
+challenging. After introducing the intermediate class, the models must not
+only separate sharp and blur patches, but also handle transition regions with
+more ambiguous visual characteristics. As a result, the overall macro
+F1-scores are lower than those observed in the binary setting.
 
-\par Figure~\ref{fig:cm-main-3c} shows the confusion matrices of the four models
-in the main three-class experiment under $100\%$ training samples. Compared with
-the binary task, the off-diagonal items are clearly more numerous in the
-three-class task, which indicates that after introducing the intermediate-state
-class, the model needs not only to distinguish sharp and non-sharp regions, but
-also to further handle transition samples with more ambiguous boundaries. From
-the overall observation, the four models all recognize the blur class relatively
-stably, while the confusion between the sharp class and the intermediate-state
-class becomes the main source of error.
+\par From the overall metrics, the SVM shows the strongest overall balance in
+the three-class task, achieving the highest accuracy and macro F1-score while
+maintaining stable macro precision and macro recall. Random forest follows
+closely and also achieves strong class-balanced performance. By comparison, the
+decision tree and CNN remain weaker on the overall metrics under this setting.
 
-\par A further comparison of the confusion matrices shows that the key
-difficulty in the three-class task is not the direct confusion between the sharp
-class and the blur class, but mainly the confusion between the sharp class and
-the intermediate-state class. Taking real sharp-class samples as an example,
-random forest, SVM, and decision tree almost never directly classify them as
-blur, and the CNN only makes $3$ such errors. The dominant error is instead that
-real sharp-class samples are predicted as intermediate-state, where the numbers
-are $2,429$ for decision tree, $2,050$ for SVM, $1,310$ for random forest, and
-as high as $5,914$ for CNN. This indicates that under the three-class setting,
-the CNN forms an obviously conservative decision boundary, that is, it predicts
-the sharp class only when the confidence is very high, while a large number of
-boundary regions are contracted into the intermediate-state class, causing
-sharp-class recall to decrease clearly. On the other hand, although random
-forest performs best on sharp-class recall and F1-score, it misclassifies
-$4,334$ real intermediate-state patches as sharp. This means that its prediction
-strategy is more aggressive. The higher recall is therefore not obtained without
-cost, but is exchanged for more ``intermediate-state $\rightarrow$ sharp''
-errors. The SVM shows a more balanced error structure between the two: its
-detection of the sharp class is relatively stable, and its macro F1 is also more
-stable overall, which gives it strong comprehensive stability in the three-class
-task. \par From the overall trends, the SVM shows the strongest stability in the
-three-class task: its macro F1 stays around $0.89$, its sharp-class F1 remains
-around $0.81$, and its training time is still lower than that of random forest
-and far lower than that of the CNN. Random forest achieves the best sharp-class
-recall and F1-score, but this advantage is accompanied by lower precision, which
-reflects a more aggressive prediction strategy. The decision tree improves with
-sample size, but its final sharp-class F1-score is still clearly behind random
-forest and SVM.
+\par At the class level, Table~\ref{tab:main-triclass-perclass} shows that all
+models recognize the blur class relatively stably, while the main differences
+appear in the sharp and intermediate classes. Random forest achieves the
+highest recall and F1-score for the sharp class, indicating strong
+minority-class detection capability. However, this advantage is accompanied by
+lower precision, suggesting a more aggressive prediction strategy. In contrast,
+the CNN maintains extremely high precision for the sharp class, but its recall
+decreases substantially, indicating that many real sharp patches are instead
+assigned to the intermediate class.
 
-\par By contrast, the CNN is much more conservative in the three-class task than
-in the binary task. Although its precision remains close to $1.00$, its
-sharp-class recall drops from $0.70$ to $0.60$, and its sharp-class F1-score
-falls from $0.82$ to $0.75$, indicating that many real sharp patches are
-absorbed into the intermediate-state class. Overall, if class balance and
-stability are emphasized, SVM is the most suitable model in the three-class
-setting, whereas random forest is more advantageous when sharp-class recall is
-the main concern.
+\par Among the four models, the SVM provides the most balanced class-wise
+performance. In particular, it achieves the highest F1-score for the
+intermediate class while maintaining stable performance across all categories.
+This balanced error structure is also consistent with its superior macro
+F1-score in the overall evaluation.
 
+\par Figure~\ref{fig:cm-main-3c} shows the confusion matrices of the four
+models in the three-class task. Compared with the binary setting, the
+off-diagonal elements become substantially more prominent, indicating increased
+classification difficulty after introducing the intermediate class. Overall,
+the main source of error is not the direct confusion between sharp and blur
+patches, but the ambiguity between the sharp and intermediate classes.
+
+\par The confusion matrices further reveal different prediction behaviours
+among the models. The CNN forms a highly conservative decision boundary and
+predicts the sharp class only under high confidence, causing many real sharp
+patches to be absorbed into the intermediate class. Random forest adopts a
+more aggressive strategy, achieving higher recall for the sharp class while
+simultaneously increasing the number of intermediate patches misclassified as
+sharp. Compared with these two extremes, the SVM exhibits a more balanced
+error structure, which contributes to its strong overall stability and
+class-balanced performance in the three-class task.
+
+\par Overall, the experimental results show that different models exhibit
+different trade-offs between class-balanced performance, minority-class
+detection, and computational efficiency. In the binary task, the CNN achieves
+the strongest overall performance, although at substantially higher
+computational cost. In the three-class task, the SVM demonstrates the most
+stable and balanced behaviour across all classes, while random forest provides
+stronger minority-class recall at the expense of lower precision. These results
+indicate that the introduction of the intermediate class significantly
+increases classification difficulty and makes the balance between recall and
+precision more critical for model evaluation.
 \subsection{Sample-Size Analysis}
+
 \par To analyze the role of training data scale more systematically, this
 section treats the scan result from $20\%$ to $100\%$ samples as an independent
 dimension for discussion. Compared with only comparing the final results under a
@@ -573,83 +595,110 @@ learning saturation, the sensitivity of models to data volume, and whether the
 performance improvement is worth the additional computational cost.
 
 \subsubsection{Class Distribution and Scaling}
+
 \par From the training data distribution, the binary task keeps a stable
 imbalanced structure across all five training ratios. Taking the $100\%$
-training set as an example, the number of non-sharp and sharp samples is
+training set as an example, the numbers of non-sharp and sharp samples are
 $578,212$ and $59,941$, respectively, and the sharp class accounts for only
 about $9.39\%$. In the $20\%$ training set, the corresponding numbers are
-$115,735$ and $11,896$, and the ratio remains basically the same. This indicates
-that the change in training sample ratio mainly affects the total sample number,
-but does not change the class proportion. Therefore, the performance change can
-mainly be attributed to the training sample quantity itself rather than to a
-change in class distribution. The three-class task shows a similar stable
-distribution. Under the $100\%$ training set, the blur, sharp, and
-intermediate-state classes contain $320,810$, $59,941$, and $257,402$ samples,
-respectively. The sharp class still accounts for only about $9.39\%$, while the
-blur class accounts for about $50.27\%$ and the intermediate-state class for
-about $40.34\%$. This means that the three-class task not only has the
-minority-class detection problem, but also needs to establish a stable boundary
-between two large non-sharp-related classes, and is therefore more difficult
-than the binary setting.
+$115,735$ and $11,896$, and the ratio remains nearly unchanged. This indicates
+that changing the training sample ratio mainly affects the total sample number
+rather than the class proportion. Therefore, the training sample quantity
+becomes the main controlled factor in the sample-size comparison.
+
+\par The three-class task shows a similar stable distribution. Under the
+$100\%$ training set, the blur, sharp, and intermediate classes contain
+$320,810$, $59,941$, and $257,402$ samples, respectively. The sharp class still
+accounts for only about $9.39\%$, while the blur and intermediate classes
+account for about $50.27\%$ and $40.34\%$, respectively. This means that the
+three-class task not only involves minority-class detection, but also requires
+the model to establish a stable boundary between two large visually related
+classes, making the classification problem more challenging than the binary
+setting.
 
 \subsubsection{Binary Setting}
-\par In the binary task, whether classical machine learning models or deep
-learning models are considered, as the training sample ratio increases from
-$20\%$ to $100\%$, the changes in all metrics are generally not dramatic, and
-most curves show only slight fluctuation or slow improvement. This indicates
-that under the current feature representation, network structure, and data
-distribution, increasing sample size can indeed bring some benefit, but it is
-not the dominant factor determining model performance. By comparison, the
-discrimination mechanism of the model itself, the complexity of the class
-boundary, and the precision-recall trade-off affect the final result more
-directly. At the same time, the training time increases almost monotonically
-with the sample ratio. Therefore, when the gain is limited, whether it is worth
-continuing to enlarge the sample size must be judged from both the performance
-increment and the time cost.
 
-\par Table~\ref{tab:sample-binary-summary} summarizes the sharp-class F1-score
-of each model under different training ratios in the binary task, together with
-the best sharp-class F1-score at each ratio, so as to observe the main trend of
-different models as data scale changes.
+\par In the binary task, as the training sample ratio increases from $20\%$ to
+$100\%$, the overall changes in most evaluation metrics remain relatively
+limited. Most curves show only slight fluctuation or slow improvement, which
+indicates that under the current feature representation, network structure, and
+data distribution, increasing sample size can provide some benefit but is not
+the dominant factor determining final model performance. Instead, model
+decision behaviour, class-boundary complexity, and the balance between
+precision and recall appear to influence the final results more directly.
+
+\par At the same time, training time increases almost monotonically with the
+sample ratio. Therefore, when performance gain remains limited, the value of
+further enlarging the training set must be evaluated together with the
+associated computational cost. The class-wise analysis below therefore focuses
+on whether the observed overall trends are caused by stable majority-class
+recognition or by changes in minority-class detection.
+
+\par To summarize the overall trend more clearly,
+Table~\ref{tab:sample-binary-summary} reports the accuracy, macro precision,
+macro recall, macro F1, and training time of each model under different
+training ratios in the binary task.
 
 \begin{table}[H]
     \centering
-    \caption{Changes of sharp-class F1-score under different training ratios in the binary task}
+    \caption{Overall performance under different training ratios in the binary task}
     \label{tab:sample-binary-summary}
-    \begin{tabular}{cccccc}
+    \begin{tabular}{lccccc}
         \toprule
-        Sample (\%) & Decision Tree & Random Forest & SVM & CNN & Best Focus F1
-        \\
+        Sample (\%) / Model & Accuracy & Macro Precision & Macro Recall & Macro F1 & Time (s) \\
         \midrule
-        20  & 0.69 & 0.81 & 0.74 & 0.81 & 0.81 (RF/CNN) \\
-        40  & 0.70 & 0.81 & 0.74 & 0.80 & 0.81 (RF) \\
-        60  & 0.71 & 0.80 & 0.74 & 0.83 & 0.83 (CNN) \\
-        80  & 0.71 & 0.79 & 0.74 & 0.81 & 0.81 (CNN) \\
-        100 & 0.71 & 0.78 & 0.74 & 0.84 & 0.84 (CNN) \\
+        20 / Decision Tree & 0.9143 & 0.77 & 0.89 & 0.82 & 17.98 \\
+        20 / Random Forest & 0.9586 & 0.88 & 0.91 & 0.90 & 19.46 \\
+        20 / SVM           & 0.9254 & 0.80 & 0.94 & 0.85 & 3.64  \\
+        20 / CNN           & 0.9660 & 0.98 & 0.84 & 0.90 & 143.14 \\
+        40 / Decision Tree & 0.9168 & 0.78 & 0.90 & 0.82 & 38.77 \\
+        40 / Random Forest & 0.9535 & 0.86 & 0.94 & 0.89 & 43.79 \\
+        40 / SVM           & 0.9260 & 0.80 & 0.94 & 0.85 & 7.66  \\
+        40 / CNN           & 0.9645 & 0.98 & 0.84 & 0.89 & 283.39 \\
+        60 / Decision Tree & 0.9210 & 0.79 & 0.91 & 0.83 & 60.58 \\
+        60 / Random Forest & 0.9498 & 0.85 & 0.95 & 0.89 & 69.38 \\
+        60 / SVM           & 0.9271 & 0.80 & 0.94 & 0.85 & 11.98 \\
+        60 / CNN           & 0.9684 & 0.98 & 0.85 & 0.91 & 417.44 \\
+        80 / Decision Tree & 0.9220 & 0.79 & 0.91 & 0.83 & 81.44 \\
+        80 / Random Forest & 0.9461 & 0.84 & 0.95 & 0.88 & 98.18 \\
+        80 / SVM           & 0.9275 & 0.80 & 0.95 & 0.85 & 15.80 \\
+        80 / CNN           & 0.9650 & 0.98 & 0.84 & 0.89 & 549.55 \\
+        100 / Decision Tree & 0.9223 & 0.79 & 0.91 & 0.83 & 103.48 \\
+        100 / Random Forest & 0.9413 & 0.83 & 0.95 & 0.87 & 120.80 \\
+        100 / SVM           & 0.9268 & 0.80 & 0.95 & 0.85 & 17.68 \\
+        100 / CNN           & 0.9709 & 0.98 & 0.87 & 0.91 & 684.51 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-\par The binary-task results show different responses to increasing sample size.
-The decision tree improves only slightly and reaches saturation early. Random
-forest performs strongly under small and medium sample ratios, but its
-sharp-class F1-score gradually declines as recall increases and precision drops.
-The SVM remains the most stable across all ratios, whereas the CNN shows the
-largest overall improvement and becomes the best model on sharp-class F1 when
-the training ratio reaches $60\%$ and above, as shown in
-Fig.~\ref{fig:sample-size-2c-eva-sharp}.
+\par From the overall metrics, the binary-task results show different responses
+to increasing sample size. The decision tree improves only slightly, with
+accuracy rising from $0.9143$ to $0.9223$ and macro F1-score from $0.82$ to
+$0.83$, which indicates early saturation. Random forest performs strongly at
+small and medium sample ratios, but its accuracy gradually decreases from
+$0.9586$ to $0.9413$, and its macro F1-score also declines from $0.90$ to
+$0.87$ as the sample ratio increases. The SVM remains the most stable across
+all ratios: its accuracy stays around $0.925\sim0.927$ and its macro F1-score
+remains near $0.85$. The CNN shows the strongest overall performance at larger
+sample ratios and reaches the highest macro F1-score when the training ratio is
+$60\%$ and above, while its accuracy also reaches the highest level at
+$100\%$ samples.
 
-\par At the same time, these performance gains must be considered together with
-recall and computational cost. Although the CNN achieves the highest F1-score at
-large sample ratios, its recall remains clearly lower than that of SVM and
-random forest, indicating a more conservative prediction tendency. Training time
-also increases for all models as sample size grows, but the SVM remains the
-lowest-cost method, while the CNN is the most expensive. Therefore, in the
-binary setting, the CNN is more suitable when overall F1 is prioritized, whereas
-the SVM is a more practical choice when high recall and efficiency are both
-important. The SVM is also relatively stable in macro F1 across different
-sample ratios, which is consistent with its overall stability in the binary
-task.
+\par At the same time, training time increases for all models as sample size
+grows, with the SVM remaining the lowest-cost method and the CNN being the
+most computationally expensive. Therefore, in the binary setting, larger sample
+size mainly benefits the CNN, whereas for the SVM and decision tree the gain
+remains relatively limited, and for random forest the additional computational
+cost is not accompanied by better overall metrics.
+
+\par After the overall comparison, the class-wise curves provide a more
+detailed view of how these trends are formed.
+Figure~\ref{fig:sample-size-2c-eva-sharp} shows the minority-class precision,
+recall, and F1-score trends of the four models, while
+Fig.~\ref{fig:sample-size-2c-eva-other} gives the corresponding blur-class
+curves. Together, they show that the main variation across sample ratios does
+not originate from the blur class, but from the trade-off related to
+minority-class detection.
 
 \begin{figure}[H]
     \centering
@@ -684,33 +733,34 @@ task.
         \label{fig:cnn-eva-2c-sharp}
     \end{subfigure}
 
-    \caption{Trends of sharp-class precision, recall, F1-score, and macro F1 of the four models under different training ratios in the binary task}
+    \caption{Trends of minority-class precision, recall, and F1-score of the four models under different training ratios in the binary task}
     \label{fig:sample-size-2c-eva-sharp}
 \end{figure}
 
-\par The blur-class curves in Fig.~\ref{fig:sample-size-2c-eva-other} provide
-an important complementary view. Across all four models, blur-class precision,
-recall, and F1-score remain at a high level and vary only slightly as the sample
-ratio increases, which indicates that the negative class in the binary task is
-already easy to model under the current feature representation. The decision
-tree keeps the blur-class F1-score around $0.95\sim0.96$, while SVM and CNN
-remain around $0.96\sim0.98$ and are almost unchanged over the whole sample-size
-range. This stability shows that enlarging the training set mainly does not
+\par The blur-class curves in
+Fig.~\ref{fig:sample-size-2c-eva-other} provide an important complementary
+view. Across all four models, blur-class precision, recall, and F1-score remain
+at a high level and vary only slightly as the sample ratio increases, which
+indicates that the majority class in the binary task is already relatively easy
+to model under the current feature representation. The decision tree keeps the
+blur-class F1-score around $0.95\sim0.96$, while SVM and CNN remain around
+$0.96\sim0.98$ and are almost unchanged over the entire sample-size range. This
+stability suggests that enlarging the training set does not substantially
 change the model's ability to recognize blur patches.
 
-\par More importantly, the blur-class trends help explain the sharp-class
-trade-off. For random forest, as the sample ratio increases, blur-class recall
-gradually decreases from $0.97$ to $0.94$, while blur-class precision stays near
-$0.99$. At the same time, the sharp-class recall rises from $0.84$ to $0.96$,
-but the sharp-class precision drops from $0.79$ to $0.66$. This indicates that
-the model increasingly predicts more patches as sharp, thereby recovering more
-true sharp samples but also sacrificing part of the blur-class recall. By
-contrast, the CNN keeps blur-class recall at nearly $1.00$ and blur-class
-F1-score near $0.98$, which is consistent with its very high sharp-class
-precision and relatively lower sharp-class recall. In other words, the CNN
-maintains high blur-class stability through a more conservative decision boundary,
-whereas random forest obtains higher sharp-class recall partly by allowing more
-blur patches to cross into the sharp side.
+\par More importantly, the blur-class trends help explain the trade-off in
+minority-class detection. For random forest, as the sample ratio increases,
+blur-class recall gradually decreases from $0.97$ to $0.94$, while blur-class
+precision stays near $0.99$. At the same time, minority-class recall rises from
+$0.84$ to $0.96$, but minority-class precision drops from $0.79$ to $0.66$.
+This indicates that the model increasingly predicts more patches as sharp,
+thereby recovering more true sharp samples but also sacrificing part of the
+blur-class recall. By contrast, the CNN keeps blur-class recall near $1.00$ and
+blur-class F1-score near $0.98$, which is consistent with its very high
+minority-class precision and relatively lower minority-class recall. In other
+words, the CNN maintains high blur-class stability through a more conservative
+decision boundary, whereas random forest obtains higher minority-class recall
+partly by allowing more blur patches to cross into the sharp side.
 
 \begin{figure}[H]
     \centering
@@ -749,46 +799,80 @@ blur patches to cross into the sharp side.
 \end{figure}
 
 \subsubsection{Three-Class Setting}
-\par The change of the sharp-class F1-score under different training ratios in
-the three-class task is shown in Table~\ref{tab:sample-triclass-summary}.
+
+\par The effect of sample-size change on the overall three-class performance is
+summarized in Table~\ref{tab:sample-triclass-summary}, which reports the
+accuracy, macro precision, macro recall, macro F1, and training time of each
+model under different training ratios. Although the overall
+evaluation remains the primary basis for comparison, the subsequent class-wise
+analysis further examines how the models handle the minority class and the
+boundary between sharp and intermediate samples.
 
 \begin{table}[H]
     \centering
-    \caption{Changes of sharp-class F1-score under different training ratios in the three-class task}
+    \caption{Overall performance under different training ratios in the three-class task}
     \label{tab:sample-triclass-summary}
-    \begin{tabular}{cccccc}
+    \begin{tabular}{lccccc}
         \toprule
-        Sample (\%) & Decision Tree & Random Forest & SVM & CNN & Best Focus F1
-        \\
+        Sample (\%) / Model & Accuracy & Macro Precision & Macro Recall & Macro F1 & Time (s) \\
         \midrule
-        20  & 0.70 & 0.82 & 0.81 & 0.82 & 0.82 (RF/CNN) \\
-        40  & 0.71 & 0.83 & 0.81 & 0.77 & 0.83 (RF) \\
-        60  & 0.73 & 0.83 & 0.81 & 0.77 & 0.83 (RF) \\
-        80  & 0.73 & 0.83 & 0.81 & 0.76 & 0.83 (RF) \\
-        100 & 0.73 & 0.83 & 0.81 & 0.75 & 0.83 (RF) \\
+        20 / Decision Tree & 0.8474 & 0.79 & 0.84 & 0.81 & 16.89 \\
+        20 / Random Forest & 0.9078 & 0.89 & 0.88 & 0.88 & 18.55 \\
+        20 / SVM           & 0.9174 & 0.88 & 0.90 & 0.89 & 14.52 \\
+        20 / CNN           & 0.8445 & 0.90 & 0.80 & 0.83 & 143.54 \\
+        40 / Decision Tree & 0.8523 & 0.80 & 0.84 & 0.82 & 36.46 \\
+        40 / Random Forest & 0.9067 & 0.88 & 0.89 & 0.89 & 39.54 \\
+        40 / SVM           & 0.9188 & 0.88 & 0.90 & 0.89 & 29.20 \\
+        40 / CNN           & 0.8437 & 0.89 & 0.78 & 0.82 & 283.73 \\
+        60 / Decision Tree & 0.8585 & 0.81 & 0.85 & 0.82 & 57.69 \\
+        60 / Random Forest & 0.9084 & 0.88 & 0.90 & 0.89 & 65.72 \\
+        60 / SVM           & 0.9206 & 0.88 & 0.90 & 0.89 & 53.38 \\
+        60 / CNN           & 0.8417 & 0.89 & 0.78 & 0.82 & 415.32 \\
+        80 / Decision Tree & 0.8560 & 0.81 & 0.85 & 0.82 & 77.41 \\
+        80 / Random Forest & 0.9073 & 0.87 & 0.90 & 0.89 & 93.13 \\
+        80 / SVM           & 0.9201 & 0.88 & 0.90 & 0.89 & 74.62 \\
+        80 / CNN           & 0.8539 & 0.90 & 0.79 & 0.82 & 549.75 \\
+        100 / Decision Tree & 0.8577 & 0.81 & 0.85 & 0.82 & 98.61 \\
+        100 / Random Forest & 0.9051 & 0.87 & 0.91 & 0.88 & 119.84 \\
+        100 / SVM           & 0.9198 & 0.88 & 0.90 & 0.89 & 92.03 \\
+        100 / CNN           & 0.8709 & 0.91 & 0.80 & 0.83 & 686.11 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-\par In the three-class task, the gain brought by increasing sample size is
-still relatively limited. Most models do not show a large jump in the interval
-from $20\%$ to $100\%$, but instead show slow improvement, stable plateau
-behavior, or slight fluctuation. This further indicates that for the current
-three-class setting, the performance bottleneck comes more from the complexity
-of the class boundaries themselves, especially the similarity between the sharp
-class and the intermediate-state class, rather than only from insufficient
-training data. At the same time, training time continues to increase as the
-sample ratio grows, which means that sample expansion in the three-class task
-leads to higher time cost while performance improvement remains limited.
+\par In the three-class task, the gain brought by increasing sample size
+remains relatively limited. Most models do not show a large improvement in the
+interval from $20\%$ to $100\%$, but instead exhibit slow improvement, stable
+plateau behaviour, or slight fluctuation. These results suggest that for the
+current three-class setting, the performance bottleneck is more closely related
+to the complexity of the class boundaries, especially the similarity between
+the sharp and intermediate classes, rather than only to insufficient training
+data.
 
-\par The detailed trends show clear differences among models. The decision tree
-improves only slightly, random forest reaches a high level early and then
-remains stable, and the SVM maintains the strongest overall stability across
-different sample ratios. By contrast, the CNN shows an overall decline in
-sharp-class F1-score, indicating that in the three-class setting, more data do
-not automatically improve its sharp-class recognition, but instead make its
-decision boundary more conservative around the intermediate-state class, as
-shown in Fig.~\ref{fig:sample-size-3c-eva-sharp}.
+\par At the same time, training time continues to increase as the sample ratio
+grows, which means that sample expansion in the three-class task leads to
+higher computational cost while the performance gain remains relatively
+limited.
+
+\par From the overall metrics, the detailed trends also show clear differences
+among models. The decision tree improves only slightly, with accuracy rising
+from $0.8474$ to $0.8577$ and macro F1-score from $0.81$ to $0.82$. Random
+forest reaches a high level early and then remains stable, with macro F1-score
+near $0.88\sim0.89$ across all ratios. The SVM maintains the strongest overall
+stability and the best comprehensive performance: its accuracy stays around
+$0.917\sim0.920$ and its macro F1-score remains about $0.89$ throughout the
+entire range. By contrast, the CNN fluctuates more strongly than in the binary
+task. Its macro F1-score remains only around $0.82\sim0.83$ even though the
+training cost continues to rise. This indicates that in the three-class
+setting, increasing sample size alone does not automatically lead to better
+overall class-balanced performance.
+
+\par After the overall comparison, the class-wise curves further clarify the
+source of this difficulty.
+Figure~\ref{fig:sample-size-3c-eva-sharp} shows the minority-class trends,
+while Fig.~\ref{fig:sample-size-3c-eva-other} gives the corresponding
+blur-class and intermediate-class curves. These figures indicate that the
+effect of increasing sample size is highly uneven across the three categories.
 
 \begin{figure}[H]
     \centering
@@ -823,44 +907,45 @@ shown in Fig.~\ref{fig:sample-size-3c-eva-sharp}.
         \label{fig:cnn-eva-3c-sharp}
     \end{subfigure}
 
-    \caption{Trends of sharp-class precision, recall, F1-score, and macro F1 of the four models under different training ratios in the three-class task}
+    \caption{Trends of minority-class precision, recall, and F1-score of the four models under different training ratios in the three-class task}
     \label{fig:sample-size-3c-eva-sharp}
 \end{figure}
 
 \par The additional class-wise curves in
-Fig.~\ref{fig:sample-size-3c-eva-other} clarify where this difficulty comes
-from. The blur class is the most stable category for almost all models. Its
-F1-score stays around $0.92$ for the
-decision tree, around $0.94$ for random forest, around $0.96$ for SVM, and
-increases from $0.89$ to $0.92$ for CNN. This means that even in the three-class
-setting, separating blur patches from the other two classes is not the main
-bottleneck. Increasing the sample ratio also brings only marginal change to the
-blur-class metrics, which again suggests that the blur boundary is already well
-captured at relatively small sample sizes.
+Fig.~\ref{fig:sample-size-3c-eva-other} further clarify where this difficulty
+originates. The blur class is the most stable category for almost all models.
+Its F1-score stays around $0.92$ for the decision tree, around $0.94$ for
+random forest, around $0.96$ for SVM, and increases from $0.89$ to $0.92$ for
+CNN. This means that even in the three-class setting, separating blur patches
+from the other two classes is not the main bottleneck. Increasing the sample
+ratio also brings only marginal change to the blur-class metrics, suggesting
+that the blur boundary is already captured reasonably well at relatively small
+sample sizes.
 
-\par By comparison, the intermediate-state class shows more informative
-differences among models. Random forest and SVM maintain a high and stable
+\par By comparison, the intermediate class shows more informative differences
+among models. Random forest and SVM maintain a high and stable
 intermediate-class F1-score near $0.88\sim0.90$, indicating that they can keep
-a relatively consistent boundary between the sharp and non-sharp transition
-regions even when the sample ratio changes. The decision tree remains slightly
-lower, around $0.81\sim0.82$, but is still fairly stable. The CNN shows a
-different trend: while its intermediate-class recall rises from $0.70$ to
-$0.80$ and its intermediate-class F1-score increases from $0.79$ to $0.84$, its
-sharp-class recall drops from $0.70$ to $0.60$ and its sharp-class F1-score
-falls from $0.82$ to $0.75$. This opposite movement indicates that additional
-training data mainly push the CNN to absorb more borderline sharp patches into
-the intermediate-state class rather than improving discrimination of the sharp
-class itself.
+a relatively consistent boundary between sharp and non-sharp transition regions
+even when the sample ratio changes. The decision tree remains slightly lower,
+around $0.81\sim0.82$, but is still fairly stable.
 
-\par Therefore, the other-class analysis confirms that the main challenge in the
-three-class task is not a general performance decline across all categories, but a specific
-allocation problem between the sharp and intermediate-state classes. Random
-forest performs best because it keeps both a high sharp-class F1-score and a
-high intermediate-class F1-score at the same time, whereas the SVM provides the
-most stable class balance across all three categories. The CNN, in contrast,
-does not collapse on the blur class or the intermediate class; instead, it
-becomes progressively more conservative in assigning patches to the sharp class
-as the sample ratio increases.
+\par The CNN shows a different trend. While its intermediate-class recall rises
+from $0.70$ to $0.80$ and its intermediate-class F1-score increases from $0.79$
+to $0.84$, its minority-class recall drops from $0.70$ to $0.60$ and its
+minority-class F1-score falls from $0.82$ to $0.75$. This opposite movement
+indicates that additional training data mainly push the CNN to absorb more
+borderline sharp patches into the intermediate class rather than improving
+discrimination of the sharp class itself.
+
+\par Therefore, the class-wise analysis confirms that the main challenge in the
+three-class task is not a general performance decline across all categories,
+but a specific allocation problem between the sharp and intermediate classes.
+Random forest performs strongly because it keeps both a high minority-class
+F1-score and a high intermediate-class F1-score simultaneously, whereas the
+SVM provides the most stable class balance across all three categories. The
+CNN, in contrast, does not collapse on the blur or intermediate class; instead,
+it becomes progressively more conservative in assigning patches to the sharp
+class as the sample ratio increases.
 
 \begin{figure}[H]
     \centering
@@ -894,19 +979,23 @@ as the sample ratio increases.
         \label{fig:cnn-eva-3c-other}
     \end{subfigure}
 
-    \caption{Trends of blur-class and intermediate-class precision, recall, and F1-score of the four models under different training ratios in the three-class task. ``Interm.'' denotes the intermediate-state class}
+    \caption{Trends of blur-class and intermediate-class precision, recall, and F1-score of the four models under different training ratios in the three-class task. ``Interm.'' denotes the intermediate class}
     \label{fig:sample-size-3c-eva-other}
 \end{figure}
 
-\par In terms of overall findings, random forest remains the strongest model on
-sharp-class F1, whereas the SVM provides the most stable balance between
-sharp-class performance and macro F1. Training time increases for all models as
-sample size grows, and the growth is generally steeper than in the binary task,
-especially for the CNN. Therefore, under the three-class setting, enlarging the
-training set alone is not sufficient to bring substantial gain; model behavior
-is still dominated more strongly by class-boundary complexity and the trade-off
-between sharp-class detection and overall class balance, which is also
-reflected by the slight fluctuation of macro F1 across sample ratios.
+\par In summary, the sample-size analysis shows that increasing the training
+ratio does not uniformly improve performance. In the binary task, the main
+overall beneficiary is the CNN, while the SVM remains the most stable and
+cost-efficient model across different sample ratios. In the three-class task,
+the SVM provides the most stable overall class-balanced performance, and random
+forest remains close behind, whereas the CNN is more strongly constrained by
+the boundary ambiguity between the sharp and intermediate classes.
+
+\par Training time increases for all models as sample size grows, and the
+growth is generally steeper in the three-class task, especially for the CNN.
+Therefore, under both task settings, enlarging the training set alone is not
+sufficient to guarantee substantial improvement; the interaction between
+class-boundary complexity and model decision behaviour remains more decisive.
 
 \subsection{Supplementary Analyses}
 \par In addition to the main experiments, this thesis further investigates the
@@ -948,14 +1037,16 @@ expected gain. When the default threshold $t=0.5$ is retained, the precision of
 the model on the sharp class remains at $1.00$, which indicates that the
 prediction strategy is still very conservative. However, recall drops from
 $0.73$ to $0.69$, which causes the sharp-class F1-score to fall back from $0.84$
-to $0.82$, and macro F1 also decreases from $0.91$ to $0.90$. This shows that
+to $0.82$. At the same time, the overall macro F1 also decreases from $0.91$
+to $0.90$. This shows that
 under the binary setting, the loss weight in the main experiment is already
 sufficient to impose a strong constraint on the minority class, and the
 additional introduction of sampling reweighting does not further improve sharp-
 class detection, but may instead enlarge training fluctuation. Furthermore,
 after lowering the decision threshold of the sharp class in the supplementary
 experiment from $0.5$ to $0.3$, the sharp-class recall rises back to $0.72$, the
-sharp-class F1-score recovers to $0.84$, and macro F1 also returns to $0.91$.
+sharp-class F1-score recovers to $0.84$, and the overall macro F1 also returns
+to $0.91$.
 This indicates that the main role of the weighted sampler in binary
 classification is not to stably improve representation ability, but to change
 the output score distribution. If threshold calibration is not used together
@@ -963,9 +1054,9 @@ with it, the gain is not obvious \cite{davis2006relationship}.
 
 \par The three-class result shows a different conclusion. After enabling the
 weighted sampler, the sharp-class recall of the CNN clearly increases from
-$0.60$ to $0.69$, the sharp-class F1-score rises from $0.75$ to $0.82$, and
-macro F1 also improves from $0.83$ to $0.85$, while accuracy increases slightly
-as well. This indicates that under the three-class setting, sample reweighting
+$0.60$ to $0.69$, and the sharp-class F1-score rises from $0.75$ to $0.82$.
+At the same time, macro F1 improves from $0.83$ to $0.85$, while accuracy also
+increases slightly. This indicates that under the three-class setting, sample reweighting
 does indeed alleviate the learning pressure faced by the sharp class as a
 minority class, and makes the model no longer as overly conservative as in the
 main experiment. Combined with the confusion matrix, it can be seen that the
@@ -1193,9 +1284,11 @@ task and yields higher and more stable performance. Second, the manual
 verification results are generally consistent with the quantitative comparison,
 which supports the validity of the observed differences among models. Third, the
 relative advantages of the models differ across task settings: in the binary
-task, the CNN achieves the highest sharp-class F1-score, whereas in the
-three-class task, random forest obtains the highest sharp-class F1-score and the
-SVM keeps the most stable macro F1.
+task, the CNN achieves the strongest overall performance according to accuracy
+and macro F1, whereas in the three-class task, the SVM provides the most stable
+macro-level performance. The sharp-class results are therefore used as a
+detailed class-level interpretation rather than as the sole basis for model
+selection.
 
 \par The pre-experimental results further verify the rationality of the unified
 parameter setting used in the subsequent main experiments. For the classical
@@ -1267,12 +1360,12 @@ classifier training.
 \end{figure}
 
 \par The main and supplementary results show clear differences among models
-under the two task settings. In the binary task, the CNN achieves the highest
-sharp-class F1-score and macro F1, the SVM maintains the highest recall with
-relatively low training cost, and random forest provides a competitive
-intermediate result. In the three-class task, random forest achieves the highest
-sharp-class F1-score, whereas the SVM keeps the most stable macro F1 and overall
-performance. Overall, the binary task is easier than the three-class task and
+under the two task settings. In the binary task, the CNN achieves the strongest
+overall performance, while the SVM maintains high macro recall with relatively
+low training cost, and random forest provides a competitive intermediate
+result. In the three-class task, the SVM keeps the most stable overall
+performance, whereas random forest is more advantageous in sharp-class
+detection. Overall, the binary task is easier than the three-class task and
 yields higher and more stable results.
 
 \par The sample-size analysis further shows that increasing the training ratio

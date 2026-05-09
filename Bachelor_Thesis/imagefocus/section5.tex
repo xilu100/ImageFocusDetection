@@ -15,8 +15,9 @@ and are reflected more as slight fluctuation or limited improvement, while the
 training time increases clearly. It should be emphasized that the ``sample
 size'' here mainly refers to the ratio of patch training samples obtained by
 splitting a limited number of original images, rather than the unlimited
-expansion of independently collected image quantity. Therefore, the result of
-this thesis is better understood as follows: under the current conditions of
+expansion of independently collected image quantity
+\cite{goodfellow2016deep,shu2018small}. Therefore, the result of this thesis is
+better understood as follows: under the current conditions of
 $32\times32$ patches, automatic labeling rules, and fixed data source,
 continuing to enlarge the training sample ratio changes the overall performance
 pattern only to a limited extent.
@@ -30,12 +31,12 @@ three-class task, the results of random forest and SVM further show that
 traditional methods also have strong applicability in the current task. By
 combining the complete sample-size scan results, it can be seen that model
 performance is related not only to structural complexity, but also to the
-boundary characteristics of the task itself. In the setting of this thesis,
+boundary characteristics of the task itself \cite{murphy2022pml}. In the setting of this thesis,
 patch labels are generated according to local sharpness-related information, and
 both traditional models and CNN are trained on unified grayscale patch input.
 The experimental results show that this patch representation is already
 sufficient to support classical machine learning methods in learning competitive
-decision boundaries. Under the binary setting, the boundary between sharp and
+decision boundaries \cite{pertuz2013analysis,5739529,yi2016lbp}. Under the binary setting, the boundary between sharp and
 non-sharp is relatively direct. Under the three- class setting, however, the
 boundary between the sharp class and the intermediate-state class is clearly
 more complex. Therefore, under the task conditions defined in this thesis,
@@ -51,7 +52,7 @@ scale, constrained computational resources, or a higher requirement for model
 interpretability, classical machine learning methods may still be more feasible
 choices, because they usually train faster, require lower implementation cost,
 and can maintain relatively stable discrimination effect under a unified patch
-input representation \cite{murphy2022pml}. In particular, from the experimental
+input representation \cite{murphy2022pml,cortes1995support,breiman2001random}. In particular, from the experimental
 results, the SVM maintains high recall at relatively low training cost in the
 binary task, and the random forest achieves a relatively strong sharp-class
 F1-score in the three-class task, while their training times are both
@@ -63,7 +64,7 @@ serving only as baseline models.
 \par At the same time, when an application provides more samples, permits higher
 training cost, or places greater emphasis on automatically learning complex
 local patterns, lightweight CNNs still offer room for further optimization
-\cite{lecun2002gradient,krizhevsky2012imagenet,shorten2019survey}. The
+\cite{lecun2002gradient,krizhevsky2012imagenet,goodfellow2016deep,shorten2019survey}. The
 experiments in this thesis show that CNNs can achieve strong overall performance
 in the binary task, but at a higher training cost. Notably, the epoch setting in
 the main text reflects a trade-off between performance and time, aiming to keep
@@ -90,7 +91,8 @@ training quality and, to some extent, limit the external generalization of the
 experimental conclusions. If some models in the experiments show bias in recall,
 precision, or class boundary behavior, the reason may partly come from the
 approximate partition of the sharp-blur boundary by the automatic labeling
-mechanism itself, rather than being determined completely by model capability.
+mechanism itself, rather than being determined completely by model capability
+\cite{5739529,pertuz2013analysis,lee2013pseudo}.
 
 \par Second, the model range adopted in this thesis mainly focuses on decision
 tree, random forest, SVM based on Nystr\"{o}m kernel approximation, and a
@@ -103,7 +105,7 @@ targets cases where local boundary features are relatively clear and the patch
 representation can effectively preserve discriminative information. If the task
 is further extended to more complex blur types, stronger semantic interference,
 or more difficult cross-domain conditions, the potential advantage of DL methods
-may still appear more clearly. In addition, although the preprocessing pipeline,
+may still appear more clearly \cite{goodfellow2016deep,shorten2019survey}. In addition, although the preprocessing pipeline,
 patch size, and evaluation method are uniformly controlled in the experiments,
 the results may still be affected by threshold setting, class distribution,
 automatic labeling parameters, and differences in data source. Therefore, the
@@ -128,7 +130,8 @@ broader scenarios.
 lightweight CNN can be explored, or transfer learning, attention mechanisms,
 self-supervised learning, and more systematic threshold calibration strategies
 can be introduced, so as to examine whether DL methods can bring more
-significant gains when task complexity continues to increase. At the same time,
+significant gains when task complexity continues to increase
+\cite{shorten2019survey,sohn2020fixmatch,davis2006relationship}. At the same time,
 feature design, feature fusion strategy, and class-imbalance handling in
 traditional methods can also be further optimized to examine their performance
 upper bound under low-cost conditions. Finally, at the task level, future
@@ -158,7 +161,7 @@ overall recognition performance in the binary task, but its training cost is
 also higher than that of classical machine learning methods. At the same time,
 random forest and support vector machine also show strong classification ability
 in multiple groups of experiments, while requiring lower training cost and more
-direct implementation. Especially in the low-sample, patch-level image focus
+direct implementation \cite{cortes1995support,breiman2001random}. Especially in the low-sample, patch-level image focus
 detection scenario studied in this thesis, both classical machine learning
 methods and CNN are trained on a unified grayscale patch representation. The
 experimental results show that under this input representation and task
@@ -183,7 +186,7 @@ set of original images in this thesis, and should not be directly generalized to
 mean that increasing independent training data is always of limited benefit.
 Within this scope, the results of this thesis further support the following
 judgment: for image tasks, although CNNs have strong modeling ability, they are
-not necessarily always the first choice. When task structure, data scale,
+not necessarily always the first choice \cite{lecun2002gradient,krizhevsky2012imagenet,goodfellow2016deep}. When task structure, data scale,
 class-boundary characteristics, and resource constraints act together, classical
 machine learning methods may still be more appropriate engineering choices.
 
@@ -196,4 +199,5 @@ only according to common experience from general vision tasks. The supplementary
 experiments in this thesis already show that the performance of the three-class
 CNN is clearly affected by training strategies such as weighted sampling, and
 therefore the final evaluation of different models should consider both model
-structure and training configuration.
+structure and training configuration
+\cite{he2009learning,buda2018systematic,Cui_2019_CVPR}.
