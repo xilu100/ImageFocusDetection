@@ -154,11 +154,11 @@ the model's ability to distinguish real focus differences under the original
 distribution.
 
 \subsubsection{Feature Extraction and Labeling}
-\subsubsection{Focus Features and Their Physical Meaning}
+\paragraph{Focus Features and Their Physical Meaning}
 \par After patch division, this thesis extracts sharpness features related to
 focus state from each local image block. Specifically, three types of features
 are used, namely Laplacian, Sobel, and fast Fourier transform (FFT), to describe
-the edge response, gradient strength, and frequency-domain high- frequency
+the edge response, gradient strength, and frequency-domain high-frequency
 information of each patch \cite{5739529,1284395}. Laplacian features emphasize
 local detail variation, Sobel features characterize edge gradient strength, and
 FFT features describe the preservation of high-frequency components in the
@@ -173,7 +173,7 @@ division, and sharpness scoring.
     \label{fig:preprocessing}
 \end{figure}
 
-\subsubsection{Automatic Label Generation}
+\paragraph{Automatic Label Generation}
 \par Different from manual patch-by-patch annotation, this thesis adopts an
 automatic labeling strategy to construct patch-level supervisory signals. The
 specific procedure is to first calculate the fused sharpness score of each patch
@@ -267,7 +267,7 @@ differences between models is expected to be limited. Based on this
 consideration, this thesis considers that this strategy achieves a reasonable
 balance among labeling cost, repeatability, and fairness of comparison.
 
-\subsubsection{Patch Representation for Model Training}
+\paragraph{Patch Representation for Model Training}
 \par In the setting of this thesis, the anchor parameters for normalizing
 Laplacian and Sobel features are set as $a_l=300$ and $a_s=12$, respectively.
 The filtering thresholds for textureless samples are set as
@@ -285,7 +285,7 @@ binary setting. For classical machine learning models, the grayscale patches are
 vectorized as input, and PCA is applied before training
 \cite{perry2025inference,zheng2021application}.
 
-\subsubsection{PCA-Based Visual Inspection of Class Separability}
+\paragraph{PCA-Based Visual Inspection of Class Separability}
 \par PCA visualization is used here only as an auxiliary inspection step after
 preprocessing and automatic labeling, rather than as a mandatory stage in model
 training. The flattened grayscale patch vectors are projected into
@@ -299,7 +299,7 @@ high-dimensional data, they cannot replace subsequent supervised training, but
 they can still provide auxiliary evidence for the reasonableness of the current
 labeling rules.
 
-\subsubsection{Visualization and Manual Verification}
+\paragraph{Visualization and Manual Verification}
 \par The visual analysis in this thesis contains two stages. Before model
 training, the fused sharpness score of each patch is converted into a continuous
 heatmap and threshold-based binary or three-class focus maps for manual
@@ -360,7 +360,8 @@ suppresses overfitting through larger leaf-node and split thresholds, while the
 random forest improves robustness and generalization through the ensemble of
 multiple weakly correlated trees.
 
-\subsubsection{Nystr\"{o}m-Based SVM} \par Support vector machines can use
+\subsubsection{Nystr\"{o}m-Based SVM}
+\par Support vector machines can use
 either a purely linear form or a kernel function to characterize nonlinear
 decision boundaries. For the patch focus detection task in this thesis, both
 choices have their own advantages and limitations. Pure linear SVM trains
@@ -484,7 +485,7 @@ $1$:
 the sharp and blur classes in the binary task, it should be regarded in the
 subsequent experimental analysis as one of the important prediction parameters
 affecting the binary performance of the CNN \cite{davis2006relationship}. In
-contrast, under the three- class setting, both the CNN and classical classifiers
+contrast, under the three-class setting, both the CNN and classical classifiers
 use the class with the maximum score as the final prediction output. Through
 unified evaluation and projection-based visualization, the discrimination
 characteristics of different methods in local focus-state recognition can be
