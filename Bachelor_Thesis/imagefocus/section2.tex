@@ -524,7 +524,7 @@ the class with the largest output score. This decision rule can be written as
     \label{eq:argmax-basic}
 \end{equation}
 \par For binary classification, the decision can also be made by comparing the
-predicted probability of one class with a threshold. Let the clear class be
+predicted probability of one class with a threshold. Let the sharp class be
 class $1$, let $\hat{p}_1$ denote its predicted probability, and let $\tau$
 denote the decision threshold. Then
 \begin{equation}
@@ -662,7 +662,7 @@ class be denoted by $TP_c$, $FP_c$, and $FN_c$, respectively. Then we have
 \par Precision, recall, and $F_1$ score reflect, respectively, how many samples
 predicted as a class truly belong to that class, how many samples that truly
 belong to that class are successfully detected, and the balance between the two.
-In focus detection tasks, if the clear class is usually the minority class,
+In focus detection tasks, if the sharp class is usually the minority class,
 recall is particularly important, because it can directly reflect whether the
 model misses true clear regions. If it is further necessary to compare class
 balance in a multi-class task from an overall perspective, the arithmetic mean
