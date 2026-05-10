@@ -351,7 +351,7 @@ When the input is a high-dimensional pixel vector, principal component analysis
 is also commonly used to map the original features into a low-dimensional
 subspace. Let the sample vector be $\mathbf{x}\in\mathbb{R}^{d}$, then the
 dimensionality-reduced representation of principal component analysis (PCA)
-\cite{perry2025inference,zheng2021application} can be written as
+\cite{zheng2021application} can be written as
 \begin{equation}
     \mathbf{r}=W^\top(\mathbf{x}-\boldsymbol{\mu}),\qquad
     W\in\mathbb{R}^{d\times k},\; k<d
@@ -366,7 +366,7 @@ correlations among pixel dimensions can be compressed into a smaller number of
 informative components. The role of PCA is therefore to compress redundant
 dimensions, reduce the influence of noise, and provide a more compact
 representation for subsequent classifiers, as commonly motivated in PCA-based
-dimensionality reduction \cite{perry2025inference,zheng2021application}. In this
+dimensionality reduction \cite{zheng2021application}. In this
 thesis, PCA serves as a practical dimensionality-reduction step when vectorized
 pixel patches are used as model input, so that the main variation structure can
 be retained while the complexity of subsequent classification is reduced.
